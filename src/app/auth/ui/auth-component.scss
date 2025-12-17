@@ -1,0 +1,195 @@
+/* ========================= CONTENEDOR PRINCIPAL ========================= */
+.auth-wrapper {
+    background: linear-gradient(to right, #e2e2e2, #b0bdec);
+    font-family: 'Montserrat', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.auth-container {
+    background: #fff;
+    border-radius: 30px;
+    box-shadow: 0 5px 15px rgba(71, 85, 194, 0.35);
+    position: relative;
+    overflow: hidden;
+
+    width: 100%;              /* ⬅️ más ancho */
+    max-width: 1300px;       /* ⬅️ más grande */
+    min-height: 550px;       /* ⬅️ más alto */
+
+    transition: all 0.6s ease-in-out;
+}
+
+
+/* ========================= FORMULARIO ========================= */
+/* FORMULARIO */
+.form-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 65%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+    z-index: 25;
+
+    padding-top: 40px; /* ⬅️ súbelo */
+}
+
+
+/* TOGGLE */
+.toggle-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 35%;
+    height: 100%;
+    overflow: hidden;
+    background: #ffffff; 
+    border-radius: 0 120px 80px 0;
+    z-index: 20;
+    box-shadow: 6px 0 20px rgba(0, 0, 0, 0.08);
+}
+
+.toggle {
+    background: transparent; /* ⬅️ sin azul */
+    color: #1f2937; /* texto oscuro elegante */
+    width: 100%;
+    height: 100%;
+    display: flex;
+}
+
+
+.toggle-panel {
+    width: 100%;
+    height: 100%;
+    padding: 0 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
+.toggle-text {
+    font-size: 1rem;
+    color: #dce3ef;
+    margin: 15px 0 20px 0;
+}
+
+.footer-image {
+    width: 210px;
+    height: 140px;
+    margin-top: 20px;
+}
+
+/* ========================= LOGO ========================= */
+.auth-logo {
+    width: 150px;
+    z-index: 30;
+}
+
+
+
+
+.single-step {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #1e293b;        /* oscuro elegante */
+    color: #ffffff;
+    font-size: 1.4rem;
+    font-weight: 600;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    margin: 0 auto 20px auto;
+}
+
+@media (max-width: 1024px) {
+  .auth-container {
+    max-width: 100%;
+  }
+
+  .toggle-container {
+    width: 40%;
+  }
+
+  .form-container {
+    width: 60%;
+  }
+}
+@media (max-width: 768px) {
+
+  /* Contenedor principal */
+  .auth-container {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    border-radius: 0;
+  }
+
+  /* TOGGLE */
+  .toggle-container {
+    position: relative;        /* 🔥 clave */
+    width: 100%;
+    height: auto;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 40px 20px;
+  }
+
+  .toggle-panel {
+    padding: 0;
+  }
+
+  .toggle-panel h2 {
+    font-size: 2rem;
+  }
+
+  .toggle-text {
+    font-size: 0.95rem;
+  }
+
+  .footer-image {
+    width: 160px;
+    height: auto;
+    margin: 20px auto 0;
+  }
+
+  /* FORMULARIO */
+  .form-container {
+    position: relative;        /* 🔥 clave */
+    width: 100%;
+    height: auto;
+    padding: 30px 20px;
+    justify-content: center;
+  }
+
+  /* Logo */
+  .auth-logo {
+    position: relative;
+    margin: 0 auto 20px;
+    display: block;
+  }
+}
+
+@media (max-width: 480px) {
+  .toggle-panel h2 {
+    font-size: 1.6rem;
+  }
+
+  .single-step {
+    width: 44px;
+    height: 44px;
+    font-size: 1.1rem;
+  }
+}

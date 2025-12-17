@@ -1,24 +1,59 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { AppMenuitem } from './app.menuitem';
+import { AuthService } from '@/auth/infraestructure/services/auth.service';
+import { MenuService } from '@/auth/infraestructure/services/menu.services';
+import { SharedModule } from '@/core/components/shared.module';
 
 @Component({
     selector: 'app-menu',
     standalone: true,
-    imports: [CommonModule, AppMenuitem, RouterModule],
-    template: `<ul class="layout-menu">
-        <ng-container *ngFor="let item of model; let i = index">
+    imports: [CommonModule, AppMenuitem, RouterModule, SharedModule],
+    template: `
+    @if (dataAuth) {
+
+<p-card class="mb-3 mt-3 w-full max-w-sm bg-gray-50">
+  <div class="flex items-center gap-1">
+    <img 
+      src="{{'https://images.vexels.com/media/users/3/129616/isolated/preview/fb517f8913bd99cd48ef00facb4a67c0-silueta-de-avatar-de-empresario.png' }}" 
+      alt="Usuario" 
+      class="w-8 h-8 rounded-full object-cover"
+    />
+
+    <div class="flex flex-col">
+      <div class="text-xs font-medium text-gray-800">{{ dataAuth.apellidosyNombres }}</div>
+      <div class="text-xs text-gray-500 break-words">{{ dataAuth.correo }}</div>
+    </div>
+  </div>
+</p-card>
+
+
+    }
+    <ul class="layout-menu">
+        <ng-container *ngFor="let item of menu; let i = index">
             <li app-menuitem *ngIf="!item.separator" [item]="item" [index]="i" [root]="true"></li>
             <li *ngIf="item.separator" class="menu-separator"></li>
         </ng-container>
     </ul> `
 })
 export class AppMenu {
+    private authService = inject(AuthService)
+    private menuService = inject(MenuService)
+    menu: MenuItem[] = [];
     model: MenuItem[] = [];
 
+    dataAuth = this.authService.getUserData()
+
     ngOnInit() {
+        setTimeout(() => {
+            this.menu = this.menuService.getMenu()
+            console.log(this.dataAuth);
+
+        }, 500);
+        console.log(this.menu);
+
         this.model = [
             {
                 label: 'Home',

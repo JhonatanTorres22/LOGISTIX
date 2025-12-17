@@ -1,0 +1,34 @@
+<p-card [ngClass]="['card-bordered', cardClass()]">
+  <!-- HEADER -->
+  @if (showHeader()) {
+    <ng-template pTemplate="header">
+      <div class="card-header d-flex justify-content-between align-items-center"
+           [ngClass]="headerClass()">
+
+        <div class="f-16 f-w-600">
+          {{ cardTitle() }}
+          <ng-container *ngTemplateOutlet="headerTitleTemplate()"></ng-container>
+        </div>
+
+        <ng-container *ngTemplateOutlet="headerOptionsTemplate()"></ng-container>
+      </div>
+    </ng-template>
+  }
+
+  <!-- CONTENT -->
+  @if (showContent()) {
+    <div class="card-content" [style.padding.px]="padding()">
+      <ng-content></ng-content>
+    </div>
+  }
+
+  <!-- ACTIONS / FOOTER -->
+  @if (actionTemplate) {
+    <ng-template pTemplate="footer">
+      <div class="card-action" [ngClass]="actionClass()">
+        <ng-container *ngTemplateOutlet="actionTemplate"></ng-container>
+      </div>
+    </ng-template>
+  }
+</p-card>
+

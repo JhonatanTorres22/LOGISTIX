@@ -1,0 +1,22 @@
+.block {
+  display: block !important;
+}
+.p-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  box-shadow: none; 
+}
+
+.card-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--surface-200);
+}
+
+.card-content {
+  display: block;
+}
+
+.card-action {
+  border-top: 1px solid var(--surface-300);
+  padding: 20px;
+}

@@ -1,0 +1,21 @@
+<button
+  pButton
+  [id]="idButton"
+  [disabled]="disabled"
+  [pTooltip]="tooltip"
+  tooltipPosition="top"
+  (click)="handleClick($event)"
+ [ngClass]="computedClass"
+  type="button"
+>
+  @if (icon) {
+    <i class="p-button-icon {{ icon }}"></i>
+
+  }
+
+  @if (label) {
+    {{ label }}
+  }
+
+  <ng-content></ng-content>
+</button>

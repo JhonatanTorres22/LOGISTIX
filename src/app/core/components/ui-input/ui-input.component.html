@@ -1,0 +1,85 @@
+<div class="ui-input w-full m-t-5" [ngClass]="classInput">
+
+  <p-floatLabel>
+
+    @if (type !== 'password') {
+      <!-- INPUT TEXT / NUMBER -->
+      <input
+      [ngClass]="classInput"
+        pInputText
+        [id]="label"
+        [type]="type"
+        [readonly]="readonly"
+        [formControl]="formControl"
+        [attr.maxlength]="maxlength || null"
+        [attr.minlength]="minlength || null"
+        [attr.min]="min || null"
+        autocomplete="off"
+        UpperCase
+        class="w-full"
+        (input)="onInput($event); onInputEvent.emit($event)"
+      />
+    }
+
+    @if (type === 'password') {
+      <!-- PASSWORD -->
+      <p-password
+        [inputId]="label"
+        [formControl]="formControl"
+        [disabled]="readonly"
+        [toggleMask]="true"
+        [feedback]="false"
+        class="w-full"
+      ></p-password>
+    }
+
+    <label>{{ label }}</label>
+  </p-floatLabel>
+
+  <!-- CONTADOR -->
+  @if (maxlength && type !== 'password') {
+    <small class="block text-right text-500 mt-1">
+      {{ formControl.value?.length || 0 }} / {{ maxlength }}
+    </small>
+  }
+
+  <!-- ERRORES -->
+  @if (formControl.touched && formControl.invalid) {
+
+    @if (formControl.hasError('maxlength')) {
+      <small class="block text-red-500 mt-1">
+        Este campo debe tener como máximo {{ maxlength }} caracteres
+      </small>
+    }
+
+    @if (formControl.hasError('minlength')) {
+      <small class="block text-red-500 mt-1">
+        Este campo debe tener como mínimo {{ minlength }} caracteres
+      </small>
+    }
+
+    @if (formControl.hasError('required')) {
+      <small class="block text-red-500 mt-1">
+        Este campo es obligatorio
+      </small>
+    }
+
+    @if (formControl.hasError('pattern')) {
+      <small class="block text-red-500 mt-1">
+        {{ patternErrorMessage }}
+      </small>
+    }
+
+    @if (formControl.hasError('codigoDuplicado')) {
+      <small class="block text-red-500 mt-1">
+        Este campo está siendo duplicado
+      </small>
+    }
+
+    @if (formControl.hasError('min')) {
+      <small class="block text-red-500 mt-1">
+        El valor ingresado no puede ser menor a {{ min }}
+      </small>
+    }
+  }
+</div>

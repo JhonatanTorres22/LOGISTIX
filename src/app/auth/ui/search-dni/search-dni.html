@@ -1,0 +1,25 @@
+@if (loading) {
+    <ui-loading-progress-bar></ui-loading-progress-bar>
+}
+<app-card cardClass="">
+    <div class="text-center d-block -mt-5">
+
+        <h4 class="font-bold pt-0 text-4xl">LOGISTIX</h4>
+
+    </div>
+    <p-divider />
+    <div class="text-center mb-3 mt-4 f-18 f-w-500 pt-1">INGRESAR USUARIO</div>
+
+    <form [formGroup]="formLogin" class="text-start">
+
+        <div class="flex align-items-center gap-2 w-full pt-4">
+            <ui-input classInput="h-5rem" label="Usuario" formControlName="userName" class="flex-1" [maxlength]="validatorUsername.maxLength" [minlength]="validatorUsername.minLength"
+            [expReg]="expRegLock" [patternErrorMessage]="'El usuario solo debe contener números.'" >
+            </ui-input>
+
+            <ui-button  (onClick)="obtenerRol(formLogin.value.userName)" [disabled]="formLogin.invalid" color="primary" icon="pi pi-search">
+            </ui-button>
+
+        </div>
+    </form>
+</app-card>
