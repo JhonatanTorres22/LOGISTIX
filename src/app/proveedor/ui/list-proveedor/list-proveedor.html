@@ -1,0 +1,70 @@
+<!-- {{ listProveedor() | json }} -->
+<p-table #dt1 [value]="listProveedor()"
+[globalFilterFields]="['nombre', 'ruc', 'direccion' ,'tipo', 'accion']"
+    selectionMode="single" dataKey="id" [tableStyle]="{ 'min-width': '50rem' }" [rows]="5" [paginator]="true" [rowsPerPageOptions]="[20,100,1000]"
+    stateStorage="session" stateKey="statedemo-session">
+
+    <ng-template #caption>
+        <div class="flex justify-between">
+            <p-iconfield iconPosition="left">
+                <p-inputicon>
+                    <i class="pi pi-search"></i>
+                </p-inputicon>
+                <input pInputText type="text" placeholder="Buscar Proveedor" (input)="dt1.filterGlobal($any($event.target).value, 'contains')" />
+            </p-iconfield>
+            <ui-button (click)="visibleAdd = true" label="AGREGAR PROVEEDOR"></ui-button>
+        </div>
+    </ng-template>
+
+    <ng-template #header>
+        <tr>
+            <th pSortableColumn="nombre" style="width:5%">NOMBRE<p-sortIcon field="name" /></th>
+            <th pSortableColumn="area" style="width:10%">
+                RUC <p-sortIcon field="area" />
+            </th>
+            <th pSortableColumn="usuario" style="width:20%">
+                DIRECCIÓN <p-sortIcon field="usuario" />
+            </th>
+            <th pSortableColumn="categoria" style="width:5%">TIPO<p-sortIcon field="categoria" /></th>
+            <th pSortableColumn="accion" style="width:2%">ACCIONES<p-sortIcon field="accion" /></th>
+        </tr>
+    </ng-template>
+
+        <ng-template #body let-proveedor>
+        <tr [pSelectableRow]="proveedor">
+            <td>
+                <span class="ml-1 align-middle">{{ proveedor.nombre }}</span>
+            </td>
+            <td>
+                <div class="flex items-center gap-2">
+                    <span class="ml-1 align-middle">{{ proveedor.ruc }}</span>
+                </div>
+            </td>
+            <td>
+                <div class="flex items-center gap-2">
+                    <span class="ml-1 align-middle">{{ proveedor.direccion }}</span>
+                </div>
+            </td>
+            <td>
+                <div class="flex items-center gap-2">
+                    <span class="ml-1 align-middle">{{ proveedor.tipo }}</span>
+                </div>
+            </td>
+            <td>
+                <div class="flex items-center gap-2">
+                    <button pButton type="button" (click)="visibleAdd = true" icon="pi pi-pencil" class="p-button-rounded p-button-success p-button-text"></button>
+                    <button pButton type="button" (click)="eliminarConfirm(proveedor)" icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-text"></button>
+                </div>         
+        </tr>
+    </ng-template>
+
+        <ng-template emptymessage>
+        <tr>
+            <td colspan="4">NO SE ENCUENTRAN PROVEEDORES DISPONIBLES</td>
+        </tr>
+    </ng-template>
+</p-table>
+
+@if (visibleAdd) {
+<app-add-edit-proveedor [(visible)]="visibleAdd"></app-add-edit-proveedor>>
+}

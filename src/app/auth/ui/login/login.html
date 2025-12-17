@@ -1,0 +1,20 @@
+<app-card cardClass="">
+    <div class="text-center d-block -mt-5">
+
+    <h4 class="font-bold pt-0 text-4xl">LOGISTIX</h4>
+
+</div>
+<p-divider />
+<div class="text-center mb-3 mt-4 f-18 f-w-500 pt-1">INICIAR SESIÓN</div>
+
+<form [formGroup]="formLogin" class="text-start">
+
+    <ui-input classInput="h-5rem" [maxlength]="validatorPassword.maxLength" [minlength]="validatorPassword.minLength" label="Contraseña"
+        formControlName="password" ></ui-input>
+
+    <div class="grid col-6 col-offset-6 mt-6">
+        <ui-button (click)="iniciarSesion()"icon="pi pi-sign-in" [disabled]="formLogin.invalid" mat-flat-button color="primary"
+            class="b-rad-0 m-t-0">INGRESAR</ui-button>
+    </div>
+</form>
+</app-card>
