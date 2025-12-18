@@ -19,6 +19,7 @@ import { AccordionModule } from 'primeng/accordion';
 import { ChipModule } from 'primeng/chip';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ProgressBarModule } from 'primeng/progressbar';
+import { FileUploadModule } from 'primeng/fileupload';
 const PrimeNgModule = [
     CardModule,
     ButtonModule,
@@ -35,7 +36,8 @@ const PrimeNgModule = [
     FieldsetModule,
     AccordionModule,
     ChipModule,
-    ProgressBarModule
+    ProgressBarModule,
+    FileUploadModule
 
 
 ];

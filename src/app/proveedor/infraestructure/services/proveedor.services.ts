@@ -2,7 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { map, Observable } from "rxjs";
 import { environment } from "src/environments/environment";
-import { CrearProveedor, EditarProveedor, EliminarProveedor, Proveedor } from "../../domain/models/proveedor.model";
+import { CrearProveedor, EditarProveedor, EliminarProveedor, Proveedor, ResponseProveedor } from "../../domain/models/proveedor.model";
 import { DataProveedorDTO } from "../dto/proveedor.dto";
 import { ProveedorMapper } from "../../domain/mappers/proveedor.mapper";
 
@@ -16,6 +16,7 @@ export class ProveedorService {
     private urlAgregar : string
     private urlEditar : string
     private urlEliminar : string
+    private urlAgregarMasivo : string
 
     constructor(
         private http : HttpClient
@@ -25,6 +26,7 @@ export class ProveedorService {
         this.urlAgregar = '/api/proveedor/Insertar'
         this.urlEditar = '/api/proveedor/Actualizar'
         this.urlEliminar = '/api/proveedor/Eliminar'
+        this.urlAgregarMasivo = '/api/proveedor/InsertarMasivo'
     }
 
     obtener = ( ) : Observable<Proveedor[]> => {
@@ -32,18 +34,23 @@ export class ProveedorService {
         .pipe(map (api => api.data.map(ProveedorMapper.toDomain)))
     }
 
-    crear = (crear : CrearProveedor) :Observable<void> => {
+    crear = (crear : CrearProveedor) :Observable<ResponseProveedor> => {
         const newProveedor = ProveedorMapper.toApiCrear(crear)
-        return this.http.post<void>(this.urlApi + this.urlAgregar, newProveedor)
+        return this.http.post<ResponseProveedor>(this.urlApi + this.urlAgregar, newProveedor)
     }
 
-    editar = (editar : EditarProveedor) : Observable<void> => {
+    editar = (editar : EditarProveedor) : Observable<ResponseProveedor> => {
         const editProveedor = ProveedorMapper.toApiEditar(editar)
-        return this.http.put<void>(this.urlApi + this.urlEditar, editProveedor)
+        return this.http.put<ResponseProveedor>(this.urlApi + this.urlEditar, editProveedor)
     }
 
-    eliminar = (eliminar : EliminarProveedor) : Observable<void> => {
+    eliminar = (eliminar : EliminarProveedor) : Observable<ResponseProveedor> => {
         const eliminarProveedor = ProveedorMapper.toApiEliminar(eliminar)
-        return this.http.delete<void>(this.urlApi + this.urlEliminar, { body : eliminarProveedor})
+        return this.http.delete<ResponseProveedor>(this.urlApi + this.urlEliminar, { body : eliminarProveedor})
+    }
+
+    crearMasivo = (crearProveedores : CrearProveedor[]) : Observable<ResponseProveedor> => {
+        const newProveedores = ProveedorMapper.toApiCrearMasivo(crearProveedores)
+        return this.http.post<ResponseProveedor>(this.urlApi + this.urlAgregarMasivo, newProveedores)
     }
 }

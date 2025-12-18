@@ -1,0 +1,97 @@
+@if (loading) {
+<ui-loading-progress-bar></ui-loading-progress-bar>
+}
+@if (excelData.length == 0) {
+<p-fileUpload name="excel" accept=".xlsx,.xls" mode="advanced" [auto]="false" [customUpload]="true"
+    [showUploadButton]="false" [showCancelButton]="false" chooseLabel="Seleccionar Archivo de Proveedores"
+    (onSelect)="onFileSelect($event)" (onClear)="limpiar()">
+
+    <ng-template pTemplate="content">
+        <div class="flex flex-column align-items-center justify-content-center 
+           border-2 border-dashed border-green-500 border-round 
+           p-5 gap-3 cursor-pointer">
+
+            <i class="pi pi-file-excel text-4xl text-green-600"></i>
+
+            <span class="text-xl font-semibold">
+                Arrastre aquí su archivo Excel
+            </span>
+
+            <small class="text-500">
+                o haga clic para seleccionarlo
+            </small>
+
+            <!-- BOTÓN DESCARGAR PLANTILLA -->
+            <button pButton type="button" icon="pi pi-download" label="Descargar plantilla"
+                class="p-button-success p-button-outlined mt-3" (click)="descargarPlantilla()">
+            </button>
+
+        </div>
+    </ng-template>
+
+</p-fileUpload>
+}
+
+@if (excelData) {
+<p-table
+    #dt2
+    [value]="excelData"
+    selectionMode="single"
+    dataKey="id"
+    [tableStyle]="{ 'min-width': '50rem' }"
+    [rows]="20"
+    [paginator]="true"
+    [rowsPerPageOptions]="[50,100,1000]"
+    stateStorage="session"
+    stateKey="statedemo-session"
+    [globalFilterFields]="['tipo','nombre','ruc','direccion']">
+
+    <ng-template #caption>
+        <div class="flex">
+            <p-iconfield iconPosition="left" class="w-full">
+                <p-inputicon>
+                    <i class="pi pi-search"></i>
+                </p-inputicon>
+                <input
+                    class="w-full"
+                    pInputText
+                    type="text"
+                    placeholder="Buscar Proveedor"
+                    (input)="dt2.filterGlobal($any($event.target).value, 'contains')" />
+            </p-iconfield>
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="header">
+        <tr>
+            <th>Tipo</th>
+            <th>Nombre</th>
+            <th>RUC</th>
+            <th>Dirección</th>
+        </tr>
+    </ng-template>
+
+    <ng-template #body pTemplate="body" let-rowData>
+        <tr [pSelectableRow]="rowData">
+            <td>{{ rowData.tipo }}</td>
+            <td>{{ rowData.nombre }}</td>
+            <td>{{ rowData.ruc }}</td>
+            <td>{{ rowData.direccion }}</td>
+        </tr>
+    </ng-template>
+
+    <ng-template emptymessage>
+        <tr>
+            <td colspan="4">NO SE ENCUENTRAN PROVEEDORES DISPONIBLES</td>
+        </tr>
+    </ng-template>
+</p-table>
+
+}
+
+@if (excelData.length > 0) {
+<div class="flex justify-content-center gap-3 mt-4">
+    <ui-button label="Guardar" icon="pi pi-save" (click)="guardar()"></ui-button>
+    <ui-button label="Limpiar" icon="pi pi-times" (click)="limpiar()"></ui-button>
+</div>
+}

@@ -1,0 +1,35 @@
+@if (loading) {
+    <ui-loading-progress-bar></ui-loading-progress-bar>
+}
+
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '40rem' }" (onHide)="closeDialog()">
+    <ng-template #header>
+        <div class="inline-flex items-center justify-center gap-2">
+            <span class="font-bold whitespace-nowrap"> {{categoriaSelect().id == 0 ? 'AGREGAR CATEGORIA' : 'EDITAR CATEGORIA'}} </span>
+        </div>
+    </ng-template>
+
+
+    <div class="pt-4">
+
+        <form [formGroup]="categoriaForm" class="flex flex-column gap-4">
+
+            <ui-input label="Nombre" formControlName="nombre" [maxlength]="maxLengthNombre"
+                [minlength]="minLengthNombre" [expReg]="expLockNombre"
+                [patternErrorMessage]="'No debe incluir espacios al final de la palabra'">
+            </ui-input>
+
+            <ui-input label="Descripción" formControlName="descripcion" [maxlength]="maxLengthDescripcion" [minlength]="minLengthDescripcion"
+                [expReg]="expLockDescripcion"
+                [patternErrorMessage]="'No debe incluir espacios al final de la palabra'">
+            </ui-input>
+
+        </form>
+    </div>
+
+    <ng-template #footer>
+        <p-button label="CANCELAR" [text]="true" severity="secondary" (click)="closeDialog()" />
+        <p-button label="GUARDAR" [outlined]="true" severity="primary" [disabled]=" categoriaForm.invalid"
+            (onClick)="onSubmit()" />
+    </ng-template>
+</p-dialog>

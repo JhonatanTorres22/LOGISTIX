@@ -1,0 +1,68 @@
+@if (loading) {
+<ui-loading-progress-bar></ui-loading-progress-bar>
+}
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '40rem' }" (onHide)="closeDialog()">
+    <ng-template #header>
+        <div class="inline-flex items-center justify-center gap-2">
+            <span class="font-bold whitespace-nowrap">LISTA DE CRITERIOS</span>
+        </div>
+    </ng-template>
+
+
+    <div class="pt-4" >
+        @for (criterio of listCriterio(); track $index) {
+
+            <form >
+                        <div class="p-mb-4" >
+            <span class="text-md font-bold">{{ $index + 1 }}. {{ criterio.nombre }}
+                @if (criterio.obligatorio) {
+                <i class="pi pi-exclamation-triangle text-red-500" title="Obligatorio"></i>
+                }
+            </span>
+            <p class="text-xs font-normal mt-2">{{ criterio.detalle }}</p>
+
+            <p-fileUpload  #fileUpload name="archivo" [customUpload]="true" [accept]="'.pdf,.xls,.xlsx,image/*'"
+                [maxFileSize]="5000000" [auto]="true" [showUploadButton]="false" [showCancelButton]="false"
+                mode="advanced" dragDropSupport="true" (uploadHandler)="onUpload($event, criterio.id)"
+                chooseLabel="Seleccionar archivo">
+
+                <ng-template pTemplate="content">
+                    <div class="flex flex-column align-items-center justify-content-center
+                  border-2 border-dashed border-green-500 border-round
+                  p-5 gap-3 cursor-pointer" style="min-height: 150px; position: relative;"
+                        (click)="openFileDialog(fileUpload)">
+
+                        <ng-container *ngIf="!archivosTemporales[criterio.id]">
+                            <i class="pi pi-upload text-4xl text-green-600"></i>
+                            <span class="text-xl font-semibold">Arrastre aquí su archivo PDF / Excel / Imagen</span>
+                        </ng-container>
+
+                        <ng-container *ngIf="archivosTemporales[criterio.id]">
+                            <img *ngIf="archivosTemporales[criterio.id].preview"
+                                [src]="archivosTemporales[criterio.id].preview" alt="preview"
+                                style="width:80px; height:90px; object-fit:contain;">
+                            <span class="text-xs font-normal">{{ archivosTemporales[criterio.id].file.name }}</span>
+                        </ng-container>
+
+                    </div>
+                </ng-template>
+            </p-fileUpload>
+                  <div class="flex align-items-center gap-3 mt-3 w-full">
+        <!-- <mat-checkbox formControlName="cumple">¿Cumple?</mat-checkbox> -->
+
+        <!-- <ui-input
+        class="w-full"
+          label="Observación"
+          [maxlength]="8"
+          formControlName="observacion">
+        </ui-input> -->
+      </div>
+        </div>
+            </form>
+        }
+    </div>
+    <ng-template #footer>
+        <ui-button label="CERRAR" icon="pi pi-times" severity="secondary" (click)="closeDialog()" />
+        <ui-button label="GUARDAR" icon="pi pi-save" severity="primary" (click)="closeDialog()" />
+    </ng-template>
+</p-dialog>

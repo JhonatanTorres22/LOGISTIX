@@ -4,7 +4,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { UiInputComponent } from "@/core/components/ui-input/ui-input.component";
 import { ProveedorSignal } from '@/proveedor/domain/signals/proveedor.signal';
 import { ProveedorValidation } from '@/proveedor/domain/validations/proveedor.validation';
-import { CrearProveedor, EditarProveedor } from '@/proveedor/domain/models/proveedor.model';
+import { CrearProveedor, EditarProveedor, ResponseProveedor } from '@/proveedor/domain/models/proveedor.model';
 import { ProveedorRepository } from '@/proveedor/domain/repositories/proveedor.repository';
 import { AlertService } from 'src/assets/demo/services/alert.service';
 
@@ -72,7 +72,6 @@ export class AddEditProveedor {
             ruc : this.proveedorForm.value.ruc,
             tipo : this.proveedorForm.value.tipo,
           }
-          console.log(newProveedor);
           this.insertar(newProveedor)
           
         }; break;
@@ -85,7 +84,6 @@ export class AddEditProveedor {
             tipo : this.proveedorForm.value.tipo,
             id : this.proveedorSelect().id
           }
-          console.log(editProveedor);
           this.editar(editProveedor)
           
         }
@@ -96,26 +94,26 @@ export class AddEditProveedor {
 
   insertar = (newProveedor : CrearProveedor) => {
     this.repository.crear(newProveedor).subscribe({
-      next : () => {
-        this.alert.showAlert('Proveedor creado correctamente', 'success')
+      next : (res: ResponseProveedor) => {
+        this.alert.showAlert(`Proveedor creado correctamente, ${res.message}`, 'success')
          this.proveedorAccion.set('Agregar')
         this.closeDialog()
       },
-      error : () => {
-        this.alert.showAlert('Error en crea el proveedor')
+      error : (res : ResponseProveedor) => {
+        this.alert.showAlert(`Error en crea el proveedor, ${res.message}`, 'error')
       }
     })
   }
 
   editar = (editProveedor : EditarProveedor) => {
     this.repository.editar(editProveedor).subscribe({
-      next : () => {
-        this.alert.showAlert('Proveedor editado correctamente', 'success')
+      next : (res: ResponseProveedor) => {
+        this.alert.showAlert(`Proveedor editado correctamente, ${res.message}`, 'success')
         this.proveedorAccion.set('Editar')
         this.closeDialog()
       },
-      error : () => {
-        this.alert.showAlert('Error al editar el proveedor', 'error')
+      error : (res: ResponseProveedor) => {
+        this.alert.showAlert(`Error al editar el proveedor, ${res.message}`, 'error')
       }
     })
   }

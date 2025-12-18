@@ -14,3 +14,10 @@ export interface CrearEvaluacion {
     observacion: string,
     documento: string
 }
+
+export interface ResponseEvaluacion {
+    data: boolean;
+    errors: any;
+    isSuccess: boolean;
+    message: string;
+}
