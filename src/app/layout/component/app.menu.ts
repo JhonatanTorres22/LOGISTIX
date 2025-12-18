@@ -49,11 +49,7 @@ export class AppMenu {
     ngOnInit() {
         setTimeout(() => {
             this.menu = this.menuService.getMenu()
-            console.log(this.dataAuth);
-
         }, 500);
-        console.log(this.menu);
-
         this.model = [
             {
                 label: 'Home',

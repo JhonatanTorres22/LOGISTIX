@@ -12,3 +12,10 @@ export class Proveedor {
 export type EditarProveedor = Omit <Proveedor, 'evaluacion'>
 export type CrearProveedor = Omit <EditarProveedor, 'id'>
 export type EliminarProveedor = Pick<Proveedor , 'id'>
+
+export interface ResponseProveedor {
+    data: boolean;
+    errors: any;
+    isSuccess: boolean;
+    message: string;
+}

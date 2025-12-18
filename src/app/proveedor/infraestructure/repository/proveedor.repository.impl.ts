@@ -1,5 +1,5 @@
 import { Observable } from "rxjs";
-import { CrearProveedor, EditarProveedor, EliminarProveedor, Proveedor } from "../../domain/models/proveedor.model";
+import { CrearProveedor, EditarProveedor, EliminarProveedor, Proveedor, ResponseProveedor } from "../../domain/models/proveedor.model";
 import { ProveedorRepository } from "../../domain/repositories/proveedor.repository";
 import { ProveedorService } from "../services/proveedor.services";
 import { Injectable } from "@angular/core";
@@ -16,14 +16,18 @@ export class ProveedorRepositoryImpl implements ProveedorRepository {
     obtener(): Observable<Proveedor[]> {
         return this.proveedorService.obtener()
     }
-    crear(proveedor: CrearProveedor): Observable<void> {
+    crear(proveedor: CrearProveedor): Observable<ResponseProveedor> {
         return this.proveedorService.crear(proveedor)
     }
-    editar(proveedor: EditarProveedor): Observable<void> {
+    editar(proveedor: EditarProveedor): Observable<ResponseProveedor> {
         return this.proveedorService.editar(proveedor)
     }
 
-    eliminar(proveedor: EliminarProveedor): Observable<void> {
+    eliminar(proveedor: EliminarProveedor): Observable<ResponseProveedor> {
         return this.proveedorService.eliminar(proveedor)
+    }
+    
+    crearMasivo(proveedores: CrearProveedor[]): Observable<ResponseProveedor> {
+        return this.proveedorService.crearMasivo(proveedores)
     }
 }

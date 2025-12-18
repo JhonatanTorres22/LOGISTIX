@@ -1,27 +1,31 @@
 <p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '40rem' }" (onHide)="closeDialog()">
     <ng-template #header>
         <div class="inline-flex items-center justify-center gap-2">
-            <span class="font-bold whitespace-nowrap">AGREGAR TICKET</span>
+            <span class="font-bold whitespace-nowrap"> {{proveedorSelect().id == 0 ? 'AGREGAR PROVEEDOR' : 'EDITAR PROVEEDOR'}} </span>
         </div>
     </ng-template>
 
 
     <div class="pt-4">
 
-        <form [formGroup]="proveedorForm">
+        <form [formGroup]="proveedorForm" class="flex flex-column gap-4">
+
             <ui-input label="Nombre" formControlName="nombre" [maxlength]="maxLengthNombre"
                 [minlength]="minLengthNombre" [expReg]="expRegLockNombre"
-                [patternErrorMessage]="'No debe incluir espacios al final de la palabra'"></ui-input>
+                [patternErrorMessage]="'No debe incluir espacios al final de la palabra'">
+            </ui-input>
 
             <ui-input label="RUC" formControlName="ruc" [maxlength]="maxLengthRuc" [minlength]="minLength"
                 [expReg]="expRegLockRuc"
-                [patternErrorMessage]="'Solo debe inclui números, No incluir espacios al final de la palabra'"></ui-input>
+                [patternErrorMessage]="'Solo debe incluir números, No incluir espacios al final de la palabra'">
+            </ui-input>
 
             <ui-input label="DIRECCION" formControlName="direccion" [maxlength]="maxLengthDireccion"
                 [minlength]="minLengthDireccion" [expReg]="expRegLockDir"
-                [patternErrorMessage]="'No debe incluir espacios de la palabra'"></ui-input>
+                [patternErrorMessage]="'No debe incluir espacios de la palabra'">
+            </ui-input>
 
-            <div class="card flex">
+            <div class="flex ">
                 <div class="flex flex-wrap gap-4">
                     <div class="flex items-center">
                         <p-radiobutton name="pizza" value="PERSONA NATURAL" formControlName="tipo"
@@ -41,12 +45,14 @@
 
 
 
+
     </div>
 
 
 
     <ng-template #footer>
         <p-button label="CANCELAR" [text]="true" severity="secondary" (click)="closeDialog()" />
-        <p-button label="GUARDAR" [outlined]="true" severity="primary" [disabled]="proveedorForm.invalid" (onClick)="onSubmit()" />
+        <p-button label="GUARDAR" [outlined]="true" severity="primary" [disabled]="proveedorForm.invalid"
+            (onClick)="onSubmit()" />
     </ng-template>
 </p-dialog>

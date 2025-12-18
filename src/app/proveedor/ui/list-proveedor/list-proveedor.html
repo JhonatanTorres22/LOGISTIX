@@ -1,8 +1,22 @@
 <!-- {{ listProveedor() | json }} -->
-<p-table #dt1 [value]="listProveedor()"
-[globalFilterFields]="['nombre', 'ruc', 'direccion' ,'tipo', 'accion']"
-    selectionMode="single" dataKey="id" [tableStyle]="{ 'min-width': '50rem' }" [rows]="5" [paginator]="true" [rowsPerPageOptions]="[20,100,1000]"
-    stateStorage="session" stateKey="statedemo-session">
+@if (loading) {
+<ui-loading-progress-bar></ui-loading-progress-bar>
+}
+@else {
+@if (listProveedor().length > 0) {
+<p-table #dt1
+    [value]="listProveedor()"
+    [globalFilterFields]="['nombre', 'ruc', 'direccion', 'tipo', 'accion']"
+    selectionMode="single"
+    dataKey="id"
+    [tableStyle]="{ 'min-width': '50rem' }"
+    [rows]="20"
+    [paginator]="true"
+    [rowsPerPageOptions]="[20,100,1000]"
+    paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros"
+    stateStorage="session"
+    stateKey="statedemo-session">
 
     <ng-template #caption>
         <div class="flex justify-between">
@@ -10,7 +24,8 @@
                 <p-inputicon>
                     <i class="pi pi-search"></i>
                 </p-inputicon>
-                <input pInputText type="text" placeholder="Buscar Proveedor" (input)="dt1.filterGlobal($any($event.target).value, 'contains')" />
+                <input pInputText type="text" placeholder="Buscar Proveedor"
+                    (input)="dt1.filterGlobal($any($event.target).value, 'contains')" />
             </p-iconfield>
             <ui-button (click)="visibleAdd = true" label="AGREGAR PROVEEDOR"></ui-button>
         </div>
@@ -30,7 +45,7 @@
         </tr>
     </ng-template>
 
-        <ng-template #body let-proveedor>
+    <ng-template #body let-proveedor>
         <tr [pSelectableRow]="proveedor">
             <td>
                 <span class="ml-1 align-middle">{{ proveedor.nombre }}</span>
@@ -52,19 +67,33 @@
             </td>
             <td>
                 <div class="flex items-center gap-2">
-                    <button pButton type="button" (click)="visibleAdd = true" icon="pi pi-pencil" class="p-button-rounded p-button-success p-button-text"></button>
-                    <button pButton type="button" (click)="eliminarConfirm(proveedor)" icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-text"></button>
-                </div>         
+                    <button pButton type="button" (click)="visibleAdd = true; seleccionarProveedor(proveedor)" icon="pi pi-pencil"
+                        class="p-button-rounded p-button-success p-button-text"></button>
+                    <button pButton type="button" (click)="eliminarConfirm(proveedor)" icon="pi pi-trash"
+                        class="p-button-rounded p-button-danger p-button-text"></button>
+                        <button pButton type="button" (click)="visibleCriterios = true; seleccionarProveedor(proveedor)" icon="pi pi-file-edit"
+                        class="p-button-rounded p-button-info p-button-text"></button>
+                </div>
         </tr>
     </ng-template>
 
-        <ng-template emptymessage>
+    <ng-template emptymessage>
         <tr>
             <td colspan="4">NO SE ENCUENTRAN PROVEEDORES DISPONIBLES</td>
         </tr>
     </ng-template>
 </p-table>
+}
+}
+
 
 @if (visibleAdd) {
 <app-add-edit-proveedor [(visible)]="visibleAdd"></app-add-edit-proveedor>>
+}
+@if (visibleCriterios) {
+    <app-list-criterios [(visible)]="visibleCriterios"></app-list-criterios>
+}
+
+@if (listProveedor().length == 0) {
+<app-import-proveedores></app-import-proveedores>
 }

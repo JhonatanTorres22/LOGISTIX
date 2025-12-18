@@ -35,4 +35,8 @@ export class ProveedorMapper  {
             codigoProveedor : param.id
         }
     }
+
+    static toApiCrearMasivo (param : CrearProveedor[]) : CrearProveedorDTO[] {
+        return param.map(proveedor => this.toApiCrear(proveedor));
+    }
 }
