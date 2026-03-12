@@ -1,0 +1,95 @@
+@if (loading) {
+<ui-loading-progress-bar></ui-loading-progress-bar>
+}
+@else {
+@if (selectEvaluacionSunat().archivoTrabajadoresPrestadores == null) {
+
+<ui-card-not-items text="No tiene cargado el archivo de trabajadores prestadores de servicio" [showButton]="true"
+    iconButton="pi pi-arrow-left" label="Volver" (onClick)="actionCerrarDrawer.set('CERRAR DRAWER')">
+</ui-card-not-items>
+
+}
+@else if (!mostrarFormulario) {
+@if (listDeudaCoactiva().length == 0) {
+<ui-card-not-items text="No se ha encontrado Deuda Coactiva" [showButton]="selectProveedor().evaluacion == 'EVALUACIÓN EN PROCESO'" iconButton="pi pi-plus"
+    label="Agregar Deuda Coactiva" (onClick)="seleccionarDeudaCoactiva(selectDeudaCoactivaDefault)"></ui-card-not-items>
+}
+@else {
+<p-table #deudaCoactiva [value]="listDeudaCoactiva()"
+    [globalFilterFields]="['monto', 'periodo', 'fechaInicio', 'entidadAsociada', 'accion']" selectionMode="single"
+    dataKey="idDeudaCoactiva" [tableStyle]="{ 'min-width': '50rem' }" [rows]="20">
+    <ng-template #caption>
+        <div class="flex justify-between gap-4">
+            <p-iconfield iconPosition="left" class="w-full">
+                <p-inputicon>
+                    <i class="pi pi-search"></i>
+                </p-inputicon>
+                <input class="w-full" pInputText type="text" placeholder="Buscar"
+                    (input)="deudaCoactiva.filterGlobal($any($event.target).value, 'contains')" />
+            </p-iconfield>
+            @if (selectProveedor().evaluacion == 'EVALUACIÓN EN PROCESO') {
+            <ui-button (click)="seleccionarDeudaCoactiva(selectDeudaCoactivaDefault)" label="AGREGAR"
+                icon="pi pi-plus"></ui-button>
+            }
+
+        </div>
+    </ng-template>
+
+    <ng-template #header>
+        <tr>
+            <th pSortableColumn="monto" style="width:20%">Monto de la Deuda<p-sortIcon field="monto" /></th>
+            <th pSortableColumn="periodo" style="width:20%"> Perido Tributario <p-sortIcon field="periodo" /></th>
+            <th pSortableColumn="fechaInicio" style="width:20%">Fecha Inicio de Cobranza <p-sortIcon
+                    field="fechaInicio" /></th>
+            <th pSortableColumn="entidadAsociada" style="width:20%">Entidad Asociada<p-sortIcon
+                    field="entidadAsociada" /></th>
+            @if (selectProveedor().evaluacion == 'EVALUACIÓN EN PROCESO') {
+            <th pSortableColumn="accion" style="width:2%">Acciones<p-sortIcon field="accion" /></th>
+            }
+        </tr>
+    </ng-template>
+
+    <ng-template #body let-deuda>
+        <tr [pSelectableRow]="deuda">
+            <td>
+                <span class="ml-1 align-middle">{{ deuda.monto }}</span>
+            </td>
+
+            <td>
+                <span class="ml-1 align-middle">{{ deuda.periodo | date:'dd/MM/yyyy' }}</span>
+            </td>
+
+            <td>
+                <span class="ml-1 align-middle">{{ deuda.fecha | date:'dd/MM/yyyy' }}</span>
+            </td>
+
+            <td>
+                <span class="ml-1 align-middle">{{ deuda.entidadAsociada }}</span>
+            </td>
+            @if (selectProveedor().evaluacion == 'EVALUACIÓN EN PROCESO') {
+            <td>
+                <div class="flex items-center gap-2">
+                    <ui-icon-button icon="pi pi-pencil" (onClick)="seleccionarDeudaCoactiva(deuda)"></ui-icon-button>
+                    <ui-icon-button icon="pi pi-trash" color="danger"
+                        (onClick)="confirmEliminarDeuda(deuda)"></ui-icon-button>
+                </div>
+            </td>
+            }
+        </tr>
+    </ng-template>
+</p-table>
+}
+
+}
+
+@if(mostrarFormulario){
+<div class="grid">
+    <div class="col-12 md:col-5">
+        <app-view-pdf-evaluacion [tipoArchivo]="'archivoDeudaCoactiva'"></app-view-pdf-evaluacion>
+    </div>
+    <div class="col-12 md:col-7">
+        <app-add-edit-deuda-coactiva (cerrar)="mostrarFormulario = false"></app-add-edit-deuda-coactiva>
+    </div>
+</div>
+}
+}

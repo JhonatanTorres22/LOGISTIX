@@ -1,18 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { SharedModule } from '../shared.module';
+import { ButtonModule, ButtonSeverity } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
 
 
 @Component({
   selector: 'ui-button',
   standalone: true,
-  imports: [CommonModule, SharedModule],
+  imports: [CommonModule, ButtonModule, TooltipModule],
   templateUrl: './ui-button.component.html',
   styleUrl: './ui-button.component.scss'
 })
 export class UiButtonComponent implements OnInit {
 
- @Input() color: string = 'secondary';
+  @Input() color: ButtonSeverity = 'primary';
   @Input() label: string = '';
   @Input() idButton: string = '';
   @Input() disabled: boolean = false;
@@ -33,12 +35,10 @@ export class UiButtonComponent implements OnInit {
   private computeClasses() {
     const classes: string[] = [];
 
-    // Clases externas
     if (this.classButton) {
       classes.push(this.classButton);
     }
 
-    // Estilo SWEET (outline / soft)
     if (this.type !== 'default') {
       classes.push(
         `bg-${this.color}-100`,
@@ -47,14 +47,12 @@ export class UiButtonComponent implements OnInit {
       );
     }
 
-    // Estilo DEFAULT
     else if (this.color !== 'secondary') {
       classes.push(
         `bg-${this.color}-500`,
         'text-white'
       );
     }
-
     this.computedClass = classes.join(' ');
   }
 

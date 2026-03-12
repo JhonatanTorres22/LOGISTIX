@@ -1,0 +1,67 @@
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '80rem' }" (onHide)="closeDialog()">
+    <ng-template #header>
+        <div class="inline-flex items-center justify-center gap-2">
+            <span class="font-bold whitespace-nowrap"> VER GRÁFICOS DE PRODUCTOS </span>
+        </div>
+    </ng-template>
+
+    <!-- {{ productoSeleccionado() | json }} -->
+    @if (loading) {
+    <ui-loading-progress-bar></ui-loading-progress-bar>
+    }
+    @else {
+    <div class="mt-1">
+        <p-float-label variant="on">
+            <p-autoComplete styleClass="w-full" inputStyleClass="w-full" [suggestions]="productosFiltrados()"
+                (completeMethod)="buscarProductos($event)" (onSelect)="onProductoSeleccionado($event)"
+                [ngModel]="productoSeleccionado()" (ngModelChange)="productoSeleccionado.set($event)"
+                optionGroupLabel="label" optionGroupChildren="items" optionLabel="nombreProducto" [group]="true"
+                [minLength]="0" [dropdown]="true" placeholder="Buscar producto" appendTo="body">
+
+                <ng-template pTemplate="group" let-group>
+                    <div class="font-bold text-primary">
+                        {{ group.label }}
+                    </div>
+                </ng-template>
+
+                <ng-template pTemplate="item" let-prod>
+                    <div class="flex gap-2 items-center">
+                        <img [src]="prod.imagen" width="40" />
+                        <div>
+                            <div class="font-medium">{{ prod.nombreProducto }}</div>
+                            <small>{{ prod.marca }} · {{ prod.modelo }}</small>
+                        </div>
+                    </div>
+                </ng-template>
+
+            </p-autoComplete>
+
+            <label for="on_label"> Buscar Producto </label>
+
+        </p-float-label>
+    </div>
+
+    <!-- <pre> {{ listProductoHistorico() | json }} </pre> -->
+    @if (productoSeleccionado()?.idProducto && listProductoHistorico().length > 0) {
+    <div echarts [options]="option" style="height:400px"></div>
+    }
+
+    @else if (productoSeleccionado()?.idProducto && listProductoHistorico().length === 0) {
+    <div class="mt-4">
+        <ui-card-not-items [text]=" `Este producto no tiene histórico` "></ui-card-not-items>
+    </div>
+    }
+
+    @else {
+    <div class="mt-4">
+        <ui-card-not-items text="Seleccione un producto"></ui-card-not-items>
+    </div>
+    }
+
+    }
+
+
+    <ng-template #footer>
+        <ui-button label="Cancelar" color="secondary" (onClick)="closeDialog()"></ui-button>
+    </ng-template>
+</p-dialog>

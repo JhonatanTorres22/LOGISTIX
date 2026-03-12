@@ -7,40 +7,57 @@ export class MenuMapper {
     static mapRootMenuToSakaiItems(rootMenus: RootMenu[]): MenuItem[] {
         const sakaiItems: MenuItem[] = [];
 
+         sakaiItems.push({
+        label: '',
+        items: [
+            {
+                label: 'Dashboard',
+                // icon: 'pi pi-home',
+                routerLink: ['/']
+            }
+        ]
+    });
         rootMenus.forEach(rootMenu => {
-            rootMenu.menus.forEach(menu => {
-                // Filtramos submenus con URL válida
-                const subItems = menu.subMenus
-                    .filter(sub => sub.urlSubMenu && sub.urlSubMenu !== 'none')
-                    .map(sub => MenuMapper.mapSubMenuToSakaiItem(sub, menu));
+            rootMenu.menus
+                .filter(menu => menu.tituloMenu !== 'Accesibilidad') 
+                .forEach(menu => {
 
-                let menuItem: MenuItem;
+                    const subItems = menu.subMenus
+                        .filter(sub => sub.urlSubMenu && sub.urlSubMenu !== 'none')
+                        .map(sub => MenuMapper.mapSubMenuToSakaiItem(sub, menu));
 
-                if (subItems.length > 0) {
-                    // Menú con submenus
-                    menuItem = {
-                        label: menu.tituloMenu,
+                    let menuItem: MenuItem;
+
+                    if (subItems.length > 0) {
+                        menuItem = {
+                            label: menu.tituloMenu,
+                            icon: menu.iconoMenu,
+                            items: subItems
+                        };
+                    } else {
+                        menuItem = {
+                            label: menu.tituloMenu,
+                            icon: menu.iconoMenu,
+                            routerLink: [menu.urlMenu]
+                        };
+                    }
+
+                    sakaiItems.push({
+                        label: '',
                         icon: menu.iconoMenu,
-                        items: subItems
-                    };
-                } else {
-                    // Menú simple, sin desplegable
-                    menuItem = {
-                        label: menu.tituloMenu,
-                        icon: menu.iconoMenu,
-                        routerLink: [menu.urlMenu]
-                    };
+                        items: [menuItem]
+                    });
+                });
+        });
+
+        sakaiItems.push({
+            label: '',
+            items: [
+                {
+                    label: 'Cerrar sesión',
+                    routerLink: ['login/logout']
                 }
-
-                // Cabecera vacía para Sakai
-                const headerItem: MenuItem = {
-                    label: '',
-                    icon: menu.iconoMenu,
-                    items: [menuItem]
-                };
-
-                sakaiItems.push(headerItem);
-            });
+            ]
         });
 
         return sakaiItems;
@@ -49,9 +66,10 @@ export class MenuMapper {
     static mapSubMenuToSakaiItem(sub: SubMenu, parentMenu: Menu): MenuItem {
         return {
             label: sub.tituloSubMenu,
-            icon: sub.iconoSubMenu && sub.iconoSubMenu !== 'none' ? sub.iconoSubMenu : parentMenu.iconoMenu,
+            icon: sub.iconoSubMenu && sub.iconoSubMenu !== 'none'
+                ? sub.iconoSubMenu
+                : parentMenu.iconoMenu,
             routerLink: [sub.urlSubMenu]
         };
     }
-
 }

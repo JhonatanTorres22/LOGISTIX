@@ -1,10 +1,10 @@
 import { Observable } from "rxjs";
-import { CrearProducto, EditarProducto, EliminarProducto, Producto } from "../models/producto.model";
-import { DataProductoDTO } from "@/producto/infraestructure/dto/producto.dto";
+import { CrearProducto, DataProducto, EditarProducto, EliminarProducto, Producto, ResponseProducto } from "../models/producto.model";
 
-export abstract class ProductoRespository {
-    abstract obtener() : Observable<DataProductoDTO<Producto[]>>
-    abstract crear(producto : CrearProducto) : Observable<void>
-    abstract editar(producto : EditarProducto) : Observable<void>
-    abstract eliminar(producto : EliminarProducto) : Observable<void>
+export abstract class ProductoRepository {
+    abstract obtener() : Observable<DataProducto>
+    abstract crear(producto : CrearProducto) : Observable<ResponseProducto>
+    abstract editar(producto : EditarProducto) : Observable<ResponseProducto>
+    abstract eliminar(producto : EliminarProducto) : Observable<ResponseProducto>
+    abstract crearMasivo(producto : CrearProducto[]): Observable<ResponseProducto>
 }

@@ -1,0 +1,341 @@
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '50rem' }" (onHide)="closeDialog()">
+    <ng-template #header>
+        <div class="inline-flex items-center justify-center gap-2">
+            <span class="font-bold whitespace-nowrap"> Listar Cronogramas </span>
+        </div>
+    </ng-template>
+
+    <!-- <pre> {{ listOrdenCompra() | json }} </pre> -->
+    @let anexoCronograma = listAnexo()[0].fases[2].anexos[1];
+    @let total = listAnexo()[0].fases[1].anexos[1].archivos.length;
+    @let activados = anexoCronograma.archivos.length;
+    @let pendientes = total - activados;
+
+    @if (loading) {
+    <ui-loading-progress-bar></ui-loading-progress-bar>
+    }
+    @else{
+    @if (pendientes > 0) {
+    @for (item of cronogramasEsperados.slice(activados); track item.idAnexosPorFase) {
+
+    <div class="pb-2">
+        <ui-button color="primary"
+            [label]="'Activar cronograma - ' + item.proveedor + ' (Anexo #' + item.idAnexosPorFase + ')'"
+            (onClick)="activarAnexoCronograma()">
+        </ui-button>
+    </div>
+
+    }
+    }
+    @if(activados > 0){
+    <!-- <pre>{{anexoCronograma | json}}</pre> -->
+    @let orden = listOrdenCompra()?.[0];
+
+    @for (item of anexoCronograma.archivos ;let i = $index; track i) {
+    <!-- {{item | json}} -->
+    @let anexoOrden = orden?.anexosPorFases?.[i];
+    @let proveedor = anexoOrden?.ordenCompra?.[0]?.nombreProveedor;
+    <p-fieldset
+        [legend]="'Cronograma - ' + (proveedor ?? 'Proveedor') + ' (#' + (anexoOrden?.idAnexosPorFase ?? '-') + ')'"
+        [toggleable]="true" [collapsed]="collapsedId() !== item.idAnexosPorFase"
+        (collapsedChange)="collapsarCronograma($event, item, i)">
+
+        @if ( item.idAnexosPorFase === selectArchivoAnexo().idAnexosPorFase) {
+        <!--FORMULARIO PARA INSERTAR EL CRONOGRAMA-->
+        @if (listCronograma().length == 0) {
+        <form [formGroup]="cronogramaForm" class="pt-2">
+
+            <ui-select formControlName="cuotas" label="Cantidad de cuotas" [options]="listCuotas"></ui-select>
+
+            @if (cronogramasForm.length > 0) {
+            <div class="pt-4">
+                <ui-select label="Tipo Documento" formControlName="tipoDocumento" [options]="listTipoDocumento">
+                </ui-select>
+
+                <div formArrayName="cronogramas" class="pt-2">
+                    @for (cronograma of cronogramasForm.controls; let j = $index; track j) {
+
+                    <div [formGroupName]="j" class="surface-card border-1 surface-border border-round-lg p-3 mb-4">
+                        <div class="flex align-items-center gap-2 mb-1">
+                            <i class="pi pi-calendar text-primary"></i>
+                            <span class="font-semibold text-xs"> Cronograma {{ j + 1 }} </span>
+                        </div>
+
+                        <div class="grid">
+                            <div class="col-12 md:col-6">
+                                <ui-input class="w-full" label="Monto" formControlName="monto"></ui-input>
+                            </div>
+
+                            <div class="col-12 md:col-6">
+                                <ui-date-picker class="w-full" label="Fecha" formControlName="fecha"></ui-date-picker>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <ui-input class="w-full" label="Concepto" formControlName="concepto"></ui-input>
+                        </div>
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+        </form>
+        }
+        @else {
+        <p-dataView [value]="listCronograma()" [paginator]="true" [rows]="5" [emptyMessage]="'No hay contactos'">
+            <ng-template let-cronogramas #list>
+                <ui-button (onClick)="eliminarCronogramas()" label="Eliminar" color="danger" tooltip="Eliminar"
+                    [disabled]="selectCronogramas().length === 0" class="flex justify-content-end pb-2">
+                </ui-button>
+
+                @for (cronograma of cronogramas; track $index) {
+                @if (cronograma.edit) {
+                <form [formGroup]="cronogramaForm" (keydown.enter)="actualizarCronogramas($event)">
+                    <div formArrayName="cronogramas">
+
+                        @for (ctrl of cronogramasForm.controls; let j = $index; track j) {
+                        @if (ctrl.value.idCronogramaPagoProveedor === cronograma.idCronogramaPagoProveedor) {
+
+                        <div [formGroupName]="j" class="flex flex-column gap-2 w-full pb-2 pt-4">
+
+                            <!-- FILA SUPERIOR -->
+                            <div class="flex gap-2 w-full">
+                                <ui-input class="w-full" label="Monto" formControlName="monto"></ui-input>
+
+                                <ui-date-picker class="w-full" label="Fecha" formControlName="fecha"></ui-date-picker>
+
+                                <ui-select class="w-full" label="Tipo Documento" formControlName="tipoDocumento"
+                                    [options]="listTipoDocumento">
+                                </ui-select>
+                            </div>
+                            <div class="w-full">
+                                <ui-input label="Concepto" formControlName="concepto">
+                                </ui-input>
+                            </div>
+
+                        </div>
+                        }
+                        }
+                    </div>
+                </form>
+
+                }
+
+                @else if (cronograma.uploadTipo) {
+                <div class="mb-4 p-3 shadow-3 rounded surface-card">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-bold text-sm">
+                             {{ cronograma.uploadTipo === 'comprobante' ? 'Comprobante' : '' }}
+                        </span>
+
+                        <ui-button icon="pi pi-times" color="secondary" (onClick)="cancelarUpload(cronograma)">
+                        </ui-button>
+                    </div>
+
+                    <div [formGroup]="archivoForm">
+                        <ui-upload-file formControlName="archivo"></ui-upload-file>
+                    </div>
+
+                    <div class="flex justify-end mt-3 gap-2">
+                        <p-button severity="secondary" label="Cancelar" (onClick)="cancelarUpload(cronograma)">
+                        </p-button>
+
+                        <ui-button label="Guardar" icon="pi pi-save" color="primary"
+                            (onClick)="actualizarArchivoCronograma()" [disabled]="archivoForm.invalid">
+                        </ui-button>
+                    </div>
+                </div>
+
+                }
+                @else {
+                    {{cronograma.estado | json}}
+                <div class="mb-4 p-2 shadow-3 rounded surface-card">
+                    <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between">
+
+                        <div class="flex flex-column gap-3 cursor-pointer"
+                            (click)="onClickCronograma($event, cronograma)">
+                            <!-- {{ cronograma | json }} -->
+                            <div class="flex align-items-center gap-2 text-xs font-bold">
+                                <i class="pi pi-calendar text-blue-700 text-xs"></i>
+                                {{ cronograma.fecha | date:'dd/MM/yyyy' }}
+                            </div>
+
+                            <div class="flex align-items-center gap-2 text-xs font-bold">
+                                <i class="pi pi-money-bill text-green-700 text-xs"></i>
+                                S/. {{ cronograma.monto }}
+                            </div>
+
+                            <div class="flex align-items-center gap-2 text-xs font-bold">
+                                <i class="pi pi-file text-red-700 text-xs"></i>
+                                {{ cronograma.tipoDocumentoTributario }}
+                            </div>
+
+                            <div class="flex align-items-center gap-2 text-xs font-bold">
+                                <i class="pi pi-tag text-purple-700 text-xs"></i>
+                                {{ cronograma.conceptoTributario }}
+                            </div>
+
+                            <p-fieldset legend="Documentos" [toggleable]="true" [collapsed]="true"
+                                class="mt-2 fieldset-sm">
+
+                                <div class="flex align-items-center justify-content-between text-xs mb-2"
+                                    [class.text-gray-500]="!cronograma.documentoTributario">
+
+                                    <div class="flex align-items-center gap-2 cursor-pointer"
+                                        (click)="verArchivoCronograma(cronograma, 'documentoTributario')">
+
+                                        <i class="pi pi-file-pdf" [class.text-red-600]="cronograma.documentoTributario"
+                                            [class.text-gray-400]="!cronograma.documentoTributario"></i>
+
+                                        Documento Tributario:
+                                        <b>{{ cronograma.documentoTributario ?? 'No disponible' }}</b>
+                                    </div>
+
+                                    @if (!cronograma.documentoTributario) {
+                                    <ui-button icon="pi pi-upload" size="small" rounded text
+                                        tooltip="Subir documento tributario"
+                                        (onClick)="selectedCronograma(cronograma, 'docTributario')">
+                                    </ui-button>
+                                    }
+                                </div>
+
+                                <div class="flex align-items-center justify-content-between text-sm mb-2"
+                                    [class.text-gray-500]="!cronograma.informeProveedor">
+
+                                    <div class="flex align-items-center gap-2 cursor-pointer"
+                                        (click)="verArchivoCronograma(cronograma, 'informeProveedor')">
+
+                                        <i class="pi pi-file-pdf" [class.text-red-600]="cronograma.informeProveedor"
+                                            [class.text-gray-400]="!cronograma.informeProveedor"></i>
+
+                                        Informe del Proveedor:
+                                        <b>{{ cronograma.informeProveedor ?? 'No disponible' }}</b>
+                                    </div>
+
+                                    @if (!cronograma.informeProveedor) {
+                                    <ui-button icon="pi pi-upload" size="small" rounded text
+                                        tooltip="Subir informe proveedor"
+                                        (onClick)="selectedCronograma(cronograma, 'infProveedor')">
+                                    </ui-button>
+                                    }
+                                </div>
+
+                                <div class="flex align-items-center justify-content-between text-sm mb-2"
+                                    [class.text-gray-500]="!cronograma.informeResponsable">
+
+                                    <div class="flex align-items-center gap-2 cursor-pointer"
+                                        (click)="verArchivoCronograma(cronograma, 'informeResponsable')">
+
+                                        <i class="pi pi-file-pdf" [class.text-red-600]="cronograma.informeResponsable"
+                                            [class.text-gray-400]="!cronograma.informeResponsable"></i>
+
+                                        Informe del Responsable:
+                                        <b>{{ cronograma.informeResponsable ?? 'No disponible' }}</b>
+                                    </div>
+
+                                    @if (!cronograma.informeResponsable) {
+                                    <ui-button icon="pi pi-upload" size="small" rounded text
+                                        tooltip="Subir informe responsable"
+                                        (onClick)="selectedCronograma(cronograma, 'infResponsable')">
+                                    </ui-button>
+                                    }
+                                </div>
+
+                                <div class="flex align-items-center justify-content-between text-sm"
+                                    [class.text-gray-500]="!cronograma.comprobante">
+
+                                    <div class="flex align-items-center gap-2 cursor-pointer"
+                                        (click)="verArchivoCronograma(cronograma, 'comprobante')">
+
+                                        <i class="pi pi-file-pdf" [class.text-red-600]="cronograma.comprobante"
+                                            [class.text-gray-400]="!cronograma.comprobante"></i>
+
+                                        Comprobante:
+                                        <b>{{ cronograma.comprobante ?? 'No disponible' }}</b>
+                                    </div>
+
+                                    @if (!cronograma.comprobante) {
+                                    <ui-button icon="pi pi-upload" size="small" rounded text tooltip="Subir comprobante"
+                                        (onClick)="selectedCronograma(cronograma, 'comprobante')">
+                                    </ui-button>
+                                    }
+                                </div>
+
+                            </p-fieldset>
+                        </div>
+
+                        <!-- <pre>{{cronograma |json}}</pre> -->
+                        <div class="flex flex-column align-items-end gap-2">
+                            <div class="flex items-center gap-2">
+                                @if ((cronograma.documentoTributario == null)) {
+                                <p-checkbox [binary]="true"
+                                    (onChange)="seleccionarCronograma(cronograma, $event)"></p-checkbox>
+                                }
+                                @else {
+                                @if (cronograma.estado == 1 ) {
+                                <ui-button icon="pi pi-check" color="primary" tooltip="Aprobar"
+                                    (onClick)="aprobarCronogramaPago(cronograma)"></ui-button>
+                                <ui-button icon="pi pi-times" color="danger" tooltip="Observar"
+                                    (onClick)="observarArchivo(cronograma)"></ui-button>
+                                }
+
+                                @if (cronograma.estado === 2) {
+                                <span
+                                    class="border-dashed border-2 border-round border-red-700 bg-red-100 px-2 py-1 text-red-800 font-semibold">
+                                    OBSERVADO
+                                </span>
+                                }
+                                <!-- {{cronograma | json}} -->
+                                @if (cronograma.estado === 3) {
+                                <span
+                                    class="border-dashed border-2 border-round border-blue-700 bg-blue-100 px-2 py-1 text-blue-800 font-semibold">
+                                    APROBADO
+                                </span>
+                                }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <!-- {{cronograma | json}} -->
+                    @if (cronograma.estado === 2 && cronograma.observacion !== null) {
+                    <div class="mt-3 border-left-3 border-red-500 pl-3 py-2 bg-red-50 text-red-900 text-sm rounded">
+                        <i class="pi pi-info-circle mr-2"></i>
+                        <strong>Observación:</strong> {{ cronograma.observacion }}
+                    </div>
+                    }
+                    <!-- MOSTRAR EL INPUT -->
+                    @if (archivoObservandoId === cronograma.idCronogramaPagoProveedor) {
+                    <form [formGroup]="observarForm"
+                        class="border-left-3 border-orange-500 pl-3 py-2 bg-orange-50 rounded">
+                        <ui-input label="Observación" formControlName="observacion" [minlength]="7"></ui-input>
+                        <div class="flex justify-end gap-2 mt-2">
+                            <ui-button label="Cancelar" color="secondary" (onClick)="cancelarObservacion()"></ui-button>
+                            <ui-button label="Guardar" color="danger" [disabled]="observarForm.invalid"
+                                (onClick)="observarCronogramaPago(cronograma)"> </ui-button>
+                        </div>
+                    </form>
+                    }
+                </div>
+                }
+                }
+            </ng-template>
+        </p-dataView>
+        }
+        }
+        <!-- <pre>{{ cronogramaForm.value.cronogramas |json }}</pre> -->
+    </p-fieldset>
+    }
+    }
+    }
+
+    <ng-template #footer>
+        <ui-button label="CERRAR" icon="pi pi-times" color="secondary" (onClick)="closeDialog()"></ui-button>
+        <ui-button label="GUARDAR" icon="pi pi-save" color="primary" (onClick)="insertarCronograma()"
+            [disabled]="cronogramaForm.value.cronogramas.length == 0 || cronogramasForm.invalid" />
+    </ng-template>
+</p-dialog>
+
+@if (visibleCarpeta) {
+
+<app-list-carpetas [(visible)]="visibleCarpeta" [modo]="'SELECCIONAR'"></app-list-carpetas>
+}

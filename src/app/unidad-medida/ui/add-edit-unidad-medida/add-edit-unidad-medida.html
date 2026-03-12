@@ -1,0 +1,21 @@
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '40rem' }" (onHide)="closeDialog()">
+<ng-template #header>
+        <div class="inline-flex items-center justify-center gap-2">
+            <span class="font-bold whitespace-nowrap"> {{ selectUnidadMedida().idUnidadMedida == 0 ? 'AGREGAR' : 'EDITAR' }} UNIDAD DE MEDIDA </span>
+        </div>
+    </ng-template>
+
+    <div class="pt-3">
+        <form action="" [formGroup]="formUnidadMedida" class="flex flex-column gap-4">
+            <ui-input label="Nombre" formControlName="nombre" [maxlength]="maxLengthNombre" [minlength]="minLengthNombre"
+            [expReg]="expLock" [patternErrorMessage]="'No debe incluir caracteres especiales, ni espacios al final'" ></ui-input>
+            <ui-input label="Descripcion" formControlName="descripcion" [maxlength]="maxLengthDescripcion" [minlength]="minLengthDescripcion"
+            [expReg]="expLock" [patternErrorMessage]="'No debe incluir caracteres especiales, ni espacios al final'"></ui-input>
+        </form>
+    </div>
+
+    <ng-template #footer>
+        <ui-button label="CANCELAR" icon="pi pi-times" color="secondary" (onClick)="closeDialog()"></ui-button>
+        <ui-button label="GUARDAR" icon="pi pi-save" (onClick)="onSubmit()" [disabled]="formUnidadMedida.invalid"></ui-button>
+    </ng-template>
+</p-dialog>

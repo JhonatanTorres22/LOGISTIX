@@ -1,0 +1,39 @@
+@if (loading) {
+    <ui-loading-progress-bar></ui-loading-progress-bar>
+}
+@else {
+    @if (selectSubTarea().codigoSubTarea === 0) {
+<div [formGroup]="formSubTarea" class="flex gap-2 w-full">
+    <ui-select label="TIPO DE GASTO" classInput="small" [options]="selectTipoGasto" formControlName="tipoGasto"
+        class="w-full"></ui-select>
+
+    <div class="flex gap-2 w-full">
+        <ui-input [maxlength]="20" [minlength]="minLengthSubTarea" [expReg]="expLockSubTarea"
+            [patternErrorMessage]="'Debe contener solo números'" class="w-full" classInput="small"
+            formControlName="codigo" label="INGRESAR CÓDIGO DE INDICADOR DE POA"></ui-input>
+
+        <ui-button (onClick)="searchSubTarea()" [disabled]="formSubTarea.invalid" class="mt-1" icon="pi pi-search"
+            color="primary"></ui-button>
+    </div>
+</div>
+}
+
+@if (visibleIniciarSesionGipeo) {
+<app-auth-gipeo [(visible)]="visibleIniciarSesionGipeo"></app-auth-gipeo>
+}
+
+@if(selectSubTarea().codigoSubTarea !== 0){
+<app-list-solicitud-compra></app-list-solicitud-compra>
+}
+
+
+
+@if (listIndicador().length > 0 && selectSubTarea().codigoSubTarea == 0) {
+<app-list-indicador></app-list-indicador>
+}
+
+
+@else if(listIndicador().length == 0 && selectSubTarea().codigoSubTarea == 0){
+<ui-card-not-items [text]="mensajeSearch "></ui-card-not-items>
+}
+}

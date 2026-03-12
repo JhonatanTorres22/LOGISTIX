@@ -1,51 +1,43 @@
-<!-- {{ listProveedor() | json }} -->
 @if (loading) {
 <ui-loading-progress-bar></ui-loading-progress-bar>
 }
 @else {
+@if(this.permisosProveedor.LISTAR){
 @if (listProveedor().length > 0) {
-<p-table #dt1
-    [value]="listProveedor()"
-    [globalFilterFields]="['nombre', 'ruc', 'direccion', 'tipo', 'accion']"
-    selectionMode="single"
-    dataKey="id"
-    [tableStyle]="{ 'min-width': '50rem' }"
-    [rows]="20"
-    [paginator]="true"
+<p-table #dtProveedor [value]="listProveedor()" size="small"
+    [globalFilterFields]="['nombre', 'ruc', 'direccion', 'tipo', 'evaluacion', 'accion']" selectionMode="single"
+    dataKey="id" [tableStyle]="{ 'min-width': '50rem' }" [rows]="20" [paginator]="true"
     [rowsPerPageOptions]="[20,100,1000]"
-    paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros"
-    stateStorage="session"
-    stateKey="statedemo-session">
+    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros">
 
     <ng-template #caption>
-        <div class="flex justify-between">
-            <p-iconfield iconPosition="left">
+        <div class="flex justify-between gap-4">
+            <p-iconfield iconPosition="left" class="w-full">
                 <p-inputicon>
                     <i class="pi pi-search"></i>
                 </p-inputicon>
-                <input pInputText type="text" placeholder="Buscar Proveedor"
-                    (input)="dt1.filterGlobal($any($event.target).value, 'contains')" />
+                <input class="w-full" pInputText type="text" placeholder="Buscar Proveedor"
+                    (input)="dtProveedor.filterGlobal($any($event.target).value, 'contains')" />
             </p-iconfield>
-            <ui-button (click)="visibleAdd = true" label="AGREGAR PROVEEDOR"></ui-button>
+            @if (permisoProveedor.INSERTAR) {
+            <ui-button (click)="seleccionarProveedor(proveedorDefault); visibleAdd = true" label="AGREGAR"></ui-button>
+            }
         </div>
     </ng-template>
 
     <ng-template #header>
         <tr>
-            <th pSortableColumn="nombre" style="width:5%">NOMBRE<p-sortIcon field="name" /></th>
-            <th pSortableColumn="area" style="width:10%">
-                RUC <p-sortIcon field="area" />
-            </th>
-            <th pSortableColumn="usuario" style="width:20%">
-                DIRECCIÓN <p-sortIcon field="usuario" />
-            </th>
-            <th pSortableColumn="categoria" style="width:5%">TIPO<p-sortIcon field="categoria" /></th>
-            <th pSortableColumn="accion" style="width:2%">ACCIONES<p-sortIcon field="accion" /></th>
+            <th pSortableColumn="nombre" style="width:15%">NOMBRE<p-sortIcon field="name" /></th>
+            <th pSortableColumn="area" style="width:10%"> RUC <p-sortIcon field="area" /></th>
+            <th pSortableColumn="usuario" style="width:25%"> DIRECCIÓN <p-sortIcon field="usuario" /></th>
+            <th pSortableColumn="categoria" style="width:10%">TIPO<p-sortIcon field="categoria" /></th>
+            <th pSortableColumn="evaluacion" style="width:10%">EVALUACIÓN<p-sortIcon field="evaluacion" /></th>
+            <th pSortableColumn="accion" style="width:10%">ACCIONES<p-sortIcon field="accion" /></th>
         </tr>
     </ng-template>
 
     <ng-template #body let-proveedor>
+        <!-- {{proveedor.id | json}} -->
         <tr [pSelectableRow]="proveedor">
             <td>
                 <span class="ml-1 align-middle">{{ proveedor.nombre }}</span>
@@ -65,35 +57,63 @@
                     <span class="ml-1 align-middle">{{ proveedor.tipo }}</span>
                 </div>
             </td>
+
             <td>
                 <div class="flex items-center gap-2">
-                    <button pButton type="button" (click)="visibleAdd = true; seleccionarProveedor(proveedor)" icon="pi pi-pencil"
-                        class="p-button-rounded p-button-success p-button-text"></button>
-                    <button pButton type="button" (click)="eliminarConfirm(proveedor)" icon="pi pi-trash"
-                        class="p-button-rounded p-button-danger p-button-text"></button>
-                        <button pButton type="button" (click)="visibleCriterios = true; seleccionarProveedor(proveedor)" icon="pi pi-file-edit"
-                        class="p-button-rounded p-button-info p-button-text"></button>
-                </div>
-        </tr>
-    </ng-template>
 
-    <ng-template emptymessage>
-        <tr>
-            <td colspan="4">NO SE ENCUENTRAN PROVEEDORES DISPONIBLES</td>
+                    <p-tag [value]="proveedor.evaluacion" [severity]="getColorEvaluacion(proveedor.evaluacion)">
+                    </p-tag>
+
+                </div>
+            </td>
+            <td>
+                <div class="flex items-center gap-2">
+                    @if (this.permisoProveedor.ACTUALIZAR) {
+                    <ui-icon-button (click)="visibleAdd = true; seleccionarProveedor(proveedor)" icon="pi pi-pencil"
+                        tooltip="Editar"></ui-icon-button>
+
+                    }
+                    @if (permisoProveedor.ELIMINAR) {
+                    <ui-icon-button (click)="eliminarConfirm(proveedor)" icon="pi pi-trash" color="danger"
+                        tooltip="Eliminar"></ui-icon-button>
+                    }
+                    <ui-icon-button (click)="visibleFichaEvaluacion = true; seleccionarProveedor(proveedor)"
+                        icon="pi pi-file-edit" color="info" tooltip="Evaluacion"></ui-icon-button>
+
+                    <ui-icon-button (click)="visibleContacto = true; seleccionarProveedor(proveedor)" icon="pi pi-phone"
+                        color="help" tooltip="Contactos"></ui-icon-button>
+
+                    <ui-icon-button (click)="seleccionarProveedor(proveedor); visibleBancos = true"
+                        icon="pi pi-credit-card" color="contrast" tooltip="Bancos"></ui-icon-button>
+                </div>
+            </td>
         </tr>
     </ng-template>
 </p-table>
 }
+@else {
+<app-import-proveedores></app-import-proveedores>
 }
-
 
 @if (visibleAdd) {
-<app-add-edit-proveedor [(visible)]="visibleAdd"></app-add-edit-proveedor>>
+<app-add-edit-proveedor [permisos]="permisoProveedor" [(visible)]="visibleAdd"></app-add-edit-proveedor>>
 }
 @if (visibleCriterios) {
-    <app-list-criterios [(visible)]="visibleCriterios"></app-list-criterios>
+<app-list-criterios [(visible)]="visibleCriterios"></app-list-criterios>
+}
+@if (visibleContacto) {
+<app-list-contacto [(visible)]="visibleContacto"></app-list-contacto>
+}
+@if (visibleBancos) {
+<app-list-bancos [(visible)]="visibleBancos"></app-list-bancos>
+}
+@if (visibleFichaEvaluacion) {
+<!-- <app-ficha-evaluacion [(visible)]="visibleFichaEvaluacion"></app-ficha-evaluacion> -->
+<app-evaluacion-sunat [(visible)]="visibleFichaEvaluacion"></app-evaluacion-sunat>
 }
 
-@if (listProveedor().length == 0) {
-<app-import-proveedores></app-import-proveedores>
+}@else {
+<ui-card-not-items text=" 'Usted no tiene acceso a leer los proveedores' "></ui-card-not-items>
+}
+
 }

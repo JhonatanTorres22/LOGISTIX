@@ -1,0 +1,39 @@
+@if (loading) {
+    <ui-loading-progress-bar></ui-loading-progress-bar>>
+}
+@else{
+    <p-card class="shadow-3 p-4">
+    <ng-template pTemplate="header">
+        <div class="flex justify-between align-items-center w-full">
+            <span class="font-bold text-lg">
+                {{ selectDeudaCoactiva().idDeudaCoactiva == 0 ? 'Agregar' : 'Editar' }}
+            </span>
+
+            <ui-icon-button icon="pi pi-times" (onClick)="closePanel()"></ui-icon-button>
+        </div>
+    </ng-template>
+
+    <div class="pt-4" [formGroup]="formDeudaCoactiva" class="flex flex-column gap-4">
+        <ui-input label="Monto de la Deuda" formControlName="monto" [expReg]="expLockMonto"></ui-input>
+        <ui-date-picker label="Periodo Tributario" formControlName="periodo" [maxDate]="hoy"></ui-date-picker>
+        <ui-date-picker label="Fecha Inicio Cobranza" formControlName="fechaInicioCobranza" [maxDate]="hoy"></ui-date-picker>
+        <ui-input label="Entidad Asociada" formControlName="entidadAsociada"></ui-input>
+    </div>
+
+
+    <p-divider></p-divider>
+
+        <form [formGroup]="fechaConsultaForm" class="flex flex-column gap-4">
+            <ui-date-picker label="Fecha de Consulta" formControlName="fechaConsulta" [maxDate]="hoy"></ui-date-picker>
+        </form>
+
+
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-content-end gap-2">
+            <ui-button label="Cancelar" icon="pi pi-times" color="secondary"(onClick)="closePanel()"></ui-button>
+            <ui-button label="Guardar" icon="pi pi-save" [disabled]="fechaConsultaForm.invalid" (onClick)="onSubmit()"></ui-button>
+        </div>
+    </ng-template>
+</p-card>
+}

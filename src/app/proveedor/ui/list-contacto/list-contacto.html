@@ -1,0 +1,67 @@
+@if (loading) {
+<ui-loading-progress-bar></ui-loading-progress-bar>
+}
+@else {
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '40rem' }" (onHide)="closeDialog()">
+    <ng-template #header>
+        <div class="inline-flex items-center justify-center gap-2">
+            <span class="font-bold whitespace-nowrap"> LISTA DE CONTACTOS </span>
+        </div>
+    </ng-template>
+
+    @if (vista == 'lista') {
+        <div class="flex justify-end mb-2">
+        <ui-button icon="pi pi-plus" label="Agregar Contacto" (onClick)="seleccionarContacto(contactoDefault)"></ui-button>
+    </div>
+
+    <p-dataView [value]="listContacto()" [paginator]="true" [rows]="5" [emptyMessage]="'No hay contactos'">
+        <ng-template let-contactos #list>
+            @for (contacto of contactos; track $index) {
+            <div
+                class="mb-4 p-2 shadow-3 rounded surface-card flex flex-column md:flex-row md:align-items-center md:justify-content-between">
+
+                <div class="flex align-items-center mb-3 md:mb-0">
+                    <p-avatar [label]="contacto.nombres[0] + contacto.apePaterno[0]" shape="circle" size="large"
+                        styleClass="mr-3"></p-avatar>
+
+                    <div class="flex flex-column space-y-2">
+                        <span class="text-sm font-bold text-900">{{ contacto.nombres }} {{ contacto.apePaterno }} {{
+                            contacto.apeMaterno }}</span>
+                        <span class="text-xs text-600">{{ contacto.cargo }}</span>
+
+                        <!-- Teléfono y correo en la misma línea -->
+                        <div class="flex flex-row gap-4">
+                            <span class="text-sm flex items-center gap-2 text-green-600"><i class="pi pi-phone"></i>{{
+                                contacto.celular }}</span> |
+                            <span class="text-sm flex items-center gap-2 text-blue-600"><i class="pi pi-envelope"></i>{{
+                                contacto.correo }}</span>
+                        </div>
+
+                        @if (contacto.anotacion1 !== '-') {
+                            <span class="text-sm mt-1 bg-gray-100 text-gray-900 px-2 py-1 rounded">{{ contacto.anotacion1}}</span>
+                        }
+
+                        @if (contacto.anotacion2 !== '-') {
+                        <span class="text-sm mt-1 bg-gray-100 text-gray-900 px-2 py-1 rounded">{{ contacto.anotacion2}}</span>
+                        }
+                    </div>
+
+
+                </div>
+                <div class="flex gap-2 md:flex-column">
+                    <ui-button icon="pi pi-pencil" color="primary" tooltip="Editar"
+                    (onClick)="seleccionarContacto(contacto)"></ui-button>
+                    <ui-button icon="pi pi-trash" color="danger" tooltip="Eliminar"
+                        (click)="eliminarConfirm(contacto)"></ui-button>
+                </div>
+            </div>
+            }
+
+        </ng-template>
+    </p-dataView>
+    }
+    @if (vista == 'form') {
+        <app-add-edit-contacto (cerrar)="cerrarFormulario()"></app-add-edit-contacto>
+    }
+</p-dialog>
+}

@@ -1,6 +1,6 @@
 <div class="ui-input w-full m-t-5" [ngClass]="classInput">
 
-  <p-floatLabel>
+  <p-floatLabel class="w-full md:w-56" variant="on">
 
     @if (type !== 'password') {
       <!-- INPUT TEXT / NUMBER -->
@@ -15,22 +15,27 @@
         [attr.minlength]="minlength || null"
         [attr.min]="min || null"
         autocomplete="off"
-        UpperCase
+        [UpperCase]="upperCase"
         class="w-full"
         (input)="onInput($event); onInputEvent.emit($event)"
       />
     }
 
     @if (type === 'password') {
+      <div>
+
+        <p-password
+        [ngClass]="classInput"
+          [inputId]="label"
+          [formControl]="formControl"
+          [disabled]="readonly"
+          [toggleMask]="true"
+          [feedback]="false"
+          inputStyleClass="w-full"
+        ></p-password>
+      </div>
       <!-- PASSWORD -->
-      <p-password
-        [inputId]="label"
-        [formControl]="formControl"
-        [disabled]="readonly"
-        [toggleMask]="true"
-        [feedback]="false"
-        class="w-full"
-      ></p-password>
+
     }
 
     <label>{{ label }}</label>
@@ -38,7 +43,7 @@
 
   <!-- CONTADOR -->
   @if (maxlength && type !== 'password') {
-    <small class="block text-right text-500 mt-1">
+    <small class="block text-right text-500">
       {{ formControl.value?.length || 0 }} / {{ maxlength }}
     </small>
   }
@@ -47,37 +52,37 @@
   @if (formControl.touched && formControl.invalid) {
 
     @if (formControl.hasError('maxlength')) {
-      <small class="block text-red-500 mt-1">
+      <small class="block text-red-500">
         Este campo debe tener como máximo {{ maxlength }} caracteres
       </small>
     }
 
     @if (formControl.hasError('minlength')) {
-      <small class="block text-red-500 mt-1">
+      <small class="block text-red-500">
         Este campo debe tener como mínimo {{ minlength }} caracteres
       </small>
     }
 
     @if (formControl.hasError('required')) {
-      <small class="block text-red-500 mt-1">
+      <small class="block text-red-500">
         Este campo es obligatorio
       </small>
     }
 
     @if (formControl.hasError('pattern')) {
-      <small class="block text-red-500 mt-1">
+      <small class="block text-red-500">
         {{ patternErrorMessage }}
       </small>
     }
 
     @if (formControl.hasError('codigoDuplicado')) {
-      <small class="block text-red-500 mt-1">
+      <small class="block text-red-500">
         Este campo está siendo duplicado
       </small>
     }
 
     @if (formControl.hasError('min')) {
-      <small class="block text-red-500 mt-1">
+      <small class="block text-red-500 ">
         El valor ingresado no puede ser menor a {{ min }}
       </small>
     }

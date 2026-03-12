@@ -1,0 +1,20 @@
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '65rem' }" (onHide)="closeDialog()"
+    header="Gestión de Carpetas">
+
+  @if (nodes.length == 0) {
+    <ui-card-not-items text="No hay carpetas creadas" ></ui-card-not-items>
+  }
+  @else {
+    <p-tree
+      [value]="nodes"
+      class="w-full md:w-[30rem]"
+      [draggableNodes]="true" 
+      [droppableNodes]="true"
+      [loading]="loading"
+      draggableScope="self" 
+      droppableScope="self"
+      (onNodeDrop)="onNodeDrop($event)"
+      selectionMode="single"
+    ></p-tree>
+  }
+</p-dialog>

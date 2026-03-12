@@ -1,0 +1,32 @@
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '700px' }" (onHide)="closeDialog()">
+    <ng-template #header>
+        <span class="font-bold">Asignar Productos</span>
+    </ng-template>
+    <p-pickList [source]="productosDisponibles" 
+    [target]="productosAsignados" 
+    sourceHeader="Productos disponibles"
+    targetHeader="Productos en almacén" 
+    [showSourceFilter]="true" 
+    [showTargetFilter]="true"sourceFilterPlaceholder="Buscar producto..." 
+    targetFilterPlaceholder="Buscar producto..."
+    filterBy="nombreProducto" 
+    [showSourceControls]="false" 
+    [showTargetControls]="false" 
+    [dragdrop]="false">
+
+        <ng-template let-producto pTemplate="item">
+            <div class="flex flex-column">
+                <strong>{{ producto.nombreProducto }}</strong>
+                <small class="text-gray-500">
+                    {{ producto.modeloProducto }} - {{ producto.unidad }}
+                </small>
+            </div>
+        </ng-template>
+    </p-pickList>
+
+
+    <ng-template #footer>
+        <ui-button label="Cancelar" icon="pi pi-times" color="secondary" (onClick)="closeDialog()"></ui-button>
+        <ui-button label="Guardar" icon="pi pi-save" color="primary"></ui-button>
+    </ng-template>
+</p-dialog>

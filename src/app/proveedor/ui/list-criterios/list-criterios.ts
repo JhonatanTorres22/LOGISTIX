@@ -1,76 +1,140 @@
 import { SharedModule } from '@/core/components/shared.module';
 import { EvaluacionRepository } from '@/proveedor/domain/repositories/evaluacion.repository';
-import { ProveedorRepository } from '@/proveedor/domain/repositories/proveedor.repository';
 import { EvaluacionSignal } from '@/proveedor/domain/signals/evaluacion.signal';
 import { ProveedorSignal } from '@/proveedor/domain/signals/proveedor.signal';
 import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { AlertService } from 'src/assets/demo/services/alert.service';
 import { UiLoadingProgressBarComponent } from "@/core/components/ui-loading-progress-bar/ui-loading-progress-bar.component";
 import { UiButtonComponent } from "@/core/components/ui-button/ui-button.component";
-import { Criterio } from '@/proveedor/domain/models/evaluacion.model';
+import { CrearEvaluacion, Criterio, EditarEvaluacion, ResponseEvaluacion } from '@/proveedor/domain/models/evaluacion.model';
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
-import { UiInputComponent } from "@/core/components/ui-input/ui-input.component";
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { TabsModule } from "primeng/tabs";
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
 interface ArchivoTemporal {
-  file: File;
-  preview: string; // base64 o icono
+  file: File | { name: string };
+  preview: SafeResourceUrl | null;
 }
+
 @Component({
   selector: 'app-list-criterios',
-  imports: [SharedModule, UiLoadingProgressBarComponent, UiButtonComponent, UiInputComponent],
+  imports: [SharedModule, UiLoadingProgressBarComponent, UiButtonComponent, TabsModule],
   templateUrl: './list-criterios.html',
   styleUrl: './list-criterios.scss'
 })
 export class ListCriterios implements OnInit {
-   @Input() visible: boolean = false;
+  @Input() visible: boolean = false;
   @Output() visibleChange = new EventEmitter<boolean>();
 
-  loading: boolean = false;
+  loading = false
+  editing = false
+  archivosTemporales: { [key: number]: ArchivoTemporal } = {};
+
+  signalProveedor = inject(ProveedorSignal);
+  proveedorSelect = this.signalProveedor.proveedorSelect;
   repository = inject(EvaluacionRepository);
   signal = inject(EvaluacionSignal);
-  listCriterio = this.signal.listEvaluacion;
 
-  archivosTemporales: { [key: number]: ArchivoTemporal } = {};
+  listCriterio = this.signal.listCriterio;
+  listEvaluacion = this.signal.listarEvaluacion;
+
   formEvaluacion: FormGroup;
 
-  constructor(private alert: AlertService) {
+  hasEvaluaciones: boolean = false;
+  constructor(private alert: AlertService,
+    private sanitizer: DomSanitizer
+  ) {
     this.formEvaluacion = new FormGroup({
       criterios: new FormArray([])
     });
   }
 
   ngOnInit(): void {
-    this.obtener();
+    this.cargarCriteriosYEvaluaciones();
   }
 
   get criteriosFormArray(): FormArray {
     return this.formEvaluacion.get('criterios') as FormArray;
   }
 
-  obtener = () => {
+  createCriterioFormGroup(observacion = '', cumple = false): FormGroup {
+    return new FormGroup({
+      observacion: new FormControl(observacion),
+      cumple: new FormControl(cumple)
+    });
+  }
+
+  getCriterioFormGroup(i: number): FormGroup {
+    return this.criteriosFormArray.at(i) as FormGroup;
+  }
+
+  async generatePreview(file: File): Promise<string> {
+    if (file.type.startsWith('image/')) {
+      return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(file);
+      });
+    }
+    return '';
+  }
+
+onUpload(event: any, criterioId: number) {
+  if (event.files?.length > 0) {
+    const file: File = event.files[0];
+
+    let preview: SafeResourceUrl | null = null;
+
+    if (file.type === 'application/pdf') {
+      const url = URL.createObjectURL(file);
+      preview = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+    }
+
+    this.archivosTemporales[criterioId] = { file, preview };
+  }
+}
+  cargarCriteriosYEvaluaciones() {
     this.loading = true;
+
     this.repository.obtenerCriterio().subscribe({
-      next: (data) => {
-        this.listCriterio.set(data);
-        this.alert.showAlert('Listando los criterios', 'success');
+      next: (criteriosData) => {
+        const criterios = criteriosData.data;
+        this.listCriterio.set(criterios);
 
-        // LIMPIAR
-        // this.criteriosFormArray.clear();
+        this.repository.obtenerEvaluacion(this.proveedorSelect().id).subscribe({
+          next: (evaluacionData) => {
+            this.listEvaluacion.set(evaluacionData.data);
+            const evaluaciones = evaluacionData.data[0]?.evaluaciones || [];
+            this.hasEvaluaciones = evaluaciones.length > 0;
 
-        // // CREAR CONTROL POR CADA CRITERIO con validaciones condicionales
-        // data.forEach((criterio) => {
-        //   this.criteriosFormArray.push(
-        //     new FormGroup({
-        //       observacion: new FormControl('', criterio.obligatorio ? Validators.required : []),
-        //       documento: new FormControl('', criterio.obligatorio ? Validators.required : []),
-        //       cumple: new FormControl(false)
-        //     })
-        //   );
-        // });
+            this.criteriosFormArray.clear();
+            this.archivosTemporales = {};
 
-        this.loading = false;
+            criterios.forEach((criterio) => {
+              const evalExistente = evaluaciones.find(e => e.idCriterio === criterio.id);
+              this.criteriosFormArray.push(
+                this.createCriterioFormGroup(evalExistente?.observacion, evalExistente?.cumple)
+              );
+
+              if (evalExistente?.documento && evalExistente.documento !== 'none') {
+                this.archivosTemporales[criterio.id] = {
+                  file: { name: evalExistente.documento },
+                  preview: this.getPreview(evalExistente.documento)
+                };
+              }
+            });
+
+            this.alert.showAlert('Criterios y evaluaciones cargados correctamente', 'success');
+            this.loading = false;
+          },
+          error: () => {
+            this.alert.showAlert('Error al obtener evaluaciones', 'error');
+            this.loading = false;
+          }
+        });
       },
       error: () => {
         this.alert.showAlert('Hubo un error al listar los criterios', 'error');
@@ -79,38 +143,10 @@ export class ListCriterios implements OnInit {
     });
   }
 
-  onUpload(event: any, criterioId: number) {
-    if (event.files && event.files.length > 0) {
-      const file = event.files[0];
-
-      if (file.type === 'application/pdf') {
-        const reader = new FileReader();
-        reader.onload = async () => {
-          const typedArray = new Uint8Array(reader.result as ArrayBuffer);
-          const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
-          const page = await pdf.getPage(1);
-          const viewport = page.getViewport({ scale: 0.3 });
-          const canvas = document.createElement('canvas');
-          const context = canvas.getContext('2d')!;
-          canvas.height = viewport.height;
-          canvas.width = viewport.width;
-          await page.render({ canvasContext: context, viewport }).promise;
-          const preview = canvas.toDataURL();
-          this.archivosTemporales[criterioId] = { file, preview };
-        };
-        reader.readAsArrayBuffer(file);
-      } else if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = () => {
-          this.archivosTemporales[criterioId] = { file, preview: reader.result as string };
-        };
-        reader.readAsDataURL(file);
-      } else {
-        // Excel u otros archivos: se puede usar un icono genérico
-        this.archivosTemporales[criterioId] = { file, preview: 'assets/file-icon.png' };
-      }
-    }
-  }
+getPreview(documento: string): SafeResourceUrl | null {
+  // NO hay URL real → no preview
+  return null;
+}
 
   openFileDialog(fileUpload: any) {
     (fileUpload as any).browse();
@@ -121,37 +157,92 @@ export class ListCriterios implements OnInit {
     this.visibleChange.emit(false);
   }
 
-  guardar() {
-    // Validar que los obligatorios tengan observación y archivo
+  guardarOEditar() {
+    this.loading = true
     let invalid = false;
+    const evaluaciones: (CrearEvaluacion | EditarEvaluacion)[] = [];
 
-    this.criteriosFormArray.controls.forEach((ctrl, i) => {
-      const obligatorio = this.listCriterio()[i].obligatorio;
-      if (obligatorio) {
-        if (!ctrl.get('observacion')?.value || !this.archivosTemporales[i]?.file) {
-          invalid = true;
-        }
+    this.listCriterio().forEach((criterio, index) => {
+      const formGroup = this.getCriterioFormGroup(index);
+      const archivoTemp = this.archivosTemporales[criterio.id];
+
+      const observacion = formGroup.get('observacion')?.value?.trim();
+      const cumple = formGroup.get('cumple')?.value === true;
+      const tieneArchivo = !!archivoTemp;
+
+      if (criterio.obligatorio && (!observacion || !tieneArchivo)) {
+        invalid = true;
+        this.loading = false
+        return;
       }
+
+      if (!observacion && !cumple && !tieneArchivo) {this.loading = false;return};
+
+      const evalExistente = this.getEvaluacion(criterio.id)
+      const evaluacion = this.editing && evalExistente
+        ? {
+          idEvaluacion: evalExistente.idEvaluacion,
+          idProveedor: this.proveedorSelect().id,
+          cumple,
+          observacion: observacion ?? '',
+          documento: tieneArchivo ? archivoTemp.file.name : 'none'
+        }
+        : {
+          idProveedor: this.proveedorSelect().id,
+          idCriterio: criterio.id,
+          cumple,
+          observacion: observacion ?? '',
+          documento: tieneArchivo ? archivoTemp.file.name : 'none'
+        };
+
+      evaluaciones.push(evaluacion);
     });
 
     if (invalid) {
-      this.alert.showAlert('Complete todos los campos obligatorios', 'warning');
-      this.criteriosFormArray.markAllAsTouched();
+      this.alert.showAlert('Complete los campos obligatorios', 'warning');
+      this.loading = false
       return;
     }
 
-    // Preparar datos para envío
-    const resultados = this.criteriosFormArray.controls.map((ctrl, i) => ({
-      criterioId: this.listCriterio()[i].id,
-      observacion: ctrl.get('observacion')?.value,
-      archivo: this.archivosTemporales[i]?.file || null,
-      cumple: ctrl.get('cumple')?.value
-    }));
+    if (!evaluaciones.length) {
+      this.alert.showAlert('No hay datos para guardar', 'info');
+      this.loading = false
+      return;
+    }
 
-    console.log('Datos a enviar:', resultados);
-    this.alert.showAlert('Datos guardados correctamente', 'success');
+    this.alert.sweetAlert('question', '¿Confirmar?', '¿Está seguro que desea realizar la acción?')
+    .then(result => {
+      if(!result){this.loading = false; return}
+    const obs = this.editing
+      ? this.repository.editar(evaluaciones as EditarEvaluacion[])
+      : this.repository.crear(evaluaciones as CrearEvaluacion[]);
 
-    // Aquí podrías hacer tu llamada al backend
+    obs.subscribe({
+      next: (res: ResponseEvaluacion) => {
+        const msg = this.editing ? 'actualizadas' : 'guardadas';
+        this.alert.showAlert(`Evaluaciones ${msg} correctamente, ${res.message}`, 'success');
+        this.closeDialog();
+        this.loading = false
+      },
+      error: (err: ResponseEvaluacion) => {
+        this.alert.showAlert(`Error al ${this.editing ? 'editar' : 'guardar'}, ${err.message}`, 'error');
+        this.loading = false
+      }
+    });
+    })
   }
 
+  getEvaluacion(codigoCriterio: number) {
+    const proveedor = this.listEvaluacion().find(p => p.idProveedor === this.proveedorSelect().id);
+    if (!proveedor || !Array.isArray(proveedor.evaluaciones)) return null;
+    return proveedor.evaluaciones.find(e => e.idCriterio === codigoCriterio) || null;
+  }
+
+  tieneEvaluacion(criterioId: number): boolean {
+    const formIndex = this.listCriterio().findIndex(c => c.id === criterioId);
+    const formGroup = this.criteriosFormArray.at(formIndex);
+    return !!formGroup?.get('observacion')?.value
+      || !!formGroup?.get('cumple')?.value
+      || !!this.archivosTemporales[criterioId];
+  }
 }

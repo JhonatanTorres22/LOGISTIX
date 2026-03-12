@@ -1,0 +1,175 @@
+@if (loading) {
+<ui-loading-progress-bar></ui-loading-progress-bar>
+}
+
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '90rem' }" (onHide)="closeDialog()">
+    <ng-template #header>
+        <div class="inline-flex items-center justify-center gap-2">
+            <span class="font-bold whitespace-nowrap"> SELECCIONAR PROVEEDOR PRODUCTO </span>
+        </div>
+    </ng-template>
+    <!-- <pre>{{ selectProveedorProductoEditar() | json }}</pre> -->
+
+    <p-table size="small" #dt1 [value]="listProveedorProductoUnificado()" dataKey="idProveedorProducto"
+        [paginator]="true" rowGroupMode="subheader" groupRowsBy="proveedor" [rows]="10"
+        [rowsPerPageOptions]="[5,10,20,50]" [loading]="loading" [selection]="tempSelectedProveedorProductos"
+        (selectionChange)="onSelectionChange($event)" selectionMode="multiple" [globalFilterFields]="[
+                'productoNombre',
+                'modelo',
+                'marca.nombre',
+                'vigencia',]">
+
+        <ng-template #groupheader let-rowData>
+            <tr pRowGroupHeader class="bg-blue-50">
+                <td colspan="8" class="font-bold">
+                    <div class="flex gap-4">
+                        <span>{{ rowData.proveedor }} </span>
+                        <div class="bg-blue-100 text-blue-800 border-round">
+                            <span class="m-2"> RUC: {{ rowData.ruc }}</span>
+                        </div>
+
+                        <p-tag [value]="rowData.evaluacion" [severity]="getEvaluacionSeverity(rowData.evaluacion)">
+                        </p-tag>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+
+        <ng-template #caption>
+            <div class="flex align-items-center justify-content-between gap-4 mb-3 flex-wrap">
+
+                <!-- Buscador -->
+                <div class="flex-1 min-w-20rem">
+                    <p-iconfield iconPosition="left" class="w-full">
+                        <p-inputicon>
+                            <i class="pi pi-search"></i>
+                        </p-inputicon>
+
+                        <input class="w-full" pInputText type="text" placeholder="Buscar producto (mínimo 4 letras)"
+                            (input)="buscarProducto($event)" />
+
+                    </p-iconfield>
+                </div>
+
+                <!-- Leyenda -->
+                <div class="flex align-items-center gap-4 flex-wrap">
+
+                    <div class="flex align-items-center gap-2">
+                        <span class="w-2rem h-1rem bg-red-100 block border-round-sm"></span>
+                        <span class="text-xs text-700 font-bold">
+                            Precio 0 (No seleccionable)
+                        </span>
+                    </div>
+
+                    <div class="flex align-items-center gap-2">
+                        <span class="w-2rem h-1rem bg-yellow-100 block border-round-sm"></span>
+                        <span class="text-xs text-700 font-boldD">
+                            Fecha vencida
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+        </ng-template>
+
+
+
+        <ng-template pTemplate="header" size="small">
+            <tr>
+                <th style="width: 3rem">
+                    <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                </th>
+
+                <th pSortableColumn="imagen"> Imagen </th>
+
+                <th pSortableColumn="productoNombre">
+                    Producto <p-sortIcon field="productoNombre"></p-sortIcon>
+                </th>
+
+                <th pSortableColumn="modelo">
+                    Modelo <p-sortIcon field="modelo"></p-sortIcon>
+                </th>
+
+                <th pSortableColumn="marca">
+                    Marca <p-sortIcon field="marca"></p-sortIcon>
+                </th>
+
+                <th pSortableColumn="vigencia">
+                    Vigencia <p-sortIcon field="vigencia"></p-sortIcon>
+                </th>
+
+                <th pSortableColumn="precio">
+                    Precio <p-sortIcon field="precio"></p-sortIcon>
+                </th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+            <tr [pSelectableRow]="row" [pSelectableRowDisabled]="row.precio === 0" [ngClass]="{
+    'bg-red-50': row.precio === 0,
+    'bg-yellow-50': row.precio > 0 && esVencido(row.vigencia)
+  }">
+                <td>
+                    <!-- Solo mostrar si precio > 0 -->
+                    @if (row.precio > 0) {
+                    <ng-container>
+                        @if (esModoEditar) {
+                        <p-radioButton name="proveedorProducto" [value]="row"
+                            [(ngModel)]="tempSelectedProveedorProductos[0]">
+                        </p-radioButton>
+                        }
+                        @if (!esModoEditar) {
+                        <p-tableCheckbox [value]="row"></p-tableCheckbox>
+                        }
+
+                    </ng-container>
+                    }
+                </td>
+
+                <td><img [src]="row.url" [alt]="row.productoNombre" width="40" height="40"
+                        class="rounded object-contain bg-gray-50" /></td>
+
+                <td>{{ row.productoNombre }}</td>
+
+
+                <td>{{ row.modelo }}</td>
+                <td> {{row.marca?.nombre}} </td>
+
+
+                <td >
+                    @if (row.vigencia == '0001-01-01T00:00:00') {
+                    <div class="bg-red-100 text-red-800 border-round px-3 py-1">
+                        Sin fecha
+                    </div>
+                    } @else {
+                    {{ row.vigencia | date:'dd/MM/yyyy' }}
+                    }
+                </td>
+
+                <td>
+                    @if (row.precio == 0) {
+                    <div class="bg-red-100 text-red-800 border-round">
+                        <div class="m-2">-</div>
+                    </div>
+                    }@else {
+                    S/. {{ row.precio }}
+                    }
+                </td>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="8" class="text-center">
+                    <ui-card-not-items text="No hoy productos para seleccionar"></ui-card-not-items>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+
+
+    <ng-template #footer>
+        <p-button label="CANCELAR" [text]="true" severity="secondary" (click)="closeDialog()" />
+        <p-button label="AÑADIR SELECCIONADOS" [outlined]="true" severity="primary"
+            (onClick)="guardarSeleccionados()" />
+    </ng-template>
+</p-dialog>

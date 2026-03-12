@@ -1,0 +1,11 @@
+<div class="w-full">
+  <p-float-label class="w-full md:w-56" variant="on">
+    <p-select [options]="options" optionLabel="text" optionValue="value" [placeholder]="placeholder"
+      [disabled]="disabled || readonly" [ngModel]="value" (onChange)="onSelectChange($event)" appendTo="body"
+      class="w-full">
+    </p-select>
+    @if (label) {
+    <label for="on_label" class="text-black-700 ml-2" style="font-size: 0.8rem;">{{ label }}</label>
+    }
+  </p-float-label>
+</div>

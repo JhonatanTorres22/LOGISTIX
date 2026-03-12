@@ -1,0 +1,22 @@
+<app-card cardTitle="GESTIÓN" cardClass="">
+
+  <p-breadcrumb [model]="breadcrumbItems()"></p-breadcrumb>
+
+  @if (vistaActual() === 'alcances') {
+    <app-list-alcance
+      (onSelectAlcance)="vistaActual.set('almacenes')">
+    </app-list-alcance>
+  }
+
+  @if (vistaActual() === 'almacenes') {
+    <app-list-almacen
+      (onSelectAlmacen)="vistaActual.set('productos')">
+    </app-list-almacen>
+  }
+
+  @if (vistaActual() === 'productos') {
+    <app-list-producto-almacen></app-list-producto-almacen>
+    <!-- <app-lis-producto-almacen></app-lis-producto-almacen> -->
+  }
+
+</app-card>

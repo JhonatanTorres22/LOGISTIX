@@ -1,0 +1,71 @@
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '40rem' }" (onHide)="closeDialog()">
+    <ng-template #header>
+        <div class="inline-flex items-center justify-center gap-2">
+            <span class="font-bold whitespace-nowrap"> LISTA DE BANCOS </span>
+        </div>
+    </ng-template>
+
+    @if(loading){
+    <ui-loading-progress-bar></ui-loading-progress-bar>
+    }
+    @else {
+    @if (vista == 'lista') {
+    <div class="flex justify-content-end mb-2">
+        <ui-button icon="pi pi-plus" label="Agregar Banco" (onClick)="seleccionarBanco(bancoDefault)"></ui-button>
+    </div>
+
+    <p-dataView [value]="listBanco()" [paginator]="true" [rows]="5" emptyMessage="No hay bancos registrados">
+
+        <ng-template let-bancos #list>
+            @for (banco of bancos; track banco.idBanco) {
+
+            <div class="mb-3 p-3 shadow-2 rounded surface-card 
+                   flex flex-column md:flex-row md:justify-content-between md:items-center">
+                <div class="flex items-start gap-3">
+                    <p-avatar [label]="banco.nombreBanco.charAt(0).toUpperCase()" shape="circle" size="normal"
+                        [styleClass]="getBancoAvatarClass(banco.nombreBanco)">
+                    </p-avatar>
+
+                    <div class="flex flex-column gap-1">
+
+                        <span class="text-sm font-semibold text-900">
+                            {{ banco.nombreBanco | uppercase }}
+                        </span>
+
+                        <div class="text-sm text-700 flex items-center gap-2">
+                            <i class="pi pi-credit-card text-green-600"></i>
+                            <span><b>CCI:</b> {{ banco.cci }}</span>
+                        </div>
+
+                        <div class="text-sm text-700 flex items-center gap-2">
+                            <i class="pi pi-wallet text-blue-600"></i>
+                            <span><b>Cuenta:</b> {{ banco.numeroCuenta }}</span>
+                        </div>
+
+                        <div class="text-sm text-700 flex items-center gap-2">
+                            <i class="pi pi-building-columns text-purple-600"></i>
+                            <span><b>Detracción:</b> {{ banco.cuentaDetraccion }}</span>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="flex gap-2 mt-3 md:mt-0 md:flex-column">
+                    <ui-button icon="pi pi-pencil" size="small" color="primary" tooltip="Editar"
+                        (onClick)="seleccionarBanco(banco)">
+                    </ui-button>
+
+                    <ui-button icon="pi pi-trash" size="small" color="danger" tooltip="Eliminar"
+                        (onClick)="confirmEliminar(banco)">
+                    </ui-button>
+                </div>
+            </div>
+            }
+        </ng-template>
+    </p-dataView>
+    }
+    @else if (vista == 'form') {
+    <app-add-edit-bancos (cerrar)="cerrarFormulario()"></app-add-edit-bancos>
+    }
+    }
+</p-dialog>

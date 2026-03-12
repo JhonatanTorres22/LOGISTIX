@@ -1,11 +1,12 @@
-<app-card cardClass="max-w-5xl w-full">
+<app-card cardClass="max-w-5xl w-full" [showHeader]="false">
 
-  <div class="flex flex-column justify-content-center align-items-center  -mt-5">
+  <div class="flex flex-column justify-content-center align-items-center">
     <h1 class="font-bold text-3xl m-0 text-800">SELECCIONAR ROL</h1>
     <p-divider />
     <!-- <p class="text-sm text-600 mt-1">Elija su área y rol para continuar</p> -->
   </div>
 
+  @if (listaModulo().length > 0) {
   <div class="flex flex-column gap-3">
 
     @for (data of listaModulo(); track $index) {
@@ -17,7 +18,7 @@
 
         @for (rol of modulo.roles; track $index) {
         <p-chip [label]="rol.nombre" class="cursor-pointer" [style.backgroundColor]="getRolColor(rol.nombre)"
-          style="color: #374151"  (click)="seleccionarRol(rol)">
+          style="color: #374151" (click)="seleccionarRol(rol)">
         </p-chip>
 
         }
@@ -28,3 +29,10 @@
     }
 
   </div>
+  }
+  @else {
+  <ui-card-not-items [text]="`No se encontraron Roles asignados con el usuario ${dni()}`"></ui-card-not-items>
+  }
+
+</app-card>
+<ui-button label="Volver" class="absolute p-4" (onClick)="volver()"></ui-button>

@@ -1,0 +1,57 @@
+@if (loading) {
+<ui-loading-progress-bar></ui-loading-progress-bar>
+}
+@else{
+<div class="flex justify-content-end mb-4">
+    <ui-button label="Agregar Almacén" icon="pi pi-plus" severity="primary" raised>
+    </ui-button>
+</div>
+
+@if (listAlmacen().length > 0) {
+<div class="flex flex-wrap gap-4">
+    @for (almacen of listAlmacen(); track $index) {
+    <app-card [showHeader]="false"
+        cardClass="w-12 h-18rem surface-card shadow-2 border-round-xl p-4 hover:shadow-4 transition-all">
+        <div class="flex flex-column h-full justify-between">
+
+            <div class="flex flex-column gap-3">
+
+                <div class="flex align-items-center gap-2">
+                    <i class="pi pi-map-marker text-primary text-2xl"></i>
+                    <span class="text-lg font-semibold uppercase">
+                        {{ almacen.nombre }}
+                    </span>
+                </div>
+
+                <div class="flex align-items-center gap-2">
+                    <i class="pi pi-home text-color-secondary"></i>
+                    <span class="text-color-secondary text-sm">
+                        {{ almacen.descripcion }}
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="border-top-1 surface-border my-4"></div>
+
+            <div class="flex align-items-center gap-4">
+                <ui-button icon="pi pi-pencil" tooltip="Editar" color="info">
+                </ui-button>
+
+                <ui-button icon="pi pi-trash" tooltip="Eliminar" color="danger">
+                </ui-button>
+
+                <ui-button (onClick)="seleccionarAlmacenEmit(almacen)" icon="pi pi-eye" tooltip="Ver Productos">
+                </ui-button>
+            </div>
+
+        </div>
+    </app-card>
+    }
+</div>
+}
+@else {
+<ui-card-not-items text="No se encuentran almacenes disponibles"></ui-card-not-items>
+}
+
+}

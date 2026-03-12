@@ -5,7 +5,7 @@ export interface ProveedorDTO {
     nombreRs: string,
     ruc: string,
     direccionFiscal: string,
-    evaluacion: boolean
+    evaluacion: string
 }
 
 export type CrearProveedorDTO = Omit<EditarProveedorDTO, 'codigoProveedor'>
@@ -17,3 +17,5 @@ export interface DataProveedorDTO {
     message: string,
     errors: null
 }
+
+export type ActualizarEvaluacionDTO = Pick<ProveedorDTO, 'codigoProveedor' | 'evaluacion'>

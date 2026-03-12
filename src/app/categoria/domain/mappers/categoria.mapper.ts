@@ -5,7 +5,7 @@ export class CategoriaMapper {
 
     static toDomain(dto: CategoriaDTO): Categoria {
         return {
-            id: dto.codigoCategoria,
+            idCategoria: dto.codigoCategoria,
             nombre: dto.nombre,
             descripcion: dto.descripcion
         }
@@ -30,7 +30,7 @@ export class CategoriaMapper {
 
     static toApiEditar = (param : ActualizarCategoria): ActualizarCategoriaDTO => {
         return {
-            codigoCategoria : param.id,
+            codigoCategoria : param.idCategoria,
             nombre : param.nombre,
             descripcion : param.descripcion
         }
@@ -38,7 +38,7 @@ export class CategoriaMapper {
 
     static toApiEliminar = (param : EliminarCategoria): EliminarCategoriaDTO => {
         return {
-            codigoCategoria : param.id
+            codigoCategoria : param.idCategoria
         }
     }
 

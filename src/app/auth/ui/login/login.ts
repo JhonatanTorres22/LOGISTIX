@@ -9,23 +9,30 @@ import { AlertService } from 'src/assets/demo/services/alert.service';
 import { UiInputComponent } from "@/core/components/ui-input/ui-input.component";
 import { SharedModule } from '@/core/components/shared.module';
 import { UiButtonComponent } from "@/core/components/ui-button/ui-button.component";
+import { AuthService } from '@/auth/infraestructure/services/auth.service';
+import { PermissionService } from '@/auth/infraestructure/services/permisos.service';
+import { UiLoadingProgressBarComponent } from "@/core/components/ui-loading-progress-bar/ui-loading-progress-bar.component";
 
 @Component({
   selector: 'app-login',
-  imports: [UiInputComponent, SharedModule, UiButtonComponent, UiButtonComponent],
+  imports: [UiInputComponent, SharedModule, UiButtonComponent, UiButtonComponent, UiLoadingProgressBarComponent],
   templateUrl: './login.html',
   styleUrl: './login.scss'
 })
 export class Login {
-
+  loading : boolean = false
+  private authService = inject(AuthService)
+  dataUser = this.authService.getUserData()
   signal = inject(AuthSignal)
   dni = this.signal.dni
   rol = this.signal.rol
+  step = this.signal.step
   messageErrorLogin = '';
   formLogin: FormGroup;
   authValidations = inject(AuthValidations)
   expRegLock = this.authValidations.expRegPasswordToLockInput
   validatorPassword = this.authValidations.validatorPassword;
+  private permisoService = inject(PermissionService)
   constructor(
     private router: Router,
     private repository: AuthRepository,
@@ -42,6 +49,7 @@ export class Login {
   }
 
   iniciarSesion = () => {
+    this.loading = true
     let login: LoginModel = {
       password: this.formLogin.value.password,
       role: this.rol(),
@@ -50,13 +58,19 @@ export class Login {
     this.repository.login(login).subscribe({
       next: () => {
         this.alert.sweetAlert('success', '¡Bienvenido!', 'Gracias por iniciar sesion el logistix')
+        this.permisoService.load();
         this.obtenerMenu()
-        setTimeout(() => {
-          this.router.navigate(['/']);
-        }, 100);
+
+        // if(this.dataUser?.role == 'Jefe Logístico'){
+        //   this.router.navigate(['/proveedor'])
+        // }
+        // else{
+        // }
+
       },
       error: () => {
         this.alert.showAlert('Hubo un error en las credenciales', 'error')
+        this.loading = false
       }
     })
   }
@@ -65,10 +79,18 @@ export class Login {
     this.repository.obtenerMenu().subscribe({
       next : (data) => {
         this.alert.showAlert('Listando los menus correctamente', 'success')
+        this.router.navigate(['/'])
+        this.loading = false
       },
       error : () => {
         this.alert.showAlert('Hubo un error al listar los menús','error')
+        this.loading = false
       }
     })
+  }
+
+  volver = () => {
+    this.step.set('roles')
+    this.rol.set('')
   }
 }

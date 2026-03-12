@@ -1,14 +1,13 @@
 @if (loading) {
     <ui-loading-progress-bar></ui-loading-progress-bar>
 }
-<app-card cardClass="">
-    <div class="text-center d-block -mt-5">
+<app-card cardClass="" [showHeader]="false">
+    <div class="text-center d-block">
 
-        <h4 class="font-bold pt-0 text-4xl">LOGISTIX</h4>
+        <h4 class="font-bold pt-0 text-4xl">INGRESAR USUARIO</h4>
 
     </div>
     <p-divider />
-    <div class="text-center mb-3 mt-4 f-18 f-w-500 pt-1">INGRESAR USUARIO</div>
 
     <form [formGroup]="formLogin" class="text-start">
 

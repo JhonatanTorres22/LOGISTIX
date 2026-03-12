@@ -1,0 +1,65 @@
+@if (loading) {
+<ui-loading-progress-bar></ui-loading-progress-bar>
+}
+<div class="flex justify-content-end mb-4">
+<ui-button label="Agregar Alcance" icon="pi pi-plus" severity="primary" raised
+    (onClick)="seleccionarAlcance(selectAlcanceDefault)">
+</ui-button>
+</div>
+
+@if (listAlcance().length > 0) {
+
+<div class="flex flex-wrap gap-4">
+    @for (alcance of listAlcance(); track $index) {
+    <app-card [showHeader]="false" 
+        cardClass="w-12 h-18rem surface-card shadow-2 border-round-xl p-4 hover:shadow-4 transition-all">
+        <div class="flex flex-column h-full justify-between">
+
+            <div class="flex flex-column gap-3">
+
+                <div class="flex align-items-center gap-2">
+                    <i class="pi pi-map-marker text-primary text-2xl"></i>
+                    <span class="text-lg font-semibold uppercase">
+                        {{ alcance.descripcion }}
+                    </span>
+                </div>
+
+                <div class="flex align-items-center gap-2">
+                    <i class="pi pi-home text-color-secondary"></i>
+                    <span class="text-color-secondary text-sm">
+                        {{ alcance.direccion }}
+                    </span>
+                </div>
+
+                <div class="flex align-items-center gap-2">
+                    <i class="pi pi-compass text-color-secondary"></i>
+                    <span class="text-color-secondary text-sm">
+                        {{ alcance.coordenada }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="border-top-1 surface-border my-4"></div>
+
+            <div class="flex align-items-center gap-4">
+                <ui-button icon="pi pi-pencil" tooltip="Editar" color="info" rounded (onClick)="seleccionarAlcance(alcance)">
+                </ui-button>
+
+                <ui-button icon="pi pi-trash"  tooltip="Eliminar" color="danger" rounded (onClick)="confirmEliminarAlcance(alcance)">
+                </ui-button>
+                <ui-button icon="pi pi-eye" tooltip="Ver Almacén" (onClick)="seleccionarAlcanceEmit(alcance)"></ui-button>
+            </div>
+
+        </div>
+    </app-card>
+    }
+</div>
+}
+@else {
+    <ui-card-not-items text="No se encuentran alcances disponibles"></ui-card-not-items>
+}
+
+
+@if (visibleAddEditAlcance) {
+<app-add-edit-alcance [(visible)]="visibleAddEditAlcance"></app-add-edit-alcance>
+}

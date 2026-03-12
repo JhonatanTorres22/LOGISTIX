@@ -1,24 +1,25 @@
-import { ActualizarCategoria, CrearCategoria,  ResponseCategoria } from '@/categoria/domain/models/categoria.model';
+import { ActualizarCategoria, CrearCategoria, ResponseCategoria } from '@/categoria/domain/models/categoria.model';
 import { CategoriaRepository } from '@/categoria/domain/repositories/categoria.repository';
 import { CategoriaSignal } from '@/categoria/domain/signals/categoria.signal';
 import { CategoriaValidation } from '@/categoria/domain/validations/categoria.validation';
 import { SharedModule } from '@/core/components/shared.module';
 import { UiInputComponent } from '@/core/components/ui-input/ui-input.component';
-import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import { Component, effect, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { AlertService } from 'src/assets/demo/services/alert.service';
 import { UiLoadingProgressBarComponent } from "@/core/components/ui-loading-progress-bar/ui-loading-progress-bar.component";
+import { UiButtonComponent } from "@/core/components/ui-button/ui-button.component";
 
 @Component({
   selector: 'app-add-edit-categoria',
-  imports: [SharedModule, UiInputComponent, UiLoadingProgressBarComponent],
+  imports: [SharedModule, UiInputComponent, UiLoadingProgressBarComponent, UiButtonComponent],
   templateUrl: './add-edit-categoria.html',
   styleUrl: './add-edit-categoria.scss'
 })
-export class AddEditCategoria implements OnInit{
+export class AddEditCategoria implements OnInit {
   @Input() visible: boolean = false
   @Output() visibleChange = new EventEmitter<boolean>();
-  
+
   signal = inject(CategoriaSignal)
   categoriaSelect = this.signal.categoriaSelect
   categoriaAccion = this.signal.categoriaAccion
@@ -33,87 +34,120 @@ export class AddEditCategoria implements OnInit{
   expLockNombre = this.validation.expRegLockInputNombre
   expLockDescripcion = this.validation.expRegLockDescripcion
 
-  loading : boolean = false
-  categoriaForm : FormGroup
-  constructor(
-    private alert : AlertService
-  ) { 
+  loading: boolean = false
+  categoriaForm: FormGroup
+  alert = inject(AlertService);
+  constructor() {
+
     this.categoriaForm = new FormGroup({
-      nombre : new FormControl('', [Validators.maxLength(this.maxLengthNombre), Validators.minLength(this.minLengthNombre), Validators.pattern(this.expRegNombre), Validators.required]),
-      descripcion : new FormControl('', [Validators.maxLength(this.maxLengthDescripcion), Validators.minLength(this.minLengthDescripcion), Validators.pattern(this.expRegDescripcion), Validators.required])
-    })
-  }
+      nombre: new FormControl('', [
+        Validators.required,
+        Validators.maxLength(this.validation.maxLengthNombre),
+        Validators.minLength(this.validation.minLengthNombre),
+        Validators.pattern(this.validation.expRegNombre)
+      ]),
+      descripcion: new FormControl('', [
+        Validators.required,
+        Validators.maxLength(this.validation.maxLengthDescripcion),
+        Validators.minLength(this.validation.minLengthDescripcion),
+        Validators.pattern(this.validation.expRegDescripcion)
+      ])
+    });
 
-  ngOnInit(): void {
-    this.categoriaSelect().id !== 0 ? this.patchValue() : ''
-  }
+    effect(() => {
+      const categoria = this.categoriaSelect();
+      if (!categoria || !this.visible) return;
 
-  onSubmit = () => {
-    this.loading = true
-    const accion : 'Editar' | 'Crear' = this.categoriaSelect().id == 0 ? 'Crear' : 'Editar'
-    if(this.categoriaForm.invalid){return}
-
-    this.alert.sweetAlert('question', '¿Confirmar?', `¿Está seguro que desea ${accion} la categoria?`)
-    .then(result => {
-      if(!result){this.loading = false; return}
-
-      switch(accion){
-        case 'Crear':
-          const newCategoria : CrearCategoria = {
-            nombre : this.categoriaForm.value.nombre,
-            descripcion : this.categoriaForm.value.descripcion
-          }
-          this.agregar(newCategoria)
-          break;
-
-          case 'Editar':
-            const editarCategoria : ActualizarCategoria = {
-               id: this.categoriaSelect().id,
-              nombre : this.categoriaForm.value.nombre,
-              descripcion : this.categoriaForm.value.descripcion
-            }
-            this.editar(editarCategoria)
-            break;
+      if (categoria.idCategoria) {
+        this.patchValue();
+      } else {
+        this.resetForm();
       }
-    })
+    });
   }
-  agregar = (newCategoria : CrearCategoria) => {
-    this.repository.crear(newCategoria).subscribe({
-      next : (res: ResponseCategoria ) => {
-        this.alert.showAlert(`Categoria creada correctamente, ${res.message}`, 'success')
-        this.categoriaAccion.set('crear')
-        this.loading = false
-        this.closeDialog()
+
+  ngOnInit(): void { }
+
+  ngOnDestroy(): void {
+    this.resetForm();
+    this.categoriaSelect.set(null as any);
+  }
+
+  onSubmit(): void {
+    if (this.categoriaForm.invalid) return;
+
+    this.loading = true;
+
+    const isEdit = this.categoriaSelect()?.idCategoria;
+    const accion = isEdit ? 'Editar' : 'Crear';
+
+    this.alert.sweetAlert('question', '¿Confirmar?', `¿Está seguro que desea ${accion} la categoría?`)
+      .then(result => {
+        if (!result) {
+          this.loading = false;
+          return;
+        }
+
+        if (isEdit) {
+          this.editar({
+            idCategoria: this.categoriaSelect().idCategoria,
+            ...this.categoriaForm.value
+          } as ActualizarCategoria);
+        } else {
+          this.agregar(this.categoriaForm.value as CrearCategoria);
+        }
+      });
+  }
+
+  agregar(categoria: CrearCategoria): void {
+    this.repository.crear(categoria).subscribe({
+      next: (res) => {
+        this.categoriaAccion.set('CREADO');
+        this.alert.showAlert('Categoría creada correctamente', 'success');
+        this.loading = false;
+        this.closeDialog();
       },
-      error : (res: ResponseCategoria) => {
-        this.alert.showAlert(`${res.message}`, 'error')
-        this.loading = false
+      error: (err) => {
+        this.alert.showAlert(err.message, 'error');
+        this.loading = false;
       }
-    })
+    });
   }
 
-  editar = (editCategoria : ActualizarCategoria) => {
-    this.repository.editar(editCategoria).subscribe({
-      next : (data: ResponseCategoria) => {
-        this.alert.showAlert(`Categoria editada correctamente, ${data.message}`, 'success')
-        this.categoriaAccion.set('editar')
-        this.loading = false
-        this.closeDialog()
+  editar(categoria: ActualizarCategoria): void {
+    this.repository.editar(categoria).subscribe({
+      next: (res) => {
+        this.categoriaAccion.set('EDITADO');
+        this.alert.showAlert('Categoría editada correctamente', 'success');
+        this.loading = false;
+        this.closeDialog();
       },
-      error : (res: ResponseCategoria) => {        
-        this.alert.showAlert(`Hubo un error al editar la categoria, ${res.message}`, 'error')
-        this.loading = false
+      error: (err) => {
+        this.alert.showAlert(err.message, 'error');
+        this.loading = false;
       }
-    })  
+    });
   }
-  patchValue = () => {
+
+  patchValue(): void {
+    const cat = this.categoriaSelect();
+    if (!cat) return;
+
     this.categoriaForm.patchValue({
-      nombre : this.categoriaSelect().nombre,
-      descripcion : this.categoriaSelect().descripcion
-    })
+      nombre: cat.nombre,
+      descripcion: cat.descripcion
+    });
   }
 
-    closeDialog() {
+  resetForm(): void {
+    this.categoriaForm.reset();
+    this.categoriaForm.markAsPristine();
+    this.categoriaForm.markAsUntouched();
+    this.loading = false;
+  }
+
+  closeDialog(): void {
+    this.resetForm();
     this.visible = false;
     this.visibleChange.emit(false);
   }

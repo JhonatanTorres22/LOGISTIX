@@ -1,0 +1,120 @@
+@if(loading){
+<ui-loading-progress-bar></ui-loading-progress-bar>
+}
+@else{
+@if (tablaCategoria().length) {
+<p-table #dtProductos size="small" [value]="tablaCategoria()" rowGroupMode="subheader" groupRowsBy="nombre"
+    dataKey="idCategoria" [tableStyle]="{ 'min-width': '70rem' }" [expandedRowKeys]="expandedCategorias"
+    (onRowExpand)="expandirCategoria($event)" (onRowCollapse)="collapsarCategoria($event)" 
+    [globalFilterFields]="[
+'nombreProducto',
+'modeloProducto',
+'marca.nombreMarca',
+'descripcionProducto',
+'unidad'
+]">
+
+    <ng-template #caption>
+        <div class="flex justify-between gap-4">
+            <p-iconfield iconPosition="left" class="w-full">
+                <p-inputicon>
+                    <i class="pi pi-search"></i>
+                </p-inputicon>
+                <input class="w-full" pInputText type="text" placeholder="Buscar Producto"
+                    (input)="dtProductos.filterGlobal($any($event.target).value, 'contains')" />
+            </p-iconfield>
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="header">
+        <tr>
+            <th style="width:10%">IMAGEN</th>
+            <th pSortableColumn="nombreProducto" style="width:30%">NOMBRE</th>
+            <th pSortableColumn="modeloProducto" style="width:20%">MODELO</th>
+            <th pSortableColumn="marca" style="width:20%">MARCA</th>
+            <th pSortableColumn="descripcion" style="width:30%">DESCRIPCIÓN</th>
+            <th pSortableColumn="unidad" style="width:15%">UNIDAD</th>
+            <th pSortableColumn="accion" style="width:20%">ACCIONES</th>
+        </tr>
+    </ng-template>
+
+    <ng-template pTemplate="groupheader" let-row let-expanded="expanded">
+        <tr>
+            <td colspan="7" class="w-full">
+                <div class="flex w-full items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <button type="button" pButton pRipple [pRowToggler]="row" text rounded plain
+                            [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'">
+                        </button>
+                        <span class="font-bold text-lg">
+                            {{ row.nombre }}
+                        </span>
+                    </div>
+
+                    @if (row.nombreProducto !== null) {
+                    <ui-icon-button icon="pi pi-plus" (click)="crearProducto(row)"></ui-icon-button>
+                    }
+                </div>
+            </td>
+        </tr>
+
+    </ng-template>
+    <ng-template pTemplate="expandedrow" let-producto let-rowIndex="rowIndex">
+        <!-- <pre>{{ producto | json }}</pre> -->
+        @if (producto.nombreProducto) {
+        <tr>
+            <td>
+                <img [src]="producto.urlImagen" [alt]="producto.nombreProducto"
+                    class="w-20 h-20 rounded object-contain bg-gray-50" />
+            </td>
+            <td>
+                {{ producto.nombreProducto }}
+            </td>
+
+            <td>
+                {{ producto.modeloProducto }}
+            </td>
+            <td>
+                {{producto?.marca?.nombreMarca}}
+            </td>
+
+            <td>
+                {{producto.descripcionProducto}}
+            </td>
+
+            <td>
+                <p-tag value="{{ producto.unidad }}" severity="info" rounded></p-tag>
+            </td>
+
+            <td>
+                <div class="flex items-center gap-2">
+                    <ui-icon-button icon="pi pi-pencil" tooltip="Editar"
+                        (onClick)="visibleAdd = true; seleccionarProducto(producto)"></ui-icon-button>
+
+                    <ui-icon-button icon="pi pi-trash" tooltip="Eliminar" color="danger"
+                        (onClick)="confirmEliminar(producto)"></ui-icon-button>
+
+                </div>
+            </td>
+        </tr>
+        }
+        @if (!producto.nombreProducto) {
+        <tr>
+            <td colspan="7" class="text-center text-gray-400">
+                <app-import-productos></app-import-productos>
+            </td>
+        </tr>
+        }
+    </ng-template>
+</p-table>
+
+}
+@else {
+<ui-card-not-items text="No se encuentra ninguna categoría creada para subir los productos" [showButton]="true"
+    label="Ir A Categoría" iconButton="pi pi-sign-out" (onClick)="irACategoria()"></ui-card-not-items>
+}
+}
+
+@if (visibleAdd) {
+<app-add-edit-producto [(visible)]="visibleAdd"></app-add-edit-producto>
+}

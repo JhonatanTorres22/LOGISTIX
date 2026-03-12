@@ -16,7 +16,7 @@ export class Card {
   headerClass = input<string>();
   actionClass = input<string>();
   cardTitle = input<string>();
-  padding = input<number>(24);
+  padding = input<number>(4);
 
   readonly headerOptionsTemplate =
     contentChild<TemplateRef<ElementRef>>('headerOptionsTemplate');

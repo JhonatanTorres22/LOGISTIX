@@ -1,0 +1,46 @@
+@if (loading) {
+<ui-loading-progress-bar></ui-loading-progress-bar>
+}
+
+@else {
+  <p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '40rem' }" (onHide)="closeDialog()">
+    <ng-template #header>
+          <div class="inline-flex items-center justify-center gap-2">
+              <span class="font-bold whitespace-nowrap"> ASIGNAR PERMISOS AL USUARIO </span>
+          </div>
+      </ng-template>
+
+    @for (modulo of listPermiso(); track modulo.nombreModulo) {
+  
+      <p-fieldset [legend]="modulo.nombreModulo" toggleable>
+  
+        @for (rol of modulo.roles; track rol.nombreRol) {
+  
+          <p-fieldset
+            [legend]="rol.nombreRol"
+            class="mb-3"
+            toggleable>
+  
+            <p-tree
+              [value]="treesPorRol.get(rol.nombreRol)"
+              selectionMode="checkbox"
+              [(selection)]="selectedNodes"
+              (selectionChange)="onSelectionChange($event)">
+            </p-tree>
+  
+          </p-fieldset>
+  
+        }
+  
+      </p-fieldset>
+  
+    }
+  
+    <ng-template #footer>
+      <ui-button label="CANCELAR" icon="pi pi-times" color="secondary" (onClick)="closeDialog()"></ui-button>
+      <ui-button label="GUARDAR" icon="pi pi-save" (onClick)="guardarCambios()"></ui-button>
+    </ng-template>
+  
+  </p-dialog>
+}
+

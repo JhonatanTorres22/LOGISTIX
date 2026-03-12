@@ -1,0 +1,59 @@
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '40rem' }" (onHide)="closeDialog()">
+    <ng-template #header>
+        <div class="inline-flex items-center justify-center gap-2">
+            <span class="font-bold whitespace-nowrap">{{modo}} DE CARPETAS</span>
+        </div>
+    </ng-template>
+    @if (loading) {
+    <ui-loading-progress-bar></ui-loading-progress-bar>
+    }
+    <div>
+        <!-- <pre> {{idNuevoAnexoPorFase}} </pre> -->
+        <p-dataview #dv [value]="listCarpeta()">
+            <ng-template #list let-carpeta>
+                <div class="grid">
+                    @for (item of carpeta; track $index) {
+                    <div class="col-12">
+                        <div class="flex align-items-center gap-4 mb-3 border-round-lg surface-card shadow-1
+                                   hover:shadow-3 transition-all transition-duration-200 cursor-pointer">
+
+                            @if (modo === 'SELECCIONAR') {
+                            <p-radioButton name="carpeta" [value]="item" [ngModel]="selectCarpeta()"
+                                (ngModelChange)="seleccionarCarpeta(item)">
+                            </p-radioButton>
+                            }
+                            <div class="flex align-items-center justify-content-center 
+                                        bg-primary-50 border-round-lg" style="width: 3rem; height: 3rem;">
+                                <i class="pi pi-folder text-primary text-xl"></i>
+                            </div>
+
+                            <div class="flex flex-column">
+                                <span class="text-lg font-semibold text-surface-900">
+                                    {{ item.prefijo }} - {{ item.numeracion }}
+                                </span>
+                                <small class="text-surface-500">
+                                    Carpeta
+                                </small>
+                            </div>
+
+                        </div>
+                    </div>
+                    }
+                    @if (modo == 'LISTAR') {
+                    <div class="w-full mt-3 p-3 border-round-lg surface-100 flex align-items-center gap-2 info-pulse">
+                        <i class="pi pi-info-circle text-primary text-lg"></i>
+                        <span class="font-medium text-surface-700"> La próxima carpeta a crear será:
+                            <strong>{{newPrefijo}} - {{newNumeracion}} </strong>
+                        </span>
+                    </div>
+                    }
+                </div>
+            </ng-template>
+        </p-dataview>
+    </div>
+
+    <ng-template #footer>
+        <ui-button label="GUARDAR" icon="pi pi-save" (onClick)="accionCarpeta()"
+            [disabled]="modo === 'SELECCIONAR' && selectCarpeta().idCarpeta == 0" />
+    </ng-template>
+</p-dialog>
