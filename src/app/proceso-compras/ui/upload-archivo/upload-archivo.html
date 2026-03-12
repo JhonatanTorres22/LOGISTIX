@@ -1,0 +1,222 @@
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '50rem' }" (onHide)="closeDialog()">
+    <ng-template #header>
+        <div class="inline-flex items-center justify-center gap-2">
+            <span class="font-bold whitespace-nowrap"> {{selectAnexo().nombre}} </span>
+        </div>
+    </ng-template>
+    @if (loading) {
+    <ui-loading-progress-bar></ui-loading-progress-bar>
+    }
+
+    @else {
+    <!-- <pre> {{listOrdenCompra() | json}} </pre> -->
+    @if (mostrarSubirArchivo) {
+    <div [formGroup]="archivoForm" class="mb-3">
+        <ui-upload-file formControlName="archivo"></ui-upload-file>
+
+        <div class="flex justify-end gap-2 mt-2">
+            <ui-button label="Cancelar" color="secondary" (onClick)="cancelarSubida()"></ui-button>
+        </div>
+    </div>
+    }
+
+
+    @if (!mostrarSubirArchivo && (
+    (selectAnexo().nombre == 'Documentacion Preliminar' && permisosSolicitud.DOCUMENTACION_PRELIMINAR) ||
+    (selectAnexo().nombre == 'Cotización' && permisosSolicitud.COTIZACION) ||
+    (selectAnexo().nombre == 'Orden de Compra' && permisosSolicitud.ORDEN_COMPRA && mostrarSubirArchivo) ||
+    (selectAnexo().nombre == 'Orden Firmada' && permisosSolicitud.ORDEN_COMPRA_FIRMADA) ||
+    (selectAnexo().nombre == 'Contrato' && permisosSolicitud.CONTRATO) ||
+    (selectAnexo().nombre == 'Cronograma' && permisosSolicitud.CRONOGRAMA) ||
+    (selectAnexo().nombre == 'Acta' && permisosSolicitud.ACTA) ||
+    (selectAnexo().nombre == 'Evidencia' && permisosSolicitud.EVIDENCIA) ||
+    (selectAnexo().nombre == 'Guia de Remision' && permisosSolicitud.GUIA_REMISION) ||
+    (selectAnexo().nombre == 'Cerrar Proceso' && permisosSolicitud.CERRAR_PROCESO)
+    )
+
+    ) {
+    <ui-button label="Agregar un Archivo" (onClick)="mostrarFormularioNuevo()"></ui-button>
+    }
+
+    @if ( selectAnexo().archivos.length > 0) {
+    <div class="flex flex-col gap-2">
+
+        @for (archivo of selectAnexo().archivos; track archivo.idAnexosPorFase) {
+        <!-- {{ archivo | json }} -->
+
+        <p-card class="p-shadow-2 mb-2">
+            <div class="flex flex-column gap-2">
+                <div class="flex items-center justify-content-between gap-2">
+                    <div class="flex items-center gap-2 cursor-pointer" (click)="verArchivo(archivo)">
+                        <i class="pi pi-file-pdf text-red-500 text-xl"></i>
+                        <span>
+                            @if(selectAnexo().nombre == 'Orden de Compra'){
+                            @let datos = obtenerDatosOrden(archivo.idAnexosPorFase);
+                            <div class="flex flex-column gap-1">
+                                <span class="font-semibold flex items-center gap-2">
+                                    {{ datos?.ordenCompra?.[0]?.nombreProveedor || 'Sin proveedor' }}
+                                    @if(!archivo.archivo){
+                                    <span class="text-gray-500 text-xs">
+                                        (Sin archivo)
+                                    </span>
+                                    }
+                                </span>
+
+                                <!-- CRONOGRAMA -->
+                                @if(datos?.ordenCompra?.[0]?.idAnexoPorFaseCronograma == 0){
+                                <span class="text-orange-600 text-sm font-medium">
+                                    Sin cronograma asociado
+                                </span>
+                                }
+                            </div>
+                            }
+                            @else {
+                                {{ archivo.archivo }}
+                            }
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <!-- <ui-button icon="pi pi-eye" (onClick)="irAFirmarPdf(archivo)"></ui-button> -->
+                        @if (archivo.estado === 1 && (
+                        (selectAnexo().nombre == 'Documentacion Preliminar' &&
+                        permisosSolicitud.VALIDAR_DOCUMENTACION_PRELIMINAR) ||
+                        (selectAnexo().nombre == 'Orden de Compra' && permisosSolicitud.VALIDAR_ORDEN_COMPRA) ||
+                        (selectAnexo().nombre == 'Orden Firmada' && permisosSolicitud.VALIDAR_ORDEN_COMPRA_FIRMADA) ||
+                        (selectAnexo().nombre == 'Cotización' && permisosSolicitud.VALIDAR_COTIZACION) ||
+                        (selectAnexo().nombre == 'Contrato' && permisosSolicitud.VALIDAR_CONTRATO) ||
+                        (selectAnexo().nombre == 'Cronograma' && permisosSolicitud.VALIDAR_CRONOGRAMA) ||
+                        (selectAnexo().nombre == 'Acta' && permisosSolicitud.VALIDAR_ACTA) ||
+                        (selectAnexo().nombre == 'Evidencia' && permisosSolicitud.VALIDAR_EVIDENCIA) ||
+                        (selectAnexo().nombre == 'Guia de Remision' && permisosSolicitud.VALIDAR_GUIA_REMISION)
+                        )
+
+                        ) {
+                        <ui-button icon="pi pi-check" color="primary" tooltip="Aprobar"
+                            (onClick)="aprobarArchivo(archivo)">
+                        </ui-button>
+
+                        <ui-button icon="pi pi-times" color="danger" tooltip="Observar"
+                            (onClick)="observarArchivo(archivo)">
+                        </ui-button>
+                        }
+
+                        @if(selectAnexo().nombre == 'Orden de Compra' && archivo.estado == 0){
+                            {{archivo.estado | json}}
+
+                        @let datos = obtenerDatosOrden(archivo.idAnexosPorFase);
+
+                        <ui-button tooltip="Subir Orden de Compra" icon="pi pi-upload"
+                            [disabled]="datos?.ordenCompra?.[0]?.idAnexoPorFaseCronograma == 0" (onClick)="mostrarFormularioOrdenCompra({
+                            id: archivo.idAnexosPorFase,
+                             tieneArchivo: archivo.archivo != null})">
+                        </ui-button>
+
+                        }
+                        @else if (archivo.estado == 2){
+
+                        <ui-button tooltip="Actualizar Archivo" icon="pi pi-file-pdf"
+                            (onClick)="mostrarFormularioEditar(archivo)">
+                        </ui-button>
+
+                        }
+
+
+                        @if (archivo.estado === 2) {
+                        <span class="border-dashed border-2 border-round
+                       border-red-700 bg-red-100
+                       px-2 py-1 text-red-800 font-semibold">
+                            OBSERVADO
+                        </span>
+                        }
+
+                        @if (archivo.estado === 3) {
+                        <span class="border-dashed border-2 border-round
+                       border-blue-700 bg-blue-100
+                       px-2 py-1 text-blue-800 font-semibold">
+                            APROBADO
+                        </span>
+                        }
+
+                    </div>
+                </div>
+                @if (archivoEditandoId === archivo.idAnexosPorFase) {
+                <div [formGroup]="archivoForm" class="mt-3">
+
+                    <ui-upload-file formControlName="archivo"></ui-upload-file>
+
+                    <div class="flex justify-end gap-2 mt-2">
+                        <ui-button label="Cancelar" color="secondary" (onClick)="cancelarSubida()">
+                        </ui-button>
+                    </div>
+                </div>
+                }
+
+
+                @if (archivo.estado === 2 && archivo.observacion) {
+                <div class="border-left-3 border-red-500 pl-3 py-2
+                  bg-red-50 text-red-900 text-sm rounded">
+                    <i class="pi pi-info-circle mr-2"></i>
+                    <strong>Observación:</strong> {{ archivo.observacion }}
+                </div>
+                }
+
+                @if (archivoObservandoId === archivo.idAnexosPorFase) {
+                <form [formGroup]="observarForm" class="border-left-3 border-orange-500 pl-3 py-2
+                   bg-orange-50 rounded">
+
+                    <ui-input label="Observación" formControlName="observacion" [minlength]="7">
+                    </ui-input>
+                    <div class="flex justify-end gap-2 mt-2">
+                        <ui-button label="Cancelar" color="secondary" (onClick)="cancelarObservacion()">
+                        </ui-button>
+
+                        <ui-button label="Guardar" color="danger" [disabled]="observarForm.invalid"
+                            (onClick)="guardarObservacion(archivo)">
+                        </ui-button>
+                    </div>
+                </form>
+                }
+
+            </div>
+        </p-card>
+        <!-- } -->
+        }
+    </div>
+    }
+    @else {
+        <!-- <pre> {{ listAnexo()[0].fases[1].anexos[2] | json }} </pre> -->
+    <ui-card-not-items text="No se encuentran archivos guardado"></ui-card-not-items>
+    }
+    @if (selectAnexo().nombre == 'Orden Firmada') {
+    <div class="flex flex-col gap-2">
+
+        @for (item of proveedores; track $index) {
+            <!-- {{ item | json }} -->
+        <ui-button (click)="seleccionarProveedor(item)" [disabled]="!item.tieneArchivo"
+            [label]="item.proveedor + (item.tieneArchivo ? '' : ' (Sin archivo)')">
+        </ui-button>
+
+        }
+
+    </div>
+    }
+
+    <ng-template #footer>
+        <p-button severity="secondary" label="Cancelar" icon="pi pi-times" (onClick)="closeDialog()"></p-button>
+        @if (selectAnexo().nombre !== 'Orden Firmada') {
+        <ui-button label="GUARDAR ARCHIVO" icon="pi pi-save" color="primary" [disabled]="archivoForm.invalid"
+            (onClick)="guardarArchivo()" />
+        }
+    </ng-template>
+    }
+</p-dialog>
+
+
+@if (visibleCarpeta) {
+<app-list-carpetas [(visible)]=" visibleCarpeta" [idNuevoAnexoPorFase]="idNuevoAnexoPorFase"
+    [modo]="selectAnexo().nombre === 'Orden de Compra' ? 'LISTAR' : 'SELECCIONAR'"></app-list-carpetas>
+}
+
+@if (visiblePdfOrden) {
+<app-pdf-orden-compra [(visible)]="visiblePdfOrden" [modo]="'FIRMAR'"></app-pdf-orden-compra>
+}

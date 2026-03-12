@@ -1,0 +1,27 @@
+.firma-container {
+  padding: 1rem;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.firma-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #555;
+  text-align: center;
+}
+
+.firma-box {
+  border: 2px dashed #c5c5c5;
+  border-radius: 8px;
+  padding: 0.5rem;
+  background: #fff;
+}
+
+canvas {
+  width: 100%;
+  height: 180px;
+  cursor: crosshair;
+  touch-action: none;
+}

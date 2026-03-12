@@ -1,0 +1,313 @@
+@if (loading) {
+<ui-loading-progress-bar></ui-loading-progress-bar>
+}
+
+@else {
+<!-- <pre> {{listAnexos()   |json}}</pre> -->
+<!-- <pre> {{listSolicitud() | json}} </pre> -->
+<!-- <pre>{{ listOrdenCarpeta() | json }}</pre> -->
+<div class="grid">
+    <div class="col-12">
+        @if (modo !== 'tree') {
+        <div class="flex justify-content-start mb-2 gap-4">
+            <ui-button icon="pi pi-search f-18 m-r-5" label="Volver a buscar Subtarea" (onClick)="volver()"></ui-button>
+            @if (listSolicitud().length > 0) {
+            <ui-button icon="pi pi-file f-18 m-r-5" label="Ordenar Carpetas"
+                (onClick)="visibleCarpeta = true"></ui-button>
+            }
+        </div>
+        }
+        <div class="flex justify-content-between align-items-start gap-2">
+            @if(listSolicitud().length == 0){
+            <app-card cardClass="mb-2" [showHeader]="false" class="flex-1">
+                <div [formGroup]="formSolicitudCompra">
+                    <div class="flex justify-content-between gap-4 mb-3">
+                        <div class="flex-1">
+                            <span class="font-bold text-xs">Datos de la Actividad</span>
+                            <div
+                                class="text-xs p-2 mt-2 border-round surface-100 bg-transparent border-1 border-gray-400">
+                                {{ selectSubTarea().nombreSubTarea }}
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="flex justify-content-between gap-4 mb-3">
+                        <div class="flex-1">
+                            <span class="text-xs font-bold">Código de Subtarea</span>
+                            <div
+                                class="text-xs p-2 mt-2 border-round surface-100 bg-transparent border-1 border-gray-400">
+                                {{ selectSubTarea().codigoSubTarea }}
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <span class="font-bold text-xs">Presupuesto Programado</span>
+                            <div
+                                class="text-xs p-2 mt-2 border-round surface-100 bg-transparent border-1 border-gray-400">
+                                S/. {{ presupuestoProgramado }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-content-between gap-4 mb-3">
+                        <div class="flex-1">
+                            <ui-select [options]="listLocal" formControlName="alcance"
+                                label="Seleccione su local"></ui-select>
+                        </div>
+                        <div class="flex-1">
+                            <ui-select [options]="listAreas" formControlName="area" label="Área"></ui-select>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-content-between gap-4 mb-3 w-full">
+
+                        <ui-input class="w-full" classInput="small" label="Código Plan de Trabajo" formControlName="codigoPlan"
+                            [maxlength]="maxLengthCodigo" [minlength]="minLengthCodigo" 
+                            [patternErrorMessage]=" 'No permite ingresar números espacios o caracteres especiales' "></ui-input>
+                    </div>
+                </div>
+            </app-card>
+            }
+            @else {
+            <div class="relative flex-1">
+                <p-panel [toggleable]="true" [collapsed]="true">
+                    <ng-template #header>
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold">
+                                {{ selectSubTarea()?.nombreSubTarea || selectSubTarea()?.datosActividad }} -
+                                {{ listSolicitud()[0].idSubTarea }}
+                            </span>
+                        </div>
+                    </ng-template>
+
+                    <app-details-subtarea></app-details-subtarea>
+                </p-panel>
+            </div>
+            }
+            <p-button (onClick)="visibleTimeLine = true" class="shadow-xl mt-2" rounded="true" icon="pi pi-hourglass"
+                pTooltip="Línea de Tiempo" tooltipPosition="top" />
+
+        </div>
+
+        @if(selectProveedorProducto().length === 0 && listSolicitud().length === 0) {
+        <div
+            class="flex gap-2 border-round border-1 border-dashed bg-gray-100 w-full h-15rem justify-content-center align-items-center border-gray-400 hover:bg-blue-50 hover:border-blue-500 hover:text-blue-500">
+            <h5 class="text-center absolute mt-8 pt-4 f-14 font-italic">No hay productos asignados a la solicitud de
+                pedido, para seleccionar los productos, primero debe ingresar datos en el formulario de arriba</h5>
+            <ui-button color="primary" icon="ti ti-plus" label="Seleccionar productos"
+                (onClick)="visibleSelectProductos = true" [disabled]="formSolicitudCompra.invalid"></ui-button>
+        </div>
+        }
+
+        @else {
+        <div class="flex items-center justify-between w-full gap-3">
+
+            <div class="flex items-center gap-2">
+                @if (listSolicitud().length > 0 ) {
+
+                <p-speedDial showIcon="pi pi-bars" hideIcon="pi pi-times" direction="up" buttonClass="p-button-primary"
+                    (onClick)="popover.toggle($event)">
+                </p-speedDial>
+
+                <p-popover #popover [dismissable]="false">
+                    <div class="flex flex-wrap gap-2 justify-end">
+                        @for (fase of listAnexos()[0]?.fases; track $index) {
+                        @for (anexo of fase.anexos; track $index) {
+
+                        @if (
+                        (anexo.nombre === 'Documentacion Preliminar' && permisosSolicitud.DOCUMENTACION_PRELIMINAR) ||
+                        (anexo.nombre === 'Cotización' && (permisosSolicitud.COTIZACION ||
+                        permisosSolicitud.VALIDAR_COTIZACION)) ||
+                        (anexo.nombre === 'Orden de Compra' && (permisosSolicitud.ORDEN_COMPRA ||
+                        permisosSolicitud.VALIDAR_ORDEN_COMPRA)) ||
+                        (anexo.nombre === 'Orden Final' && (permisosSolicitud.ORDEN_COMPRA_FIRMADA ||
+                        permisosSolicitud.VALIDAR_ORDEN_COMPRA_FIRMADA)) ||
+                        (anexo.nombre === 'Contrato' && (permisosSolicitud.CONTRATO ||
+                        permisosSolicitud.VALIDAR_CONTRATO)) ||
+                        (anexo.nombre === 'Cronograma' && (permisosSolicitud.CRONOGRAMA ||
+                        permisosSolicitud.VALIDAR_CRONOGRAMA)) ||
+                        (anexo.nombre === 'Guia de Remision' && (permisosSolicitud.GUIA_REMISION ||
+                        permisosSolicitud.VALIDAR_GUIA_REMISION)) ||
+                        (anexo.nombre === 'Acta' && (permisosSolicitud.ACTA || permisosSolicitud.VALIDAR_ACTA)) ||
+                        (anexo.nombre === 'Evidencia' && (permisosSolicitud.EVIDENCIA ||
+                        permisosSolicitud.VALIDAR_EVIDENCIA)) ||
+                        (anexo.nombre === 'Cerrar Proceso' && permisosSolicitud.CERRAR_PROCESO) ||
+                        permisosSolicitud.ESCRITURA
+                        ) {
+                        <p-splitbutton [label]="anexo.nombre" icon="pi pi-file-pdf" dropdownIcon="pi pi-chevron-down"
+                            (onClick)="mostrarModalArchivo(anexo)" [model]="itemsPorAnexo.get(anexo.idAnexo)">
+                        </p-splitbutton>
+                        }
+                        }
+                        }
+                    </div>
+                </p-popover>
+
+                }
+                <!-- @else {
+
+                <div class="border-blue-700 border-dashed border-1 p-2 text-blue-700 font-bold border-round">
+                    PRIMERO DEBE SUBIR SU ORDEN DE COMPRA
+                </div>
+                } -->
+            </div>
+
+            <div class="flex items-center gap-2">
+                @if (selectProveedorProducto().length > 0 && listSolicitud().length == 0) {
+                <ui-button color="primary" icon="ti ti-refresh" label="Agregar" icon="pi pi-plus"
+                    (onClick)="visibleSelectProductos = true">
+                </ui-button>
+                <ui-button [disabled]="botonGuardarSolicitudDeshabilitado" color="primary" icon="pi pi-save"
+                    label="Guardar Solicitud" (onClick)="guardar()">
+                </ui-button>
+
+                }
+
+                <!-- @if (tempSelectedProveedorProductos.length > 0) {
+                <ui-button icon="pi pi-file-pdf" label="Generar Orden"
+                    (onClick)="generarOrdenDeCompra(anexoOrdenCompra!)">
+                </ui-button>
+                } -->
+            </div>
+        </div>
+        <!--TABS PARA SOLICITUD DE COMPRAS Y ORDEN DE COMPRA-->
+
+        <p-tabs [(value)]="value">
+            <p-tablist>
+                <p-tab [value]="0">Solicitud de Compra</p-tab>
+                @if (listSolicitud().length > 0) {
+                <p-tab [value]="1">Orden de Compra</p-tab>
+                }
+            </p-tablist>
+            <p-tabpanels>
+                <p-tabpanel [value]="0">
+                    <!-- {{value}} -->
+                    @if (value === 0) {
+                    <ng-container>
+                        <div class="grid" style="width:100%;">
+                            <div class="col-12 md:6">
+
+                                <p-table [scrollable]="true" scrollHeight="400px" #dt1 [value]="tablaProductos"
+                                    dataKey="idSolicitudCompraDetalle" [paginator]="true" [rows]="10"
+                                    [rowsPerPageOptions]="[5,10,20,50]" [loading]="loading"
+                                    [globalFilterFields]="['descripcionDelBien','nombreProveedor','ruc','cantidad']"
+                                    rowGroupMode="subheader" sortField="proveedor" groupRowsBy="proveedor"
+                                    sortMode="single">
+
+                                    <ng-template #groupheader let-rowData>
+                                        <tr pRowGroupHeader class="bg-blue-50">
+                                            <td colspan="7">
+                                                <div class="flex gap-4">
+                                                    <span>{{ rowData.proveedor }}</span>
+                                                    <div class="bg-blue-100 text-blue-800 border-round">
+                                                        <span class="m-2">RUC: {{ rowData.ruc }}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </ng-template>
+
+                                    <ng-template pTemplate="header">
+                                        <tr>
+                                            <th>Cantidad</th>
+                                            <th>Unidad Medida</th>
+                                            <th>Producto o Servicio</th>
+                                            <th>Precio Unitario</th>
+                                            <th>Precio Total</th>
+                                            @if (listSolicitud().length == 0) {
+                                            <th>Accion</th>
+                                            }
+                                        </tr>
+                                    </ng-template>
+
+                                    <ng-template pTemplate="body" let-row>
+                                        <tr
+                                            [ngClass]="{ 'bg-green-50': row.ordenCompra, 'bg-red-50': !row.ordenCompra}">
+                                            <td pEditableColumn>
+                                                <p-cellEditor>
+                                                    <ng-template pTemplate="input">
+                                                        <p-inputNumber [(ngModel)]="row.cantidad" [min]="1"
+                                                            (ngModelChange)="recalcularFila(row)"></p-inputNumber>
+                                                    </ng-template>
+                                                    <ng-template pTemplate="output">
+                                                        {{ row.cantidad }}
+                                                    </ng-template>
+                                                </p-cellEditor>
+                                            </td>
+                                            <td> {{row.unidad}} </td>
+                                            <td>{{ row.productoNombre }}</td>
+                                            <td>S/. {{row.precio}}</td>
+                                            <td> S/. {{ (row.precio * row.cantidad) }}</td>
+                                            @if (listSolicitud().length == 0) {
+                                            <ui-icon-button icon="pi pi-times" (onClick)="quitarProducto(row)"
+                                                color="danger" tooltip="Eliminar"></ui-icon-button>
+                                            }
+                                        </tr>
+                                    </ng-template>
+                                </p-table>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-content-end mt-4">
+
+                            <div class="p-3 border-round bg-blue-50 flex flex-column gap-2">
+
+                                <div class="flex justify-content-between gap-5">
+                                    <span class="font-semibold">Total Solicitud Compra </span>
+                                    <span class=" font-bold" [ngClass]="{'text-green-600': totalGeneral <= presupuestoProgramado,
+                                    'text-red-600':  totalGeneral > presupuestoProgramado }">
+                                        S/ {{ totalGeneral | number:'1.2-2' }}
+                                    </span>
+                                </div>
+
+                                <div class="flex justify-content-between gap-5">
+                                    <span class="font-semibold">Presupuesto Programado</span>
+                                    <span class="text-blue-600 font-bold">
+                                        S/ {{ presupuestoProgramado }}
+
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </ng-container>
+
+                    }
+                </p-tabpanel>
+                @if (listSolicitud().length > 0 ) {
+                <p-tabpanel [value]="1">
+                    @if (value === 1) {
+                    <ng-container>
+                        <app-list-orden-compra-detalle
+                            [tablaSolicitudCompra]="tablaProductos"></app-list-orden-compra-detalle>
+                    </ng-container>
+                    }
+                </p-tabpanel>
+                }
+            </p-tabpanels>
+        </p-tabs>
+        }
+    </div>
+</div>
+}
+
+@if (visibleSelectProductos) {
+<app-select-proveedor-producto [(visible)]="visibleSelectProductos"></app-select-proveedor-producto>
+}
+
+@if (visiblepdfOrdenCompra) {
+<app-pdf-orden-compra [(visible)]="visiblepdfOrdenCompra" [modo]="'GENERAR'"></app-pdf-orden-compra>
+}
+
+@if (visibleSubirArchivo) {
+<app-upload-archivo [(visible)]="visibleSubirArchivo"></app-upload-archivo>
+}
+
+@if (visibleCronograma) {
+<app-list-cronogramas [(visible)]="visibleCronograma"></app-list-cronogramas>
+}
+
+@if (visibleCarpeta) {
+<app-one-drive-carpetas [(visible)]="visibleCarpeta"></app-one-drive-carpetas>
+}
+@if (visibleTimeLine) {
+<app-time-line-solicitud-compra [(visible)]="visibleTimeLine"></app-time-line-solicitud-compra>
+}

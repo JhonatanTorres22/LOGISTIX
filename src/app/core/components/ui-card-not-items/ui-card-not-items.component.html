@@ -1,0 +1,23 @@
+<p-card [class]="'w-full ' + class" [header]="''">
+  <div class="text-center flex flex-col justify-center items-center h-full" [ngClass]="classContent">
+
+    <i [class]="icon"></i>
+
+    <p class="f-w-600 f-16 uppercase mt-2">
+      {{ text }}
+    </p>
+
+    <!-- BOTÓN OPCIONAL -->
+    @if (showButton) {
+      <button
+        pButton
+        type="button"
+        class="mt-3"
+        [icon]="iconButton"
+        [label]="label"
+        (click)="onClick.emit()">
+      </button>
+    }
+
+  </div>
+</p-card>

@@ -1,0 +1,132 @@
+<p-drawer [(visible)]="visible"
+          position="right"
+          [modal]="true"
+          [style]="{ width: '40rem' }"
+          (onHide)="closeDrawer()">
+
+  <ng-template #header>
+    <span class="font-bold">LÍNEA DE TIEMPO</span>
+  </ng-template>
+
+  <p-timeline [value]="events()" align="alternate" class="customized-timeline">
+
+    <ng-template #content let-event>
+
+      <p-card class="shadow-md timeline-card-small">
+
+        <!-- HEADER CARD -->
+        <ng-template pTemplate="header">
+          <div class="flex align-items-center gap-2">
+
+            @if (event.estadoTag) {
+              <p-tag
+                class="ml-auto"
+                [value]="event.estadoTag.label"
+                [severity]="event.estadoTag.severity"
+                rounded>
+              </p-tag>
+            }
+
+          </div>
+        </ng-template>
+
+
+        @if (event.archivo) {
+
+        <div class="flex flex-column gap-2">
+
+          <!-- ICONO PDF + BADGE -->
+          <div class="flex align-items-center gap-2">
+
+            <div class="relative flex align-items-center">
+
+              <i
+                class="pi pi-file-pdf text-red-500 text-xl cursor-pointer"
+                (click)="mostrarArchivos($event, event, pop)">
+              </i>
+
+              @if (event.agrupado && event.cantidadArchivos > 1) {
+                <p-badge
+                  [value]="event.cantidadArchivos"
+                  severity="danger"
+                  class="absolute -top-2 -right-2 small-badge">
+                </p-badge>
+              }
+
+            </div>
+
+            <span class="text-base font-bold">
+              {{ event.status }}
+            </span>
+
+          </div>
+
+
+          <!-- FECHA -->
+          @if (event.fechaCreacion) {
+          <div class="flex align-items-center gap-2">
+            <i class="pi pi-calendar"></i>
+
+            <span class="text-xs">
+              {{ event.fechaCreacion | date:'dd/MM/yyyy h:mm a' }}
+            </span>
+          </div>
+          }
+
+
+          <!-- USUARIO -->
+          @if (event.usuario) {
+          <div class="flex align-items-center gap-2">
+
+            <i class="pi pi-user"></i>
+
+            <span class="text-xs">
+              {{ event.usuario }}
+            </span>
+
+          </div>
+          }
+
+        </div>
+
+        } @else {
+
+        <p class="text-red-500 font-semibold text-xs mt-2">
+          No hay archivos disponibles.
+        </p>
+
+        }
+
+      </p-card>
+
+    </ng-template>
+
+  </p-timeline>
+
+
+  <!-- POPOVER ARCHIVOS -->
+  <p-popover #pop>
+
+    <div class="flex flex-column gap-2">
+
+      @for (file of selectedArchivos; track file.idAnexosPorFase) {
+
+        <div
+          class="flex align-items-center gap-2 cursor-pointer file-item"
+          (click)="abrirArchivo(file)">
+
+          <i class="pi pi-file-pdf text-red-500"></i>
+
+          <span class="text-sm">
+            {{ file.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}
+          </span>
+
+        </div>
+
+      }
+
+    </div>
+
+  </p-popover>
+
+</p-drawer>

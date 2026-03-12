@@ -1,0 +1,62 @@
+<p-data-view [value]="listDocTributarioPorAprobar()" [paginator]="true" [rows]="5">
+
+    <ng-template #emptymessage>
+        <ui-card-not-items text="No hay documentos tributarios por aprobar"></ui-card-not-items>
+    </ng-template>
+    <ng-template #header>
+        <div class="font-bold text-sm">
+            DOCUMENTOS TRIBUTARIOS POR APROBAR
+        </div>
+    </ng-template>
+
+    <ng-template #list let-docTributarios>
+        @for (docTributario of docTributarios; track $index) {
+        <div class="col-12 border-bottom-1 surface-border py-2 text-xs">
+
+            <div class="flex justify-content-between align-items-center mb-1">
+
+                <div class="flex align-items-center gap-2">
+
+                    <span *ngIf="docTributario.idCarpeta > 0"
+                        class="px-2 py-1 border-round text-xs font-semibold bg-blue-100 text-blue-800">
+                        {{ docTributario.prefijoCarpeta }}-{{ docTributario.numeracionCarpeta }}
+                    </span>
+
+                    <span class="font-semibold">
+                        {{ docTributario.tipoDocumento }}
+                    </span>
+
+                </div>
+
+                <span class="px-2 py-1 border-round text-xs font-semibold" [ngClass]="docTributario.estadoClass">
+                    {{ docTributario.estadoTexto }}
+                </span>
+
+            </div>
+
+            <div class="text-600 mb-1">
+                {{ docTributario.concepto }}
+            </div>
+
+            <div class="flex justify-content-between align-items-center text-700">
+
+                <div class="flex gap-3">
+                    <div>
+                        <b>Monto:</b> S/.{{ docTributario.monto }}
+                    </div>
+
+                    <div>
+                        <b>Fecha:</b> {{ docTributario.fechaPago | date:'dd/MM/yyyy' }}
+                    </div>
+                </div>
+
+                <ui-icon-button icon="pi pi-arrow-right"></ui-icon-button>
+
+            </div>
+
+        </div>
+        }
+    </ng-template>
+</p-data-view>
+
+<!-- <pre> {{ listDocTributarioPorAprobar | json }} </pre> -->

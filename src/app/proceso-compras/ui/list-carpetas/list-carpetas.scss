@@ -1,0 +1,16 @@
+@keyframes infoPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.6); /* blue-600 */
+    }
+    70% {
+        box-shadow: 0 0 0 12px rgba(37, 99, 235, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+    }
+}
+
+
+.info-pulse {
+    animation: infoPulse 1.2s ease-out infinite;
+}

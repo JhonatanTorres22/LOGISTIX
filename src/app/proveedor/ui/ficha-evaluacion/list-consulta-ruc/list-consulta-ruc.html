@@ -1,0 +1,266 @@
+@if (loading) {
+<ui-loading-progress-bar></ui-loading-progress-bar>
+}
+
+@else {
+
+@if (selectEvaluacionSunat().archivoConsultaRuc !== null) {
+
+@if (vistaActual() === 'FORMULARIO') {
+
+<div class="grid">
+    <div class="col-12 md:col-5">
+        <app-view-pdf-evaluacion [tipoArchivo]="'archivoConsultaRuc'">
+        </app-view-pdf-evaluacion>
+    </div>
+
+    <div class="col-12 md:col-7">
+        <app-add-edit-consulta-ruc (cerrarFormulario)="volverAMostrar()" [modoFormularioRuc]="modoFormularioRuc">
+        </app-add-edit-consulta-ruc>
+    </div>
+</div>
+}
+
+@else if (vistaActual() === 'CLONAR') {
+
+<p-card>
+    <div class="flex flex-column align-items-center gap-3 p-5 text-center">
+
+        <i class="pi pi-info-circle text-4xl text-600"></i>
+
+        <span class="text-lg font-semibold">
+            ¿Desea usted clonar la última Ficha RUC registrada?
+        </span>
+
+        <div class="flex gap-8">
+            <ui-button icon="pi pi-clone" label="Clonar" (onClick)="clonarDesdeAnterior()">
+            </ui-button>
+
+            <ui-button label="No clonar" icon="pi pi-times" color="danger" (onClick)="prepararFormulario('AGREGAR')">
+            </ui-button>
+        </div>
+
+    </div>
+</p-card>
+
+}
+
+<!-- ===================== -->
+<!-- MOSTRAR CONSULTA -->
+<!-- ===================== -->
+@else if (vistaActual() === 'MOSTRAR') {
+
+<p-card>
+
+    <ng-template pTemplate="header">
+        <div class="flex justify-content-between align-items-center p-2">
+
+            <span class="text-lg font-semibold">
+                Consulta RUC - SUNAT
+            </span>
+
+            <div class="flex gap-2">
+                @if (selectProveedor().evaluacion == 'EVALUACIÓN EN PROCESO') {
+                    <ui-button icon="pi pi-pencil" label="Editar ficha RUC" (onClick)="prepararFormulario('EDITAR')">
+                    </ui-button>
+    
+                    <ui-button label="Eliminar" icon="pi pi-trash" color="danger"
+                        (onClick)="eliminarConsulta(listConsultaRuc()[0])">
+                    </ui-button>
+                }
+
+
+            </div>
+
+        </div>
+    </ng-template>
+
+    <div class="text-sm">
+
+        <!-- DATOS PRINCIPALES -->
+        <div class="grid">
+
+            <div class="col-12 md:col-6">
+                <div class="font-semibold text-600 mb-1">Razón Social</div>
+                <div>{{ listConsultaRuc()[0].nombreComercial }}</div>
+            </div>
+
+            <div class="col-12 md:col-3">
+                <div class="font-semibold text-600 mb-1">RUC</div>
+                <div>{{ listConsultaRuc()[0].ruc }}</div>
+            </div>
+
+            <div class="col-12 md:col-3">
+                <div class="font-semibold text-600 mb-1">Estado del Contribuyente</div>
+                <p-tag [value]="listConsultaRuc()[0].estadoContribuyente"
+                    [severity]="listConsultaRuc()[0].estadoContribuyente === 'ACTIVO' ? 'success' : 'danger'">
+                </p-tag>
+            </div>
+
+        </div>
+
+        <p-divider></p-divider>
+
+        <!-- CONDICIÓN Y TIPO -->
+        <div class="grid">
+
+            <div class="col-12 md:col-6">
+                <div class="font-semibold text-600 mb-1">Condición del Contribuyente</div>
+                <p-tag [value]="listConsultaRuc()[0].condicionDelContribuyente"
+                    [severity]="listConsultaRuc()[0].condicionDelContribuyente === 'HABIDO' ? 'success' : 'warning'">
+                </p-tag>
+            </div>
+
+            <div class="col-12 md:col-6">
+                <div class="font-semibold text-600 mb-1">Tipo de Contribuyente</div>
+                <div>{{ listConsultaRuc()[0].tipoContribuyente }}</div>
+            </div>
+
+        </div>
+
+        <p-divider></p-divider>
+
+        <!-- ACTIVIDADES -->
+        <div class="grid">
+
+            <div class="col-12">
+                <div class="font-semibold text-600 mb-1">Actividad Principal</div>
+                <div>{{ listConsultaRuc()[0].actividadPrincipal }}</div>
+            </div>
+
+            <div class="col-12">
+                <div class="font-semibold text-600 mb-1">Actividad Secundaria</div>
+                <div>{{ listConsultaRuc()[0].actividadSecundaria }}</div>
+            </div>
+
+            <div class="col-12 md:col-6">
+                <div class="font-semibold text-600 mb-1">Actividad de Comercio Exterior</div>
+                <div>{{ listConsultaRuc()[0].actividadComercioExterior }}</div>
+            </div>
+
+        </div>
+
+        <p-divider></p-divider>
+
+        <!-- DIRECCIÓN -->
+        <div class="grid">
+            <div class="col-12">
+                <div class="font-semibold text-600 mb-1">Dirección Fiscal</div>
+                <div>{{ listConsultaRuc()[0].direccion }}</div>
+            </div>
+        </div>
+
+        <p-divider></p-divider>
+
+        <!-- SISTEMAS -->
+        <div class="grid">
+
+            <div class="col-12 md:col-4">
+                <div class="font-semibold text-600 mb-1">Sistema de Contabilidad</div>
+                <div>{{ listConsultaRuc()[0].sistemaContabilidad }}</div>
+            </div>
+
+            <div class="col-12 md:col-4">
+                <div class="font-semibold text-600 mb-1">Sistema de Emisión</div>
+                <div>{{ listConsultaRuc()[0].sistemaEmisionDeComprobante }}</div>
+            </div>
+
+            <div class="col-12 md:col-4">
+                <div class="font-semibold text-600 mb-1">Emisión Electrónica</div>
+                <div>{{ listConsultaRuc()[0].sistemaDeEmisionElectronica }}</div>
+            </div>
+
+        </div>
+
+        <p-divider></p-divider>
+
+        <!-- COMPROBANTES -->
+        <div class="grid">
+            <div class="col-12">
+                <div class="font-semibold text-600 mb-1">Comprobantes de Pago Autorizados</div>
+                <div>{{ listConsultaRuc()[0].comprobantesDePago }}</div>
+            </div>
+        </div>
+
+        <p-divider></p-divider>
+
+        <!-- FECHAS -->
+        <div class="grid">
+
+            <div class="col-12 md:col-3">
+                <div class="font-semibold text-600 mb-1">Fecha de Inscripción</div>
+                <div>{{ listConsultaRuc()[0].fechaInscripcion | date:'dd/MM/yyyy' }}</div>
+            </div>
+
+            <div class="col-12 md:col-3">
+                <div class="font-semibold text-600 mb-1">Inicio de Actividades</div>
+                <div>{{ listConsultaRuc()[0].fechaInicioDeActividades | date:'dd/MM/yyyy' }}</div>
+            </div>
+
+            <div class="col-12 md:col-3">
+                <div class="font-semibold text-600 mb-1">Factura desde</div>
+                <div>{{ listConsultaRuc()[0].facturaDesde | date:'dd/MM/yyyy' }}</div>
+            </div>
+
+            <div class="col-12 md:col-3">
+                <div class="font-semibold text-600 mb-1">Boleta desde</div>
+                <div>{{ listConsultaRuc()[0].boletaDesde | date:'dd/MM/yyyy' }}</div>
+            </div>
+
+        </div>
+
+        <p-divider></p-divider>
+
+        <!-- PLE Y PADRONES -->
+        <div class="grid">
+
+            <div class="col-12 md:col-4">
+                <div class="font-semibold text-600 mb-1">Afiliado al PLE desde</div>
+                <div>{{ listConsultaRuc()[0].afiliadoAlPleDesde | date:'dd/MM/yyyy' }}</div>
+            </div>
+
+            <div class="col-12 md:col-8">
+                <div class="font-semibold text-600 mb-1">Padrones</div>
+                <div>{{ listConsultaRuc()[0].padrones }}</div>
+            </div>
+
+        </div>
+
+        <p-divider></p-divider>
+
+        <!-- FECHA CONSULTA -->
+        <div class="flex justify-content-center mt-3">
+            <div class="text-center">
+                <div class="font-semibold text-600 mb-1">
+                    Fecha de Consulta
+                </div>
+                <div>
+                    {{ selectEvaluacionSunat().fechaConsultaRuc | date:'dd/MM/yyyy' }}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</p-card>
+
+}
+
+<!-- ===================== -->
+<!-- VACÍO -->
+<!-- ===================== -->
+@else {
+<ui-card-not-items text="No se encontraron datos" [showButton]="true" iconButton="pi pi-arrow-left" label="Volver"
+    (onClick)="actionCerrarDrawer.set('CERRAR DRAWER')">
+</ui-card-not-items>
+}
+
+}
+
+@else {
+<ui-card-not-items text="No tiene cargado el archivo de la consulta RUC" [showButton]="true"
+    iconButton="pi pi-arrow-left" label="Volver" (onClick)="actionCerrarDrawer.set('CERRAR DRAWER')">
+</ui-card-not-items>
+}
+
+}

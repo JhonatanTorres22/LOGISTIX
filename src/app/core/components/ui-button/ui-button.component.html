@@ -1,3 +1,4 @@
+
 <button
   pButton
   [id]="idButton"
@@ -7,6 +8,7 @@
   (click)="handleClick($event)"
  [ngClass]="computedClass"
   type="button"
+  [severity]="color" 
 >
   @if (icon) {
     <i class="p-button-icon {{ icon }}"></i>

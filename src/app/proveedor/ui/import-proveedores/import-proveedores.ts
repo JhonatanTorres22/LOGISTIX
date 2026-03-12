@@ -23,7 +23,7 @@ export class ImportProveedores {
   proveedorAccion = this.signal.proveedorAccion
   excelData: CrearProveedor[] = [];
 
-  onFileSelect(event: any): void {
+  onFileSelect =(event: any) => {
     const file: File = event.files[0];
 
     if (!file) return;
@@ -50,15 +50,58 @@ export class ImportProveedores {
     reader.readAsArrayBuffer(file);
   }
 
-  limpiar(): void {
+  limpiar =() => {
     this.excelData = [];
   }
 
-  guardar(): void {
+  private validarExcelData(): boolean {
+  if (!this.excelData.length) {
+    this.alert.showAlert('No hay datos para importar', 'warning');
+    return false;
+  }
+
+  const camposObligatorios: (keyof CrearProveedor)[] = [
+    'tipo',
+    'nombre',
+    'ruc',
+    'direccion'
+  ];
+
+  const filasInvalidas = this.excelData
+    .map((row, index) => ({
+      fila: index + 1,
+      faltantes: camposObligatorios.filter(
+        campo => !row[campo] || String(row[campo]).trim() === ''
+      )
+    }))
+    .filter(r => r.faltantes.length > 0);
+
+  if (filasInvalidas.length > 0) {
+    const mensaje = filasInvalidas
+      .slice(0, 5)
+      .map(r => `Fila ${r.fila}: falta ${r.faltantes.join(', ')}`)
+      .join('\n');
+
+    this.alert.showAlert(
+      `Datos incompletos, ${mensaje}${filasInvalidas.length > 5 ? '\n...' : ''}`,
+      'error'
+    );
+
+    return false;
+  }
+
+  return true;
+}
+
+
+  guardar = () => {
     this.loading = true
     let agregarMasivo: CrearProveedor[] = this.excelData;
     console.log(agregarMasivo);
 
+      if (!this.validarExcelData()) {
+    return;
+  }
     this.alert.sweetAlert('question', '¿Confirmar?', '¿Desea importar los proveedores?').
       then(result => {
         if (!result) { this.loading = false; return }
@@ -78,7 +121,7 @@ export class ImportProveedores {
       })
   }
 
-  descargarPlantilla(): void {
+  descargarPlantilla = () => {
     const link = document.createElement('a');
     link.href = 'assets/plantillas/plantilla_proveedores.xlsx';
     link.download = 'plantilla_proveedores.xlsx';

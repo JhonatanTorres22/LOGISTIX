@@ -1,11 +1,14 @@
 import { Injectable, signal } from "@angular/core";
-import { Criterio } from "../models/evaluacion.model";
+import { Criterio, Evaluacion, ProveedorEvaluacion } from "../models/evaluacion.model";
 
 @Injectable({
     providedIn: 'root'
 })
 
 export class EvaluacionSignal {
-    listEvaluacionDefault : Criterio[] = []
-    listEvaluacion = signal(this.listEvaluacionDefault)
+    listCriterioDefault : Criterio[] = []
+    listCriterio = signal(this.listCriterioDefault)
+
+    listarEvaluacionDefault : ProveedorEvaluacion[] = []
+    listarEvaluacion = signal(this.listarEvaluacionDefault)
 }

@@ -1,18 +1,32 @@
+import { ListarMarca } from "@/marca/domain/models/marca.model"
+import { ListarMarcaDTO } from "@/marca/infraestructure/dto/marca.dto"
+
+export interface ProductoCategoriaDTO {
+    codigoCategoria: number,
+    nombre : string,
+    descripcion : string
+    productosServicios : ProductoDTO[]
+}
 export interface ProductoDTO {
-    codigo: number,
+    codigoProducto: number,
     nombre: string,
     modelo: string,
     descripcion: string,
     unidadDeMedida: string,
-    precioReferencial: number
+    precioReferencial: number,
+    url: string,
+    marca : ListarMarcaDTO |null
 }
 
-export type CrearProductoDTO = Omit<ProductoDTO, 'codigo'>
-export type EditarProductoDTO = ProductoDTO
-export type EliminarProductoDTO = Pick<ProductoDTO, 'codigo'>
+export type EditarProductoDTO = Omit<ProductoDTO,  | 'precioReferencial'| 'marca'> & { codigoCategoria: number; codigoMarca : number | undefined}
+export type CrearProductoDTO = Omit<EditarProductoDTO, 'codigoProducto' | 'precioReferencial' |'marca'>
 
-export interface DataProductoDTO<T> {
-    data : T
+export interface EliminarProductoDTO {
+    codigo: number
+}
+
+export interface DataProductoDTO {
+    data : ProductoCategoriaDTO[]
     isSuccess: boolean,
     message: string,
     errors: null | string

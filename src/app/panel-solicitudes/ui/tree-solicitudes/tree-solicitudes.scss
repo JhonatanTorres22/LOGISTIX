@@ -1,0 +1,148 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+/* Layout principal */
+.tree-layout {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden; /* evita scroll horizontal */
+}
+
+/* Panel izquierdo */
+.tree-panel {
+  width: 260px;
+  min-width: 0;
+  max-width: 260px;
+  flex-shrink: 0;
+  overflow: hidden;
+  overflow-y: auto;
+  border-right: 1px solid #e0e0e0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease; /* animación del colapso */
+
+  /* Botón hamburguesa */
+  .collapse-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    background: #0f172a;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 8px; /* separación del borde superior e izquierdo */
+    flex-shrink: 0;
+    z-index: 10;
+    transition: background 0.2s ease;
+  }
+
+  .collapse-btn:hover {
+    background: #1e293b;
+  }
+
+  /* Tree debajo del botón */
+  .tree-container {
+    flex: 1; /* ocupa el resto del panel */
+    min-width: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin-top: 8px;
+    transition: all 0.3s ease; /* animación suave */
+  }
+
+  .node-label {
+    font-size: 10px;
+    display: block;
+    max-width: 100%;
+    white-space: normal;    /* permite salto de línea */
+    word-break: break-word; /* corta palabras largas */
+    overflow-wrap: break-word;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+}
+
+/* Colapsado */
+.tree-layout.collapsed .tree-panel {
+  width: 80px;
+  min-width: 80px;
+  max-width: 80px;
+  overflow-x: hidden;
+
+  .tree-container {
+    opacity: 0;
+    height: 0;
+    pointer-events: none;
+  }
+
+  .collapse-btn {
+    margin-left: auto; /* botón alineado a la derecha del panel colapsado */
+  }
+}
+
+/* Content panel */
+.content-panel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding-left: 1rem;
+  box-sizing: border-box;
+  transition: padding-left 0.3s ease;
+}
+
+/* Tree estilo VSCode */
+:host ::ng-deep .vscode-tree,
+:host ::ng-deep .p-tree-container,
+:host ::ng-deep .p-treenode-content,
+:host ::ng-deep .p-treenode-children {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  white-space: normal; /* permite wrap */
+  overflow: hidden;
+}
+
+/* Nodos personalizados */
+.custom-node {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.node-sin-anexo {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+/* Estado vacío */
+.empty-state {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Contenido panel derecho */
+.content-panel app-list-solicitud-compra {
+  flex: 1;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  box-sizing: border-box;
+}

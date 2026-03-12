@@ -1,0 +1,71 @@
+@if (loading) {
+<ui-loading-progress-bar></ui-loading-progress-bar>
+}
+@else {
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '40rem' }" (onHide)="closeDialog()">
+    <ng-template #header>
+        <div class="inline-flex items-center justify-center gap-2">
+            <span class="font-bold whitespace-nowrap"> {{productoSelect().id == 0 ? 'AGREGAR PRODUCTO O SERVICIO' :
+                'EDITAR PRODUCTO O SERVICIO'}} </span>
+        </div>
+    </ng-template>
+
+    <!-- {{listMarca() |json}} -->
+    <!-- {{ productoSelect() | json }} -->
+    <div [formGroup]="formProducto" class="mt-4 flex flex-column gap-4">
+
+        <ui-input label="Nombre" formControlName="nombre" [maxlength]="maxLengthNombre" [minlength]="minLengthNombre"
+            [expReg]="expLockNombreModeloDescripcion"
+            [patternErrorMessage]="'No debe incluir espacios al final de la palabra'"></ui-input>
+
+        <ui-input label="Modelo" formControlName="modelo" [maxlength]="maxLengthModelo" [minlength]="minLengthModelo"
+            [expReg]="expLockNombreModeloDescripcion"
+            [patternErrorMessage]="'No incluir espacios al final de la palabra'"></ui-input>
+
+        <ui-input label="Descripción" formControlName="descripcion" [maxlength]="maxLengthDescripcion"
+            [minlength]="minLengthDescripcion" [expReg]="expLockNombreModeloDescripcion"
+            [patternErrorMessage]="'No debe incluir espacios de la palabra'"></ui-input>
+
+        <p-float-label class="w-full" variant="on">
+            <p-autocomplete class="w-full" formControlName="unidad" [suggestions]="filteredUnidades"
+                (completeMethod)="buscarUnidad($event)" optionLabel="text" optionValue="value"
+                placeholder="Buscar unidad" [dropdown]="true" [minLength]="1" [forceSelection]="true"
+                emptyMessage="No se encontró la unidad">
+            </p-autocomplete>
+            <label for="Unidad de Medida">Unidad de Medida</label>
+        </p-float-label>
+
+        <ui-input label="URL Imagen" formControlName="urlImagen" [minlength]="8" [upperCase]="false"></ui-input>
+
+        <p-float-label class="w-full" variant="on">
+            <p-autocomplete class="w-full" inputId="marca" formControlName="marca" [suggestions]="filteredMarcas"
+                (completeMethod)="buscarMarca($event)" optionLabel="nombreMarca" placeholder="Seleccione una marca"
+                [dropdown]="true" appendTo="body">
+
+                <ng-template pTemplate="footer">
+                    @if (filteredMarcas.length === 0) {
+                        <div class="p-2">
+                            <ui-button label="Agregar nueva marca" icon="pi pi-plus" (onClick)="visibleMarcaModal = true"></ui-button>
+                        </div>
+                    }
+                </ng-template>
+
+            </p-autocomplete>
+
+            <label for="marca">Marca</label>
+        </p-float-label>
+
+    </div>
+
+    <ng-template #footer>
+        <ui-button color="secondary" label="Cancelar" icon="pi pi-times" (onClick)="closeDialog()"></ui-button>
+        <!-- <p-button severity="secondary" label="Cancelar" icon="pi pi-times" (onClick)="closeDialog()"></p-button> -->
+        <ui-button label="GUARDAR" icon="pi pi-save" color="primary" [disabled]="formProducto.invalid"
+            (onClick)="onSubmit()" />
+    </ng-template>
+</p-dialog>
+}
+
+@if (visibleMarcaModal) {
+<app-add-edit-marca [(visible)]="visibleMarcaModal"></app-add-edit-marca>
+}

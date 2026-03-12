@@ -1,0 +1,33 @@
+<div class="ui-input w-full m-t-5">
+  <p-floatLabel class="w-full" variant="on">
+    <p-datepicker
+      appendTo="body"
+      [ngModel]="value"
+      (ngModelChange)="onDateChange($event)"
+      [readonlyInput]="readonly"
+      [disabled]="disabled"
+      [minDate]="minDate"
+      [maxDate]="maxDate"
+      [dateFormat]="dateFormat"
+      styleClass="w-full"
+    ></p-datepicker>
+    <label>{{ label }}</label>
+  </p-floatLabel>
+
+  <!-- ERRORES -->
+  @if (formControl?.touched && formControl?.invalid) {
+
+    @if (formControl?.hasError('required')) {
+      <small class="block text-red-500">Este campo es obligatorio</small>
+    }
+
+    @if (formControl?.hasError('min')) {
+      <small class="block text-red-500">La fecha no puede ser menor a {{ minDate | date:'dd/MM/yyyy' }}</small>
+    }
+
+    @if (formControl?.hasError('max')) {
+      <small class="block text-red-500">La fecha no puede ser mayor a {{ maxDate | date:'dd/MM/yyyy' }}</small>
+    }
+
+  }
+</div>

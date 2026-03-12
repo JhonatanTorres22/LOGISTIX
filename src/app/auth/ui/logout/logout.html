@@ -1,1 +1,14 @@
-<p>logout works!</p>
+@if (isSpinnerVisible) {
+  <div class="fixed inset-0 flex flex-col items-center justify-center bg-white/80 z-50">
+    <p-progress-spinner 
+      strokeWidth="8" 
+      fill="transparent" 
+      animationDuration=".5s"
+      [style]="{ width: '200px', height: '200px' }">
+    </p-progress-spinner>
+
+    <p class="mt-4 text-xl font-semibold text-blue-900">
+      Cerrando Sesión...
+    </p>
+  </div>
+}

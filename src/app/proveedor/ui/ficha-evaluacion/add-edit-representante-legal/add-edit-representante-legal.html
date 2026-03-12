@@ -1,0 +1,54 @@
+@if (loading) {
+<ui-loading-progress-bar></ui-loading-progress-bar>
+}
+@else {
+<p-card class="shadow-3 p-4">
+    <ng-template pTemplate="header">
+        <div class="flex justify-between align-items-center w-full">
+            <span class="font-bold text-lg">
+                {{ selectRepresentanteLegal().idRepresentanteLegal == 0 ? 'Agregar' : 'Editar' }}
+            </span>
+
+            <ui-icon-button icon="pi pi-times" (onClick)="closePanel()"></ui-icon-button>
+        </div>
+    </ng-template>
+    <div class="pt-2">
+        <form [formGroup]="representanteForm" class="flex flex-column gap-4">
+
+            <ui-select label="Seleccionar Tipo Documento" [options]="listTipoDocumento"
+                formControlName="tipoDocumento"></ui-select>
+
+            <ui-input label="N° de Documento" formControlName="nDocumento" [maxlength]="maxLengthDoc"
+                [minlength]="minLengthDoc" [expReg]="expLockDoc" [patternErrorMessage]="'Solo debe contener números'">
+            </ui-input>
+
+            <ui-input label="Nombre" formControlName="nombre" [maxlength]="maxLengthNombre"
+                [minlength]="minLengthNombre" [expReg]="expLockNombre"
+                [patternErrorMessage]="'Solo debe contener letras'">
+            </ui-input>
+
+            <ui-input label="Cargo" formControlName="cargo" [maxlength]="maxLengthNombre" [minlength]="minLengthNombre"
+                [expReg]="expLockNombre" [patternErrorMessage]="'Solo debe contener letras'">
+            </ui-input>
+
+            <ui-date-picker label="Fecha Desde" formControlName="fecha" [maxDate]="hoy">
+            </ui-date-picker>
+        </form>
+    </div>
+    <p-divider></p-divider>
+
+    <form [formGroup]="fechaConsultaForm" class="flex flex-column gap-4">
+        <ui-date-picker label="Fecha de Consulta" formControlName="fechaConsulta" [maxDate]="hoy"></ui-date-picker>
+    </form>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-content-end gap-2">
+            <ui-button label="Cancelar" icon="pi pi-times" color="secondary" (onClick)="closePanel()">
+            </ui-button>
+            <ui-button label="Guardar" icon="pi pi-save"
+                [disabled]="representanteForm.invalid  && fechaConsultaForm.invalid" (onClick)="onSubmit()">
+            </ui-button>
+        </div>
+    </ng-template>
+</p-card>
+}

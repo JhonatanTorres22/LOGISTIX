@@ -1,0 +1,48 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [closable]="false"
+  [style]="{ width: '42rem' }"
+  (onHide)="closeDialog()">
+
+  <!-- HEADER -->
+  <ng-template #header>
+    <div class="flex align-items-center gap-2">
+      <i class="pi pi-pencil text-primary"></i>
+      <span class="font-bold text-lg">Firma Digital – Gerencia</span>
+    </div>
+  </ng-template>
+
+  <!-- BODY -->
+  <div class="firma-container">
+    <span class="firma-label">Firme dentro del recuadro</span>
+
+    <div class="firma-box">
+      <canvas
+        #firmaCanvas
+        width="400"
+        height="180">
+      </canvas>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <ng-template #footer>
+    <div class="flex justify-content-between w-full">
+      <ui-button
+        label="Limpiar"
+        icon="pi pi-refresh"
+        severity="secondary"
+        (click)="limpiar()">
+      </ui-button>
+
+      <ui-button
+        label="Guardar firma"
+        icon="pi pi-check"
+        severity="primary"
+        (click)="guardarFirma()">
+      </ui-button>
+    </div>
+  </ng-template>
+
+</p-dialog>

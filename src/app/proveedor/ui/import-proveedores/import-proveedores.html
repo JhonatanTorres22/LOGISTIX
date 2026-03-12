@@ -32,7 +32,7 @@
 </p-fileUpload>
 }
 
-@if (excelData) {
+@if (excelData.length > 0) {
 <p-table
     #dt2
     [value]="excelData"

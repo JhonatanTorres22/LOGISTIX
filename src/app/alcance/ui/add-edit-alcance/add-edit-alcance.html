@@ -1,0 +1,30 @@
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{width: '500px'}" (onHide)="closeDialog()">
+    <ng-template #header>
+        <div class="inline-flex items-center justify-center gap-2">
+            <span class="font-bold whitespace-nowrap"> {{selectAlcance().id == 0 ? 'Agregar' : 'Editar'}} </span>
+        </div>
+    </ng-template>
+    <div class="pt-4 m-2 flex flex-col gap-4" [formGroup]="formAlcance">
+        <ui-input label="Nombre" formControlName="nombre" [maxlength]="maxLengthNombre"
+            [minlength]="minLengthNombre" [expReg]="nombreLock"
+            [patternErrorMessage]="'No debe incluir espacios al final de la palabra'">
+        </ui-input>
+
+        <ui-input label="Dirección" formControlName="direccion" [maxlength]="maxLengthDireccion"
+            [minlength]="minLengthDireccion" [expReg]="direccionLock"
+            [patternErrorMessage]="'No debe incluir espacios al final de la palabra'">
+        </ui-input>
+
+        <ui-input label="Coordenada" formControlName="coordenadas" [maxlength]="maxLengthCoordenadas"
+            [minlength]="minLengthCoordenadas" [expReg]="coordenadasLock"
+            [patternErrorMessage]="'No debe incluir espacios al final de la palabra'">
+        </ui-input>
+
+
+    </div>
+
+        <ng-template #footer>
+            <ui-button label="Cancelar" icon="pi pi-times" color="secondary" (onClick)="closeDialog()"></ui-button>
+            <ui-button label="Guardar" icon="pi pi-save" color="primary" (onClick)="onSubmit()" [disabled]="formAlcance.invalid"></ui-button>
+    </ng-template>
+</p-dialog>

@@ -1,14 +1,16 @@
 export class Categoria{
     constructor(
-        public id: number,
+        public idCategoria: number,
         public nombre: string,
         public descripcion: string
     ){}
 }
 
-export type CrearCategoria = Omit<Categoria, 'id'>;
+export type CrearCategoria = Omit<Categoria, 'idCategoria'>;
 export type ActualizarCategoria = Partial<Categoria>;
-export type EliminarCategoria = Pick<Categoria, 'id'>;
+export type EliminarCategoria = Pick<Categoria, 'idCategoria'>;
+
+
 
 export interface DataCategoria{
     data: Categoria[];

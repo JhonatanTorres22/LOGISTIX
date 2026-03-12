@@ -1,0 +1,52 @@
+@for ( solicitud of listSolicitud(); track $index) {
+
+
+    <div class="flex justify-content-between gap-4 mb-3">
+        <div class="flex-1">
+            <span class="font-bold text-xs">Tipo de Gasto</span>
+            <div class="text-xs p-2 mt-2 border-round surface-100 bg-transparent border-1 border-gray-400">
+                {{ solicitud.tipoGasto }}
+            </div>
+        </div>
+
+        <div class="flex-1">
+            <span class="text-xs font-bold">Código de Subtarea</span>
+            <div class="text-xs p-2 mt-2 border-round surface-100 bg-transparent border-1 border-gray-400">
+                {{ solicitud.idSubTarea }}
+            </div>
+        </div>
+    </div>
+
+    <div class="flex justify-content-between gap-4">
+       <div class="flex-1">
+    <span class="text-xs font-bold">Datos de la Actividad</span>
+    <div class="text-xs p-2 mt-2 border-round surface-100 bg-transparent border-1 border-gray-400">
+        {{ selectSubTarea()?.nombreSubTarea || selectSubTarea()?.datosActividad }}
+    </div>
+</div>
+
+        <div class="flex-1">
+            <span class="text-xs font-bold">Presupuesto Programado</span>
+            <div class="text-xs p-2 mt-2 border-round surface-100 bg-transparent border-1 border-gray-400">
+                S/. {{ solicitud.total }}
+            </div>
+        </div>
+    </div>
+
+    <div class="flex justify-content-between gap-4">
+        <div class="flex-1">
+            <span class="text-xs font-bold">Área Responsable</span>
+            <div class="text-xs p-2 mt-2 border-round surface-100 bg-transparent border-1 border-gray-400">
+                {{ solicitud.areaResponsable }}
+            </div>
+        </div>
+
+        <div class="flex-1">
+            <span class="text-xs font-bold">Local</span>
+            <div class="text-xs p-2 mt-2 border-round surface-100 bg-transparent border-1 border-gray-400">
+                {{ solicitud.codigoPlanDeTrabajo }}
+            </div>
+        </div>
+    </div>
+    }
+    

@@ -1,13 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, Output, Self, EventEmitter, input } from '@angular/core';
 
-import { ControlValueAccessor, FormControl, NgControl } from '@angular/forms';
+import { ControlValueAccessor, FormControl, FormsModule, NgControl, ReactiveFormsModule } from '@angular/forms';
 import { SharedModule } from '../shared.module';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { UpperCaseDirective } from '@/core/directivas/upper-case.directive';
+import { PasswordModule } from 'primeng/password';
+import { InputTextModule } from 'primeng/inputtext';
 
 @Component({
   selector: 'ui-input',
   standalone: true,
-  imports: [ CommonModule, SharedModule],
+  imports: [ CommonModule, FloatLabelModule,UpperCaseDirective, FormsModule, ReactiveFormsModule, PasswordModule, InputTextModule],
   templateUrl: './ui-input.component.html',
   styleUrl: './ui-input.component.scss'
 })
@@ -32,6 +36,8 @@ export class UiInputComponent implements ControlValueAccessor, OnInit{
   @Input() classInput = '';
   @Input() patternErrorMessage = '';
   @Input() min!: number;
+  @Input() upperCase = true;
+
 
   formControl!: FormControl;
 

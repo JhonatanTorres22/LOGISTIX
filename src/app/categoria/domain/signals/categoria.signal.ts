@@ -6,13 +6,28 @@ import { Categoria } from "../models/categoria.model";
 })
 
 export class CategoriaSignal {
-    categoriaListDefault : Categoria[] = []
+
     categoriaDefault : Categoria = {
-        id: 0,
+        idCategoria: 0,
         nombre: "",
         descripcion: ""
     }   
     categoriaSelect = signal(this.categoriaDefault)
-    categoriaList = signal(this.categoriaListDefault)
+    categoriaList = signal<Categoria[]>([]);
     categoriaAccion = signal('')
+
+     cargado = signal(false);
+
+  setCategorias(data: Categoria[]) {
+    this.categoriaList.set(data);
+    this.cargado.set(true);
+  }
+
+  reset() {
+    this.categoriaList.set([]);
+    this.cargado.set(false);
+    this.categoriaSelect.set(this.categoriaDefault);
+    this.categoriaAccion.set('');
+  }
+  
 }

@@ -1,0 +1,53 @@
+@if (loading) {
+    <ui-loading-progress-bar></ui-loading-progress-bar>
+}
+@else {
+    <p-card class="shadow-3 p-4">
+
+    <ng-template pTemplate="header">
+        <div class="flex justify-between align-items-center w-full">
+            <span class="font-bold text-lg">
+                {{ selectTrabajadores().idTrabajadores == 0 ? 'Agregar' : 'Editar' }}
+            </span>
+
+            <ui-icon-button icon="pi pi-times" (onClick)="closePanel()"></ui-icon-button>
+        </div>
+    </ng-template>
+
+    <div class="pt-4">
+        <form [formGroup]="trabajadorForm" class="flex flex-column gap-4">
+
+            <ui-date-picker label="Periodo" formControlName="periodo" [maxDate]="hoy">
+            </ui-date-picker>
+
+            <ui-input label="N° de Trabajadores" formControlName="nTrabajadores" [expReg]="expLockTrabajadores">
+            </ui-input>
+
+            <ui-input label="N° de Pensionistas" formControlName="nPensionistas" [expReg]="expLockTrabajadores">
+            </ui-input>
+
+            <ui-input label="N° de Prestadores de Servicios" formControlName="nPrestadoresServicios"
+                [expReg]="expLockTrabajadores">
+            </ui-input>
+
+        </form>
+
+        <p-divider></p-divider>
+
+        <form [formGroup]="fechaConsultaForm" class="flex flex-column gap-4">
+            <ui-date-picker label="Fecha de Consulta" formControlName="fechaConsulta" [maxDate]="hoy"></ui-date-picker>
+        </form>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-content-end gap-2">
+            <ui-button label="Cancelar" icon="pi pi-times" color="secondary" (onClick)="closePanel()">
+            </ui-button>
+
+            <ui-button label="Guardar" icon="pi pi-save" [disabled]="trabajadorForm.invalid || fechaConsultaForm.invalid" (onClick)="onSubmit()">
+            </ui-button>
+        </div>
+    </ng-template>
+
+</p-card>
+}

@@ -1,0 +1,172 @@
+<!-- {{modoFormularioRuc | json}} -->
+ <!-- <pre> {{selectConsultaRuc() | json}} </pre> -->
+ <!-- <pre> {{modoFormularioRuc}} </pre> -->
+<p-card header="" styleClass="shadow-3">
+     <div [formGroup]="formConsultaRuc" class="p-fluid grid">
+
+    <div class="col-12 md:col-6 mb-3">
+        <ui-select 
+            [options]="tipoContribuyente" 
+            label="Tipo Contribuyente" 
+            formControlName="tipoContribuyente">
+        </ui-select>
+    </div>
+
+    <div class="col-12 md:col-6 mb-3">
+        <ui-input 
+            label="Nombre Comercial" 
+            formControlName="nombreComercial">
+        </ui-input>
+    </div>
+
+    <div class="col-12 md:col-6 mb-3">
+        <ui-date-picker 
+            label="Fecha de Inscripción" 
+            formControlName="fechaInscripcion"
+            [maxDate]="hoy">
+        </ui-date-picker>
+    </div>
+
+    <div class="col-12 md:col-6 mb-3">
+        <ui-date-picker 
+            label="Fecha Inicio de Actividades" 
+            formControlName="fechaInicioDeActividades"
+            [maxDate]="hoy">
+        </ui-date-picker>
+    </div>
+
+    <div class="col-12 md:col-6 mb-3">
+        <ui-select 
+            [options]="estadoContribuyente" 
+            label="Estado del Contribuyente" 
+            formControlName="estadoContribuyente">
+        </ui-select>
+    </div>
+
+    <div class="col-12 md:col-6 mb-3">
+        <ui-select 
+            [options]="condicionContribuyente" 
+            label="Condición del Contribuyente"
+            formControlName="condicionDelContribuyente">
+        </ui-select>
+    </div>
+
+    <div class="col-12 md:col-6 mb-3">
+        <ui-select 
+            [options]="sistemaEmision" 
+            label="Sistema Emisión de Comprobante" 
+            formControlName="sistemaEmisionDeComprobante">
+        </ui-select>
+    </div>
+
+    <div class="col-12 md:col-6 mb-3">
+        <ui-select 
+            [options]="sistemaContabilidad" 
+            label="Sistema Contabilidad" 
+            formControlName="sistemaContabilidad">
+        </ui-select>
+    </div>
+
+    <div class="col-12 mb-3">
+        <ui-input 
+            label="Sistema de Emisión Electrónica" 
+            formControlName="sistemaDeEmisionElectronica">
+        </ui-input>
+    </div>
+
+
+    <div class="col-12 mb-3">
+        <ui-input 
+            label="Actividad Principal" 
+            formControlName="actividadPrincipal">
+        </ui-input>
+    </div>
+
+    <div class="col-12 mb-3">
+        <ui-input 
+            label="Actividad Secundaria" 
+            formControlName="actividadSecundaria">
+        </ui-input>
+    </div>
+
+    <div class="col-12 mb-3">
+        <ui-input 
+            label="Actividad Comercio Exterior" 
+            formControlName="actividadComercioExterior">
+        </ui-input>
+    </div>
+
+
+    <div class="col-12 mb-3">
+        <ui-input 
+            label="Comprobantes de Pago" 
+            formControlName="comprobantesDePago">
+        </ui-input>
+    </div>
+
+    <div class="col-12 md:col-4 mb-3">
+        <ui-date-picker 
+            label="Factura Desde" 
+            formControlName="facturaDesde"
+            [maxDate]="hoy">
+        </ui-date-picker>
+    </div>
+
+    <div class="col-12 md:col-4 mb-3">
+        <ui-date-picker 
+            label="Emisor Electrónico Desde" 
+            formControlName="emisorElectronico"
+            [maxDate]="hoy">
+        </ui-date-picker>
+    </div>
+
+
+    <div class="col-12 md:col-4 mb-3">
+        <ui-date-picker 
+            label="Boleta Desde" 
+            formControlName="boletaDesde"
+            [maxDate]="hoy">
+        </ui-date-picker>
+    </div>
+
+    <div class="col-12 md:col-4 mb-3">
+        <ui-date-picker 
+            label="Afiliado al PLE Desde" 
+            formControlName="afiliadoAlPleDesde"
+            [maxDate]="hoy">
+        </ui-date-picker>
+    </div>
+
+    <div class="col-12 mb-3">
+        <ui-input 
+            label="Padrones" 
+            formControlName="padrones">
+        </ui-input>
+    </div>
+
+    <p-divider></p-divider>
+
+        <form [formGroup]="fechaConsultaForm" class="flex flex-column gap-4 w-full">
+            <ui-date-picker label="Fecha de Consulta" formControlName="fechaConsulta" class="w-full"
+            [maxDate]="hoy"></ui-date-picker>
+        </form>
+
+
+    <div class="col-12 flex justify-content-end mt-3 gap-2">
+        <ui-button 
+            label="Cancelar" 
+            icon="pi pi-times" 
+            color="secondary"
+            (onClick)="cancelar()">
+        </ui-button>
+
+        <ui-button 
+            label="Guardar" 
+            icon="pi pi-save" 
+            (onClick)="onSubmit()"
+            [disabled]="formConsultaRuc.invalid || fechaConsultaForm.invalid">
+        </ui-button>
+    </div>
+
+</div>
+</p-card>

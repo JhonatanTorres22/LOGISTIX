@@ -1,0 +1,118 @@
+@if (loading) {
+<ui-loading-progress-bar></ui-loading-progress-bar>
+}
+@else {
+<!-- <pre> {{selectEvaluacionSunat().archivoTrabajadoresPrestadores | json}} </pre> -->
+@if (selectEvaluacionSunat().archivoTrabajadoresPrestadores == null) {
+
+<ui-card-not-items text="No tiene cargado el archivo de trabajadores prestadores de servicio" [showButton]="true"
+    iconButton="pi pi-arrow-left" label="Volver" (onClick)="actionCerrarDrawer.set('CERRAR DRAWER')">
+</ui-card-not-items>
+
+}
+
+@else if (listTrabajadores().length > 0) {
+
+<p-table #dtTrabajador [value]="listTrabajadores()"
+    [globalFilterFields]="['periodo', 'nTrabajadores', 'nPensionistas', 'nPrestadoresServicio', 'accion']"
+    selectionMode="single" dataKey="idTrabajadores" [tableStyle]="{ 'min-width': '50rem' }" [rows]="20"
+    [paginator]="true" [rowsPerPageOptions]="[20,100,1000]"
+    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros">
+
+    <ng-template #caption>
+        <div class="flex justify-between gap-4">
+            <p-iconfield iconPosition="left" class="w-full">
+                <p-inputicon>
+                    <i class="pi pi-search"></i>
+                </p-inputicon>
+                <input class="w-full" pInputText type="text" placeholder="Buscar"
+                    (input)="dtTrabajador.filterGlobal($any($event.target).value, 'contains')" />
+            </p-iconfield>
+            @if (selectProveedor().evaluacion == 'EVALUACIÓN EN EJECUCIÓN') {
+            <ui-button (click)="seleccionarTrabajadores(selecTrabajadoresDefault) " label="AGREGAR"
+                icon="pi pi-plus"></ui-button>
+            }
+
+        </div>
+    </ng-template>
+
+    <ng-template #header>
+        <tr>
+            <th pSortableColumn="periodo" style="width:20%">Periodo<p-sortIcon field="periodo" /></th>
+            <th pSortableColumn="nTrabajadores" style="width:20%"> N° de Trabajadores <p-sortIcon
+                    field="nTrabajadores" /></th>
+            <th pSortableColumn="nPensionistas" style="width:20%"> N° de Pensionistas <p-sortIcon
+                    field="nPensionistas" /></th>
+            <th pSortableColumn="nPrestadoresServicio" style="width:20%">N° de Prestadores de Servicio<p-sortIcon
+                    field="nPrestadoresServicio" /></th>
+            @if (selectProveedor().evaluacion == 'EVALUACIÓN EN EJECUCIÓN') {
+            <th pSortableColumn="accion" style="width:2%">ACCIONES<p-sortIcon field="accion" /></th>
+            }
+        </tr>
+    </ng-template>
+
+    <ng-template #body let-trabajadores>
+        <tr [pSelectableRow]="trabajadores">
+            <td>
+                <span class="ml-1 align-middle">{{ trabajadores.periodo | date:'dd/MM/yyyy' }}</span>
+            </td>
+            <td>
+                <div class="flex items-center gap-2">
+                    <span class="ml-1 align-middle">{{ trabajadores.nTrabajadores }}</span>
+                </div>
+            </td>
+            <td>
+                <div class="flex items-center gap-2">
+                    <span class="ml-1 align-middle">{{ trabajadores.nPensionistas }}</span>
+                </div>
+            </td>
+            <td>
+                <div class="flex items-center gap-2">
+                    <span class="ml-1 align-middle">{{ trabajadores.nPrestadoresDeServicios }}</span>
+                </div>
+            </td>
+            @if (selectProveedor().evaluacion == 'EVALUACIÓN EN EJECUCIÓN') {
+            <td>
+                <div class="flex items-center gap-2">
+                    <ui-icon-button icon="pi pi-pencil"
+                        (onClick)="seleccionarTrabajadores(trabajadores)"></ui-icon-button>
+                    <ui-icon-button icon="pi pi-trash" (onClick)="eliminar(trabajadores)"
+                        color="danger"></ui-icon-button>
+                </div>
+            </td>
+            }
+        </tr>
+    </ng-template>
+
+    <ng-template emptymessage>
+        <tr>
+            <td colspan="4">NO SE ENCUENTRAN PROVEEDORES DISPONIBLES</td>
+        </tr>
+    </ng-template>
+</p-table>
+}
+@else {
+@if (!visibleAdd) {
+<ui-card-not-items text="No hay cantidad de trabajadores creados por periodo" [showButton]="true"
+    iconButton="pi pi-plus" (onClick)="seleccionarTrabajadores(selecTrabajadoresDefault)"
+    label="Insertar cantidad de trabajadores"></ui-card-not-items>
+}
+}
+@if (visibleAdd) {
+
+<div class="grid">
+
+    <div class="col-12 md:col-6">
+        <app-view-pdf-evaluacion [tipoArchivo]="'archivoTrabajadoresPrestadores'"></app-view-pdf-evaluacion>
+    </div>
+
+    <div class="col-12 md:col-6">
+        <app-add-edit-trabajadores-prestadores (cerrar)="visibleAdd = false">
+        </app-add-edit-trabajadores-prestadores>
+    </div>
+
+</div>
+
+}
+
+}

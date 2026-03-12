@@ -1,0 +1,73 @@
+@if (loading) {
+<ui-loading-progress-bar></ui-loading-progress-bar>
+}
+
+@if(listUnidadMedida().length> 0){
+<p-table #dt1 [value]="listUnidadMedida()" [globalFilterFields]="['nombre', 'descripcion', 'accion']"
+    selectionMode="single" dataKey="idUnidadMedida" [tableStyle]="{ 'min-width': '50rem' }" [rows]="20"
+    [paginator]="true" [rowsPerPageOptions]="[20,100,1000]"
+    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros">
+
+    <ng-template #caption>
+        <div class="flex justify-between gap-2">
+            <p-iconfield iconPosition="left" class="w-full">
+                <p-inputicon>
+                    <i class="pi pi-search"></i>
+                </p-inputicon>
+                <input class="w-full" pInputText type="text" placeholder="Buscar Unidad Medida"
+                    (input)="dt1.filterGlobal($any($event.target).value, 'contains')" />
+            </p-iconfield>
+            <ui-button icon="pi pi-plus" (click)="seleccionarCategoria(selectUnidadMedidaDefault)" label="AGREGAR"></ui-button>
+        </div>
+    </ng-template>
+
+    <ng-template #header>
+        <tr>
+            <th pSortableColumn="nombre" style="width:5%">NOMBRE<p-sortIcon field="name" /></th>
+            <th pSortableColumn="area" style="width:10%">
+                DESCRIPCIÓN <p-sortIcon field="area" />
+            </th>
+
+            <th pSortableColumn="accion" style="width:2%">ACCIONES<p-sortIcon field="accion" /></th>
+        </tr>
+    </ng-template>
+
+        <ng-template #body let-unidadMedida>
+        <tr [pSelectableRow]="unidadMedida">
+            <td>
+                <span class="ml-1 align-middle">{{ unidadMedida.nombre }}</span>
+            </td>
+            <td>
+                <div class="flex items-center gap-2">
+                    <span class="ml-1 align-middle">{{ unidadMedida.descripcion }}</span>
+                </div>
+            </td>
+            <td>
+                <div class="flex items-center gap-2">
+                    <ui-icon-button icon="pi pi-pencil" tooltip="Editar"
+                        (click)="seleccionarCategoria(unidadMedida)"></ui-icon-button>
+
+                    <ui-icon-button icon="pi pi-trash" color="danger" tooltip="Eliminar" (onClick)="eliminarUnidadConfirm(unidadMedida)"
+                        ></ui-icon-button>
+
+                </div>
+            </td>
+        </tr>
+    </ng-template>
+
+    <ng-template emptymessage>
+        <tr>
+            <td colspan="4">NO SE ENCUENTRAN UNIDADES DE MEDIDA DISPONIBLES</td>
+        </tr>
+    </ng-template>
+</p-table>
+}
+
+@else {
+<ui-card-not-items text="No se encuentran Unidades Medida creadas" icon="pi pi-inbox" [showButton]="true"
+    label="Crear Unidad Medida" (onClick)="visibleAdd = true"></ui-card-not-items>
+}
+
+@if (visibleAdd) {
+    <app-add-edit-unidad-medida [(visible)]="visibleAdd"></app-add-edit-unidad-medida>
+}

@@ -1,0 +1,40 @@
+@if (loading) {
+<ui-loading-progress-bar></ui-loading-progress-bar>
+}
+@else{
+<p-drawer [(visible)]="visible" [fullScreen]="true" [header]="selectAnexo().nombre" (onHide)="closeDrawer()">
+  <!-- <pre> {{listCronograma() | json}} </pre> -->
+  <!-- <pre>{{ selectProveedorProducto() | json }} </pre> -->
+   @if (selectProveedorProducto()[0].idAnexoPorFaseCronograma === 0) {
+    <ui-card-not-items text="No se puede generar el pdf de la orden de compra, porque no tiene cronogramas asociados"></ui-card-not-items>
+   }
+   @else {
+     @if (listCronograma().length > 0) {
+       <div class="flex gap-2">
+         @if (selectAnexo().nombre === 'Orden Firmada') {
+         <ui-button [label]=" 'Generar' + ' ' + selectAnexo().nombre" (onClick)="generar()" classButton="mb-2"></ui-button>
+         }
+         @if ((permisosSolicitud.ORDEN_COMPRA_FIRMADA || permisosSolicitud.ESCRITURA || permisosSolicitud.LECTURA) &&
+         selectAnexo().nombre == 'Orden Firmada') {
+         <ui-button (onClick)="visibleFirma = true" label="Ingresar Firma"></ui-button>
+         }
+       </div>
+       @if (pdfUrl) {
+       <iframe [src]="pdfUrl" width="100%" height="100%" style="border: none;"></iframe>
+       }
+     }
+     @else {
+     <ui-card-not-items text="Esta orden de compra no cuenta con cronogramas asignados" ></ui-card-not-items>
+     }
+   }
+
+</p-drawer>
+}
+
+@if (visibleCarpeta) {
+<app-list-carpetas [idNuevoAnexoPorFase]="idNuevoAnexoPorFase" [(visible)]=" visibleCarpeta"
+  [modo]=" selectAnexo().nombre == 'Orden de Compra' ? 'LISTAR' : 'SELECCIONAR' "></app-list-carpetas>
+}
+@if (visibleFirma) {
+<app-generar-firma [(visible)]=" visibleFirma" (firmaGenerada)="onFirmaRecibida($event)"></app-generar-firma>
+}

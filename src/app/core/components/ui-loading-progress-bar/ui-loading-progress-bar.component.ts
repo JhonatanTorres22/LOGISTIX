@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { SharedModule } from '../shared.module';
+import { ProgressBarModule } from 'primeng/progressbar';
 
 
 @Component({
@@ -8,10 +8,10 @@ import { SharedModule } from '../shared.module';
   standalone: true,
   imports: [
     CommonModule,
-    SharedModule,
+    ProgressBarModule
   ],
   templateUrl: './ui-loading-progress-bar.component.html',
-  styleUrl: './ui-loading-progress-bar.component.scss'
+  styleUrls: ['./ui-loading-progress-bar.component.scss']
 })
 export class UiLoadingProgressBarComponent {
 

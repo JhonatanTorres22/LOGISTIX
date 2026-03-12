@@ -1,0 +1,235 @@
+@if (loading) {
+<ui-loading-progress-bar></ui-loading-progress-bar>
+}
+@else {
+<p-drawer [(visible)]="visible" [fullScreen]="true"
+    [header]="`EVALUACIÓN DEL PROVEEDOR - ${selectProveedor().nombre} - ${selectProveedor().ruc}`"
+    (onHide)="closeDrawer()" [closeOnEscape]="false">
+
+    @if (listEvaluacionSunat().length == 0) {
+    <ui-card-not-items text="No se ha registrado una solicitud" iconButton="pi pi-plus" [showButton]="true"
+        (onClick)="agregar()"></ui-card-not-items>
+    }
+    @else {
+    <!-- <pre> {{listEvaluacionSunat() | json}} </pre> -->
+    <!-- {{ mostrarObservacion }} -->
+    <p-table #dtProveedor [value]="listEvaluacionSunat()" [globalFilterFields]="[
+      'fechaConsultaRuc',
+      'archivoConsultaRuc',
+      'fechaTrabajadoresPrestadores',
+      'archivoTrabajadoresPrestadores',
+      'fechaDeudaCoactiva',
+      'archivoDeudaCoactiva',
+      'fechaRepresentanteLegal',
+      'archivoRepresentanteLegal'
+    ]" selectionMode="single" dataKey="idSunat" [tableStyle]="{ 'min-width': '50rem' }" [rows]="20" [paginator]="true"
+        [rowsPerPageOptions]="[20,100,1000]"
+        currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros">
+
+        <!-- BUSCADOR -->
+        <ng-template #caption>
+            <div class="flex justify-end gap-4">
+                <!-- <p-iconfield iconPosition="left" class="w-full">
+                    <p-inputicon>
+                        <i class="pi pi-search"></i>
+                    </p-inputicon>
+                    <input class="w-full" pInputText type="text" placeholder="Buscar"
+                        (input)="dtProveedor.filterGlobal($any($event.target).value, 'contains')" />
+                </p-iconfield> -->
+
+                <ui-button (click)="agregar()" label="AGREGAR CONSULTA" icon="pi pi-plus"></ui-button>
+            </div>
+        </ng-template>
+
+        <!-- HEADER -->
+        <ng-template #header>
+            <tr>
+                <th style="width:5%">RUC</th>
+                <th style="width:5%">TRABAJADORES</th>
+                <th style="width:5%">DEUDA COACTIVA</th>
+                <th style="width:5%">REPRESENTANTE LEGAL</th>
+                <th style="width:2%;">ESTADO PROCESO</th>
+                @if (mostrarObservacion) {
+                @if (selectProveedor().evaluacion == 'RECHAZADO') {
+                <th style="width:5%">OBSERVACIÓN</th>
+                }
+                <th style="width:5%">OBSERVADO</th>
+                }
+                <th style="width:5%">ACCIÓN</th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-evaluacion let-rowIndex="rowIndex">
+            <tr>
+
+                <!-- CONSULTA RUC -->
+                <td>
+                    <div class="flex items-center gap-2">
+
+                        @if (!evaluacion.fechaConsultaRuc || evaluacion.fechaConsultaRuc === '0001-01-01T00:00:00') {
+                        <p-tag value="FALTA FECHA" severity="danger"></p-tag>
+                        } @else {
+                        {{ evaluacion.fechaConsultaRuc | date:'dd/MM/yyyy' }}
+                        }
+
+                        @if (!evaluacion.archivoConsultaRuc) {
+                        <p-tag (click)="abrirSubidaArchivo(evaluacion, 'RUC')" class="cursor-pointer"
+                            value="FALTA ARCHIVO" severity="warning"></p-tag>
+                        } @else {
+                        <div class="flex gap-2">
+                            <ui-button icon="pi pi-file-pdf" (onClick)="verArchivo(evaluacion, 'RUC')"></ui-button>
+                            <ui-icon-button icon="pi pi-ellipsis-v" (onClick)="abrirMenuArchivo($event, evaluacion, 'RUC')">
+                            </ui-icon-button>
+                        </div>
+                        }
+                    </div>
+                </td>
+
+                <!-- TRABAJADORES PRESTADORES -->
+                <td>
+                    <div class="flex items-center gap-2">
+
+                        @if (!evaluacion.fechaTrabajadoresPrestadores || evaluacion.fechaTrabajadoresPrestadores ===
+                        '0001-01-01T00:00:00') {
+                        <p-tag value="FALTA FECHA" severity="danger"></p-tag>
+                        } @else {
+                        {{ evaluacion.fechaTrabajadoresPrestadores | date:'dd/MM/yyyy' }}
+                        }
+
+                        @if (!evaluacion.archivoTrabajadoresPrestadores) {
+                        <p-tag (click)="abrirSubidaArchivo(evaluacion, 'TRABAJADORES')" class="cursor-pointer"
+                            value="FALTA ARCHIVO" severity="warning"></p-tag>
+                        } @else {
+                            <div class="flex gap-2">
+                                <ui-button icon="pi pi-file-pdf" (onClick)="verArchivo(evaluacion, 'TRABAJADORES')"></ui-button>
+                                <ui-icon-button icon="pi pi-ellipsis-v"
+                                    (onClick)="abrirMenuArchivo($event, evaluacion, 'TRABAJADORES')">
+                                </ui-icon-button>
+                            </div>
+                        }
+                    </div>
+                </td>
+
+                <!-- DEUDA COACTIVA -->
+                <td>
+                    <div class="flex items-center gap-2">
+                        @if (!evaluacion.fechaDeudaCoactiva || evaluacion.fechaDeudaCoactiva === '0001-01-01T00:00:00')
+                        {
+                        <p-tag value="FALTA FECHA" severity="danger"></p-tag>
+                        } @else {
+                        {{ evaluacion.fechaDeudaCoactiva | date:'dd/MM/yyyy' }}
+                        }
+
+                        @if (!evaluacion.archivoDeudaCoactiva) {
+                        <p-tag (click)="abrirSubidaArchivo(evaluacion, 'DEUDA')" class="cursor-pointer"
+                            value="FALTA ARCHIVO" severity="warning"></p-tag>
+                        } @else {
+                            <div class="flex gap-2">
+                                <ui-button icon="pi pi-file-pdf" (onClick)="verArchivo(evaluacion, 'DEUDA')"></ui-button>
+                                <ui-icon-button icon="pi pi-ellipsis-v"
+                                    (onClick)="abrirMenuArchivo($event, evaluacion, 'DEUDA')">
+                                </ui-icon-button>
+                            </div>
+                        }
+                    </div>
+                </td>
+
+                <!-- REPRESENTANTE LEGAL -->
+                <td>
+                    <div class="flex items-center gap-2">
+
+                        @if (!evaluacion.fechaRepresentanteLegal || evaluacion.fechaRepresentanteLegal ===
+                        '0001-01-01T00:00:00') {
+                        <p-tag value="FALTA FECHA" severity="danger"></p-tag>
+                        } @else {
+                        {{ evaluacion.fechaRepresentanteLegal | date:'dd/MM/yyyy' }}
+                        }
+
+                        @if (!evaluacion.archivoRepresentanteLegal) {
+                        <p-tag (click)="abrirSubidaArchivo(evaluacion, 'REPRESENTANTE')" class="cursor-pointer"
+                            value="FALTA ARCHIVO" severity="warning"></p-tag>
+                        } @else {
+                            <div class="flex gap-2">
+                                <ui-button icon="pi pi-file-pdf" (onClick)="verArchivo(evaluacion, 'REPRESENTANTE')"></ui-button>
+                                <ui-icon-button icon="pi pi-ellipsis-v"
+                                    (onClick)="abrirMenuArchivo($event, evaluacion, 'REPRESENTANTE')">
+                                </ui-icon-button>
+                            </div>
+                        }
+                    </div>
+                </td>
+                <!-- EVALUACION DEL PROVEEDOR -->
+                <td>
+
+
+                    @if (rowIndex === listEvaluacionSunat().length - 1) {
+
+                    <p-tag [value]="selectProveedor().evaluacion"
+                        [severity]="getColorEvaluacion(selectProveedor().evaluacion)" (click)="abrirMenu($event)">
+                    </p-tag>
+
+                    @if (mostrarObservacion) {
+                    <p-menu #menu [popup]="true" appendTo="body" [model]="itemsMenu"></p-menu>
+                    }
+
+                    } @else {
+                    <p-tag [value]="evaluacion.observado ? 'RECHAZADO' : 'APROBADO'"
+                        [severity]="evaluacion.observado ? 'danger' : 'success'">
+                    </p-tag>
+                    }
+
+                </td>
+
+                <!-- OBSERVACIÓN -->
+                @if (mostrarObservacion) {
+                @if (selectProveedor().evaluacion == 'RECHAZADO') {
+                <td pEditableColumn (onEditInit)="tempObservacion = evaluacion.observacion">
+                    <p-cellEditor>
+
+                        <ng-template pTemplate="input">
+                            <textarea pInputTextarea [(ngModel)]="evaluacion.observacion"
+                                (ngModelChange)="tempObservacion = $event" (blur)="guardarObservacion(evaluacion)"
+                                (keydown.enter)="guardarObservacion(evaluacion); $event.preventDefault()"
+                                placeholder="Agregar observación..."
+                                class="w-full p-2 border-1 border-300 rounded-md shadow-inset focus:border-primary focus:shadow-focus text-sm resize-none break-words"
+                                style="height:80px; max-height:200px; overflow-y:auto;"></textarea>
+                        </ng-template>
+
+                        <ng-template pTemplate="output">
+                            <div class="p-2 rounded-md text-sm text-700 break-words"
+                                style="max-height:300px; overflow-y:auto; word-break: break-word;">
+                                {{ evaluacion.observacion || '-' }}
+                            </div>
+                        </ng-template>
+                    </p-cellEditor>
+                </td>
+                }
+
+                <!-- OBSERVADO -->
+                <td>
+                    <p-tag [value]="evaluacion.observado ? 'Observado' : 'No observado'"
+                        [severity]="evaluacion.observado ? 'danger' : 'info'">
+                    </p-tag>
+                </td>
+                }
+                <td>
+                    <ui-icon-button icon="pi pi-arrow-up-right"
+                        (onClick)="seleccionarEvaluacion(evaluacion)"></ui-icon-button>
+                </td>
+
+            </tr>
+        </ng-template>
+    </p-table>
+    <p-menu #menuArchivo [popup]="true" [model]="itemsArchivo" appendTo="body"></p-menu>
+    }
+
+</p-drawer>
+}
+
+@if (visibleAdd) {
+<app-ficha-evaluacion [(visible)]="visibleAdd"></app-ficha-evaluacion>
+}
+@if (visibleSubirArchivo) {
+<app-upload-archivo-sunat [tipoArchivo]="tipoArchivoSeleccionado"
+    [(visible)]="visibleSubirArchivo"></app-upload-archivo-sunat>
+}

@@ -5,12 +5,12 @@
 <p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '40rem' }" (onHide)="closeDialog()">
     <ng-template #header>
         <div class="inline-flex items-center justify-center gap-2">
-            <span class="font-bold whitespace-nowrap"> {{categoriaSelect().id == 0 ? 'AGREGAR CATEGORIA' : 'EDITAR CATEGORIA'}} </span>
+            <span class="font-bold whitespace-nowrap"> {{categoriaSelect().idCategoria === 0 ? 'AGREGAR CATEGORIA' : 'EDITAR CATEGORIA'}} </span>
         </div>
     </ng-template>
+    <!-- <pre> {{categoriaSelect() | json}} </pre> -->
 
-
-    <div class="pt-4">
+    <div class="pt-3">
 
         <form [formGroup]="categoriaForm" class="flex flex-column gap-4">
 
@@ -28,8 +28,7 @@
     </div>
 
     <ng-template #footer>
-        <p-button label="CANCELAR" [text]="true" severity="secondary" (click)="closeDialog()" />
-        <p-button label="GUARDAR" [outlined]="true" severity="primary" [disabled]=" categoriaForm.invalid"
-            (onClick)="onSubmit()" />
+        <ui-button label="CANCELAR" icon="pi pi-times" color="secondary" (click)="closeDialog()"></ui-button>
+        <ui-button label="GUARDAR" icon="pi pi-save" (onClick)="onSubmit()" [disabled]=" categoriaForm.invalid"></ui-button>
     </ng-template>
 </p-dialog>

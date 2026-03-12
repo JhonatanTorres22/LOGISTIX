@@ -1,0 +1,27 @@
+@if (loading) {
+<ui-loading-progress-bar></ui-loading-progress-bar>
+}
+@else {
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '40rem' }" (onHide)="closeDialog()">
+    <ng-template #header>
+        <div class="inline-flex items-center justify-center gap-2">
+            <span class="font-bold whitespace-nowrap"> {{selectMarca().idMarca == 0 ? 'Agregar Marca' : 'Editar Marca'}}
+            </span>
+        </div>
+    </ng-template>
+
+    <div class="pt-4 flex flex-column gap-4" [formGroup]="formMarca">
+        <ui-input label="Nombre" formControlName="nombre" [maxlength]="maxLengthNombre"
+            [minlength]="minLengthNombre"></ui-input>
+        <ui-input label="Descripción" formControlName="descripcion" [maxlength]="maxLengthDescripcion"
+            [minlength]="minLengthDescripcion"></ui-input>
+    </div>
+
+    <ng-template #footer>
+        <ui-button color="secondary" label="Cancelar" icon="pi pi-times" (onClick)="closeDialog()"></ui-button>
+        <ui-button label="Guardar" icon="pi pi-save" (onClick)="onSubmitMarca()"
+            [disabled]="formMarca.invalid"></ui-button>
+
+    </ng-template>
+</p-dialog>
+}

@@ -1,0 +1,30 @@
+<div class="pt-4">
+    <div [formGroup]="contactoForm" class="flex flex-column gap-4">
+        <ui-input label="APELLIDO PATERNO" formControlName="apePaterno" [maxlength]="maxLength" [minlength]="minLength"
+            [expReg]="expLock"></ui-input>
+
+        <ui-input label="APELLIDO MATERNO" formControlName="apeMaterno" [maxlength]="maxLength" [minlength]="minLength"
+            [expReg]="expLock"></ui-input>
+
+        <ui-input label="NOMBRES" formControlName="nombres" [maxlength]="maxLength" [minlength]="minLength"
+            [expReg]="expLock"></ui-input>
+
+        <ui-input label="CELULAR" formControlName="celular" [maxlength]="maxLengthCelular"
+            [minlength]="minLengthCelular" [expReg]="expLockCelular"></ui-input>
+
+        <ui-input label="CORREO" formControlName="correo" [maxlength]="maxLength" [minlength]="minLength"></ui-input>
+
+        <ui-input label="CARGO" formControlName="cargo" [maxlength]="maxLength" [minlength]="minLength"
+            [expReg]="expLock"></ui-input>
+
+        <ui-input label="PRIMERA ANOTACIÓN" formControlName="anotacion1"></ui-input>
+
+        <ui-input label="SEGUNDA ANOTACIÓN" formControlName="anotacion2"></ui-input>
+
+        <div class="flex justify-end gap-2 mt-4">
+            <p-button label="CANCELAR" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="cancelar()" />
+            <ui-button label="GUARDAR" icon="pi pi-save" color="primary" (onClick)="onSubmit()"
+                [disabled]="contactoForm.invalid"></ui-button>
+        </div>
+    </div>
+</div>

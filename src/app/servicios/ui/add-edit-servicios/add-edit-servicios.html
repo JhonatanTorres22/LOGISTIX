@@ -1,0 +1,17 @@
+@if (loading) {
+<ui-loading-progress-bar></ui-loading-progress-bar>
+}
+@else{
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '40rem' }" (onHide)="closeDialog()">
+    <ng-template #header>
+        <div class="inline-flex items-center justify-center gap-2">
+            <span class="font-bold whitespace-nowrap"> AGREGAR MARCA </span>
+        </div>
+    </ng-template>
+
+    <ng-template #footer>
+        <ui-button color="secondary" label="Cancelar" icon="pi pi-times" (onClick)="closeDialog()"></ui-button>
+        <ui-button label="Guardar" icon="pi pi-save"></ui-button>
+    </ng-template>
+</p-dialog>
+}

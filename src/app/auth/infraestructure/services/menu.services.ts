@@ -1,44 +1,77 @@
-import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
-import { map, Observable, tap } from "rxjs";
-// import { NavigationItem } from "src/app/@theme/types/navigation";
-// import { environment } from "src/environments/environment";
-import { RootMenu } from "../../domain/models/menu.model";
-import { MenuMapper } from "../../domain/mappers/menu.mapper";
-import { environment } from "src/environments/environment";
-import { MenuItem } from "primeng/api";
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, map, Observable, tap } from 'rxjs';
+import { environment } from 'src/environments/environment';
+import { MenuItem } from 'primeng/api';
+import { RootMenu } from '../../domain/models/menu.model';
+import { MenuMapper } from '../../domain/mappers/menu.mapper';
+import { PermissionService } from './permisos.service';
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root'
 })
-
 export class MenuService {
-    private urlApi : string
-    private urlListar : string
 
-    constructor(
-        private http : HttpClient
-    ){
-        this.urlApi = environment.EndPoint
-        this.urlListar = '/api/usuario/ListarMenu'
+  private urlApi = environment.EndPoint;
+  private urlListar = '/api/usuario/ListarMenu';
+
+  private menuSubject = new BehaviorSubject<MenuItem[]>([]);
+  menu$ = this.menuSubject.asObservable();
+
+  constructor(
+    private http: HttpClient,
+    private permissionService: PermissionService
+  ) {}
+
+  obtenerMenu(): Observable<MenuItem[]> {
+    return this.http.get<{ data: RootMenu[] }>(this.urlApi + this.urlListar).pipe(
+
+      tap(response => {
+        if (response.data) {
+          const permisos = this.extraerPermisos(response.data);
+          localStorage.setItem('app_permisos', JSON.stringify(permisos));
+          this.permissionService.load(); // 🔥 reactivo
+        }
+      }),
+
+      map(response =>
+        response.data
+          ? MenuMapper.mapRootMenuToSakaiItems(response.data)
+          : []
+      ),
+
+      tap(menu => {
+        localStorage.setItem('app_menu', JSON.stringify(menu));
+        this.menuSubject.next(menu); // 🔥 reactivo
+      })
+    );
+  }
+
+  getMenu(): MenuItem[] {
+    const stored = localStorage.getItem('app_menu');
+    return stored ? JSON.parse(stored) : [];
+  }
+
+  cargarMenuDesdeStorage() {
+    const menu = this.getMenu();
+    if (menu.length > 0) {
+      this.menuSubject.next(menu);
     }
+  }
 
-obtenerMenu = (): Observable<MenuItem[]> => {
-  return this.http.get<{ data: RootMenu[] }>(this.urlApi + this.urlListar).pipe(
-    map(response => {
-      if (response.data) {
-        return MenuMapper.mapRootMenuToSakaiItems(response.data);
-      }
-      return [];
-    }),
-    tap(mappedMenu => {
-      // Guardar en localStorage
-      localStorage.setItem('app_menu', JSON.stringify(mappedMenu));
-    })
-  );
-}
-getMenu = (): MenuItem[] => {
-  const storedMenu = localStorage.getItem('app_menu');  
-  return storedMenu ? JSON.parse(storedMenu) : [];
-}
+  extraerPermisos(rootMenus: RootMenu[]): string[] {
+    const permisos = new Set<string>();
+
+    rootMenus.forEach(root => {
+      root.menus.forEach(menu => {
+        menu.subMenus.forEach(sub => {
+          sub.permisos.forEach(p => {
+            permisos.add(p.descripcionPermiso);
+          });
+        });
+      });
+    });
+
+    return Array.from(permisos);
+  }
 }

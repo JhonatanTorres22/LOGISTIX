@@ -1,0 +1,133 @@
+<!-- <pre> {{listSolicitudCompra() | json}} </pre> -->
+<!-- <pre> {{listOrdenCompra() | json}} </pre> -->
+<!-- <pre> {{ nuevaLista | json }} </pre> -->
+<!-- <pre> {{tablaSolicitudCompra |json}} </pre> -->
+@if (loading) {
+<ui-loading-progress-bar></ui-loading-progress-bar>
+}
+@else{
+@if (nuevaLista.length == 0) {
+<ui-card-not-items text="No se ha encontrado órdenes de compra creadas" [showButton]="true"
+  label="Crear orden de compra" (onClick)="visibleGenerarOrden = true"></ui-card-not-items>
+}
+@else {
+<p-table [value]="nuevaLista" dataKey="idOrdenCompra" rowGroupMode="subheader" [groupRowsBy]="'_grupoUnico'"
+  sortMode="single" [sortField]="'_grupoUnico'" [sortOrder]="1" [paginator]="true" [rows]="10"
+  [rowsPerPageOptions]="[5,10,20,50]" editMode="row">
+  <ng-template pTemplate="caption">
+    <div class="flex justify-content-between">
+      <div class="informativo bg-blue-100 border-round text-blue-800 border-dashed border-1">
+        <span class="p-4">Tiene órdenes de compra por generar</span>
+      </div>
+      <ui-button (onClick)="visibleGenerarOrden = true" icon="pi pi-save" label="Generar Orden de Compra"></ui-button>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="groupheader" let-rowData>
+    <tr class="bg-blue-50">
+      <td colspan="7">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-4">
+            <strong>Proveedor: {{ rowData.proveedor }}</strong>
+            <div class="bg-blue-100 text-blue-800 rounded px-2 py-1 flex items-center gap-2">
+              <span>RUC: {{ rowData.ruc }}</span>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <ui-icon-button icon="pi pi-trash" tooltip="Eliminar todo el grupo" (onClick)="confirmEliminar(rowData)"
+              color="danger"></ui-icon-button>
+            <ui-icon-button icon="pi pi-eye" tooltip="Ver Pdf" (onClick)="verPdfOrdenCompra(rowData)"></ui-icon-button>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="header">
+    <tr>
+      <th>Cantidad</th>
+      <th>Unidad</th>
+      <th>Descripción</th>
+      <th>Precio Unitario</th>
+      <th>Precio Total</th>
+      <th>Dirección</th>
+      <th>Acciones</th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-rowData let-editing="editing">
+    <tr [pEditableRow]="rowData">
+      <td>
+        <p-cellEditor>
+          <ng-template pTemplate="input">
+            <p-inputNumber [(ngModel)]="rowData.cantidad" [min]="0" (ngModelChange)="recalcularTotales()">
+            </p-inputNumber>
+          </ng-template>
+          <ng-template pTemplate="output">
+            {{ rowData.cantidad }}
+          </ng-template>
+        </p-cellEditor>
+      </td>
+      <td>{{ rowData.unidadMedida }}</td>
+      <td>{{ rowData.descripcionDelBien }}</td>
+
+
+      <td>S/. {{ rowData.precioUnitario }}</td>
+      <td>S/. {{ rowData.precioUnitario * rowData.cantidad }}</td>
+      <td>{{ rowData.direccion }}</td>
+
+      <td>
+        <div class="flex items-center justify-center gap-2">
+          <button *ngIf="!editing" pButton pRipple type="button" pInitEditableRow icon="pi pi-pencil" text rounded
+            severity="secondary" (click)="iniciarEdicion(rowData)"></button>
+          <button *ngIf="editing" pButton pRipple type="button" (click)="editarOrdenCompra(rowData)" pSaveEditableRow
+            icon="pi pi-check" text rounded severity="secondary"></button>
+          <button *ngIf="editing" pButton pRipple type="button" pCancelEditableRow icon="pi pi-times" text rounded
+            severity="secondary" (click)="cancelarEdicion(rowData)"></button>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<div class="flex justify-content-end mt-4">
+
+  <div class="p-3 border-round bg-blue-50 flex flex-column gap-2">
+
+    <div class="flex justify-content-between gap-5">
+      <span class="font-semibold">Presupuesto Programado</span>
+      <span class="text-blue-600 font-bold">
+        S/ {{ listOrdenCompra()[0].presupuestoProgramado }}
+      </span>
+    </div>
+
+    <div class="flex justify-content-between gap-5">
+      <span class="font-semibold">Total Orden</span>
+
+      <span class="font-bold" 
+      [ngClass]="{'text-green-600': getTotalOrdenes() <= listOrdenCompra()[0].presupuestoProgramado,
+      'text-red-600':  getTotalOrdenes() > listOrdenCompra()[0].presupuestoProgramado }">
+
+        S/ {{ getTotalOrdenes() }}
+
+      </span>
+
+    </div>
+
+  </div>
+
+</div>
+@if(getTotalOrdenes() > listOrdenCompra()[0].presupuestoProgramado){
+<div class="text-red-500 text-right mt-2 font-semibold">
+  ⚠ El total de la orden supera el presupuesto programado
+</div>
+}
+}
+}
+@if (visibleGenerarOrden) {
+<app-list-clonador-productos [(visible)]="visibleGenerarOrden"
+  [tablaSolicitudCompra]="tablaSolicitudCompra"></app-list-clonador-productos>
+}
+@if (visiblePdfOrdenCompra) {
+<app-pdf-orden-compra [(visible)]="visiblePdfOrdenCompra"></app-pdf-orden-compra>
+}

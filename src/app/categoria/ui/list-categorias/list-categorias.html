@@ -1,12 +1,11 @@
 @if (loading) {
 <ui-loading-progress-bar></ui-loading-progress-bar>
 }
+@if (listCategorias().length > 0) {
 <p-table #dt1 [value]="listCategorias()" [globalFilterFields]="['nombre', 'descripcion', 'accion']"
-    selectionMode="single" dataKey="id" [tableStyle]="{ 'min-width': '50rem' }" [rows]="20" [paginator]="true"
+    selectionMode="single" dataKey="idCategoria" [tableStyle]="{ 'min-width': '50rem' }" [rows]="20" [paginator]="true"
     [rowsPerPageOptions]="[20,100,1000]"
-    paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros" stateStorage="session"
-    stateKey="statedemo-session">
+    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros">
 
     <ng-template #caption>
         <div class="flex justify-between gap-2">
@@ -17,7 +16,7 @@
                 <input class="w-full" pInputText type="text" placeholder="Buscar Categoria"
                     (input)="dt1.filterGlobal($any($event.target).value, 'contains')" />
             </p-iconfield>
-            <ui-button (click)="visibleAdd = true" label="AGREGAR"></ui-button>
+            <ui-button (click)="seleccionarCategoria(selectCategoriaDefault)" label="AGREGAR"></ui-button>
         </div>
     </ng-template>
 
@@ -32,24 +31,26 @@
         </tr>
     </ng-template>
 
-    <ng-template #body let-categorias>
-        <tr [pSelectableRow]="categorias">
+    <ng-template #body let-categoria>
+        <tr [pSelectableRow]="categoria">
             <td>
-                <span class="ml-1 align-middle">{{ categorias.nombre }}</span>
+                <span class="ml-1 align-middle">{{ categoria.nombre }}</span>
             </td>
             <td>
                 <div class="flex items-center gap-2">
-                    <span class="ml-1 align-middle">{{ categorias.descripcion }}</span>
+                    <span class="ml-1 align-middle">{{ categoria.descripcion }}</span>
                 </div>
             </td>
             <td>
                 <div class="flex items-center gap-2">
-                    <button pButton type="button" (click)="visibleAdd = true; seleccionarCategoria(categorias)"
-                        icon="pi pi-pencil" class="p-button-rounded p-button-success p-button-text"></button>
-                    <button pButton type="button" (click)="eliminarConfirm(categorias)" icon="pi pi-trash"
-                        class="p-button-rounded p-button-danger p-button-text"></button>
+                    <ui-icon-button icon="pi pi-pencil" tooltip="Editar"
+                        (click)="seleccionarCategoria(categoria)"></ui-icon-button>
+
+                    <ui-icon-button icon="pi pi-trash" color="danger" tooltip="Eliminar"
+                        (click)="eliminarConfirm(categoria)"></ui-icon-button>
+
                 </div>
-                </td>
+            </td>
         </tr>
     </ng-template>
 
@@ -60,6 +61,13 @@
     </ng-template>
 </p-table>
 
+
+}
+@else {
+<ui-card-not-items text="No se encuentran Categorías creadas" icon="pi pi-inbox" [showButton]="true"
+    label="Crear Categoría" (onClick)="visibleAdd = true"></ui-card-not-items>
+}
+
 @if (visibleAdd) {
-<app-add-edit-categoria [(visible)]="visibleAdd" ></app-add-edit-categoria>
+<app-add-edit-categoria [(visible)]="visibleAdd"></app-add-edit-categoria>
 }

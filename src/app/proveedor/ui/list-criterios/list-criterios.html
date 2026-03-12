@@ -1,68 +1,133 @@
 @if (loading) {
 <ui-loading-progress-bar></ui-loading-progress-bar>
 }
-<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '40rem' }" (onHide)="closeDialog()">
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '100rem' }" (onHide)="closeDialog()">
     <ng-template #header>
         <div class="inline-flex items-center justify-center gap-2">
             <span class="font-bold whitespace-nowrap">LISTA DE CRITERIOS</span>
         </div>
     </ng-template>
 
-
-    <div class="pt-4" >
-        @for (criterio of listCriterio(); track $index) {
-
-            <form >
-                        <div class="p-mb-4" >
-            <span class="text-md font-bold">{{ $index + 1 }}. {{ criterio.nombre }}
-                @if (criterio.obligatorio) {
-                <i class="pi pi-exclamation-triangle text-red-500" title="Obligatorio"></i>
+    <div class="pt-4">
+        <form [formGroup]="formEvaluacion">
+            @if (criteriosFormArray.length > 0) {
+            <div formArrayName="criterios">
+                @if (hasEvaluaciones && !editing) {
+                <div class="mb-4">
+                    <ui-button label="Editar" icon="pi pi-pencil" (onClick)="editing = true"> </ui-button>
+                </div>
                 }
-            </span>
-            <p class="text-xs font-normal mt-2">{{ criterio.detalle }}</p>
+                <div *ngFor="let criterio of listCriterio(); let i = index" [formGroupName]="i" class="p-mb-4">
 
-            <p-fileUpload  #fileUpload name="archivo" [customUpload]="true" [accept]="'.pdf,.xls,.xlsx,image/*'"
-                [maxFileSize]="5000000" [auto]="true" [showUploadButton]="false" [showCancelButton]="false"
-                mode="advanced" dragDropSupport="true" (uploadHandler)="onUpload($event, criterio.id)"
-                chooseLabel="Seleccionar archivo">
+                    <span class="text-md font-bold">
+                        {{ criterio.id }}. {{ criterio.nombre }}
 
-                <ng-template pTemplate="content">
-                    <div class="flex flex-column align-items-center justify-content-center
-                  border-2 border-dashed border-green-500 border-round
-                  p-5 gap-3 cursor-pointer" style="min-height: 150px; position: relative;"
-                        (click)="openFileDialog(fileUpload)">
+                        @if (criterio.obligatorio) {
+                        <span class="ml-2 px-2 py-1 rounded bg-red-100 text-red-800 text-xs font-semibold">
+                            Obligatorio
+                        </span>
+                        } @else {
+                        <span class="ml-2 px-2 py-1 rounded bg-green-100 text-green-800 text-xs font-semibold">
+                            Opcional
+                        </span>
+                        }
+                    </span>
 
-                        <ng-container *ngIf="!archivosTemporales[criterio.id]">
-                            <i class="pi pi-upload text-4xl text-green-600"></i>
-                            <span class="text-xl font-semibold">Arrastre aquí su archivo PDF / Excel / Imagen</span>
-                        </ng-container>
+                    <p class="text-xs font-normal mt-2">{{ criterio.detalle }}</p>
 
-                        <ng-container *ngIf="archivosTemporales[criterio.id]">
-                            <img *ngIf="archivosTemporales[criterio.id].preview"
-                                [src]="archivosTemporales[criterio.id].preview" alt="preview"
-                                style="width:80px; height:90px; object-fit:contain;">
-                            <span class="text-xs font-normal">{{ archivosTemporales[criterio.id].file.name }}</span>
-                        </ng-container>
 
+                    @if (hasEvaluaciones && !editing) {
+                    <div class="p-2 space-y-2 mb-4 mt-4">
+
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-xs">OBSERVACIÓN:</span>
+                            <span class="px-2 py-1 rounded text-gray-800 text-xs">
+                                {{ getEvaluacion(criterio.id)?.observacion || 'Sin observación' }}
+                            </span>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-xs">CUMPLE:</span>
+                            <span class="px-2 py-1 rounded font-semibold text-xs" [ngClass]="{
+        'bg-green-100 text-green-800': getEvaluacion(criterio.id)?.cumple,
+        'bg-red-100 text-red-800': !getEvaluacion(criterio.id)?.cumple
+      }">
+                                {{ getEvaluacion(criterio.id)?.cumple ? 'Sí' : 'No' }}
+                            </span>
+
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-xs">ARCHIVO:</span>
+                            <span class="px-2 py-1 rounded bg-gray-100 text-gray-800 text-xs">
+                                {{ getEvaluacion(criterio.id)?.documento && getEvaluacion(criterio.id)?.documento !==
+                                'none'
+                                ? getEvaluacion(criterio.id)?.documento
+                                : 'Sin archivo' }}
+                            </span>
+                        </div>
                     </div>
-                </ng-template>
-            </p-fileUpload>
-                  <div class="flex align-items-center gap-3 mt-3 w-full">
-        <!-- <mat-checkbox formControlName="cumple">¿Cumple?</mat-checkbox> -->
+                    }
 
-        <!-- <ui-input
-        class="w-full"
-          label="Observación"
-          [maxlength]="8"
-          formControlName="observacion">
-        </ui-input> -->
-      </div>
-        </div>
-            </form>
-        }
+                    @if (!hasEvaluaciones ||editing) {
+                    <div>
+                        <p-fileUpload #fileUpload name="archivo" [customUpload]="true" [accept]="'.pdf'"
+                            [maxFileSize]="5000000" [auto]="true" [showUploadButton]="false" [showCancelButton]="false"
+                            mode="advanced" dragDropSupport="true" (uploadHandler)="onUpload($event, criterio.id)"
+                            chooseLabel="Seleccionar archivo">
+
+                            <ng-template pTemplate="content">
+
+                                @if (!archivosTemporales[criterio.id]?.preview) {
+                                <!-- ZONA UPLOAD -->
+                                <div class="flex flex-column align-items-center justify-content-center
+                           p-5 gap-3 cursor-pointer" style="min-height: 180px" (click)="openFileDialog(fileUpload)">
+
+                                    <i class="pi pi-cloud-upload text-4xl text-primary"></i>
+                                    <span class="text-lg font-semibold">Suba su archivo PDF</span>
+                                    <span class="text-sm text-600">Arrastre aquí o haga clic para seleccionar</span>
+                                </div>
+                                } @else {
+                                <div class="grid">
+
+                                    <div class="col-12 md:col-5">
+                                        <div class="border-round shadow-2 overflow-hidden surface-0 h-full">
+
+                                            <div class="flex align-items-center px-3 py-2 surface-900 text-white">
+                                                <span class="text-sm font-medium">
+                                                    {{ archivosTemporales[criterio.id]?.file?.name }}
+                                                </span>
+                                            </div>
+
+                                            <embed [src]="archivosTemporales[criterio.id].preview"
+                                                type="application/pdf" class="w-full"
+                                                style="height: 80vh; border: none" />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 md:col-7">
+                                        <div class="border-2 border-dashed border-300 border-round h-full flex align-items-center justify-content-center"
+                                            style="height: 80vh">
+                                        </div>
+                                    </div>
+
+                                </div>
+                                }
+
+                            </ng-template>
+                        </p-fileUpload>
+                    </div>
+
+                    }
+                    <p-divider></p-divider>
+
+                </div>
+            </div>
+            }
+        </form>
     </div>
     <ng-template #footer>
         <ui-button label="CERRAR" icon="pi pi-times" severity="secondary" (click)="closeDialog()" />
-        <ui-button label="GUARDAR" icon="pi pi-save" severity="primary" (click)="closeDialog()" />
+        <ui-button label="GUARDAR" icon="pi pi-save" severity="primary" (click)="guardarOEditar()" />
     </ng-template>
 </p-dialog>

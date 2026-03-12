@@ -1,0 +1,33 @@
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '40rem' }" (onHide)="closeDialog()">
+    <ng-template #header>
+        <div class="inline-flex items-center justify-center gap-2">
+            <span class="font-bold whitespace-nowrap"> INICIAR SESIÓN EN GIPEO </span>
+        </div>
+    </ng-template>
+
+    <app-card cardClass=" md:mt-0 shadow-2 border-round-xl" [showHeader]="false">
+        <div class="flex justify-content-center mb-2">
+            <img src="assets/images/logo_negro_v2.png" alt="Logo Gipeo" class="h-3rem" />
+        </div>
+
+        <div class="text-center mb-3 mt-3">
+            <h4 class="font-bold text-700">INICIAR SESIÓN EN GIPEO</h4>
+        </div>
+
+        <div [formGroup]="formGipeo" class="flex flex-column gap-4">
+            <ui-input classInput="small w-full" formControlName="userName" label="Usuario" [maxlength]="maxLengthDni"
+                [minlength]="minLengthDni" [expReg]="expRegLockDni"
+                [patternErrorMessage]="'Solo se permiten números'"></ui-input>
+
+            <ui-input type="password" classInput="small w-full" formControlName="password" label="Contraseña"
+                [maxlength]="maxLengthPassword" [minlength]="minLengthPassword"></ui-input>
+
+            <ui-select label="Rol" classInput="small w-full" [options]="listRol()" formControlName="rol"></ui-select>
+        </div>
+    </app-card>
+
+    <ng-template #footer>
+        <p-button icon="pi pi-times" label="CANCELAR" [text]="true" severity="secondary" (click)="closeDialog()" />
+        <ui-button icon="pi pi-save" label="INICIAR SESIÓN" [disabled]="formGipeo.invalid" (onClick)="iniciarSesion()"></ui-button>
+    </ng-template>
+</p-dialog>

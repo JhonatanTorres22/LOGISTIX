@@ -7,6 +7,8 @@ import { ProveedorValidation } from '@/proveedor/domain/validations/proveedor.va
 import { CrearProveedor, EditarProveedor, ResponseProveedor } from '@/proveedor/domain/models/proveedor.model';
 import { ProveedorRepository } from '@/proveedor/domain/repositories/proveedor.repository';
 import { AlertService } from 'src/assets/demo/services/alert.service';
+import { PERMISOS } from '@/auth/infraestructure/services/permisos.constants';
+import { ApiError } from '@/core/interceptors/error-message.model';
 
 @Component({
   selector: 'app-add-edit-proveedor',
@@ -16,9 +18,10 @@ import { AlertService } from 'src/assets/demo/services/alert.service';
 })
 export class AddEditProveedor {
   proveedorForm!: FormGroup
+  @Input() permisos = PERMISOS.PROVEEDOR
   @Input() visible: boolean = false
   @Output() visibleChange = new EventEmitter<boolean>();
-  
+
 
   signal = inject(ProveedorSignal)
   proveedorSelect = this.signal.proveedorSelect
@@ -35,96 +38,108 @@ export class AddEditProveedor {
   minLength: number = this.validation.minLengthRuc
   expRegLockRuc: RegExp = this.validation.expRegLockRuc
 
-  expRegDireccion: RegExp = this.validation.expRegDireccion
+  // expRegDireccion: RegExp = this.validation.expRegDireccion
   maxLengthDireccion: number = this.validation.maxLengthDireccion
   minLengthDireccion: number = this.validation.minLengthDireccion
-  expRegLockDir: RegExp = this.validation.expRegLockDireccion
 
   repository = inject(ProveedorRepository)
 
   constructor(
     private alert: AlertService,
   ) {
-     this.proveedorForm = new FormGroup({
-      nombre : new FormControl('', [Validators.required, Validators.maxLength(this.maxLengthNombre), Validators.minLength(this.minLengthNombre), Validators.pattern(this.expRegNombre) ]),
-      tipo : new FormControl('', [Validators.required]),
-      ruc : new FormControl('', [Validators.required, Validators.maxLength(this.maxLengthRuc), Validators.minLength(this.minLength), Validators.pattern(this.expRegRuc)]),
-      direccion : new FormControl('', [Validators.required, Validators.maxLength(this.maxLengthDireccion), Validators.minLength(this.minLengthDireccion), Validators.pattern(this.expRegDireccion)])
+    this.proveedorForm = new FormGroup({
+      nombre: new FormControl('', [Validators.required, Validators.maxLength(this.maxLengthNombre), Validators.minLength(this.minLengthNombre), Validators.pattern(this.expRegNombre)]),
+      tipo: new FormControl('', [Validators.required]),
+      ruc: new FormControl('', [Validators.required, Validators.maxLength(this.maxLengthRuc), Validators.minLength(this.minLength), Validators.pattern(this.expRegRuc)]),
+      direccion: new FormControl('', [Validators.required, Validators.maxLength(this.maxLengthDireccion), Validators.minLength(this.minLengthDireccion)])
     })
   }
 
-    ngOnInit(): void {
+  ngOnInit(): void {
     this.proveedorSelect().id !== 0 ? this.patchValue() : ''
   }
 
-    onSubmit = () => {
-    const accion : 'Editar' | 'Crear' = this.proveedorSelect().id == 0 ? 'Crear' : 'Editar'
-    if(this.proveedorForm.invalid){return}
+  onSubmit = () => {
+    const accion: 'Editar' | 'Crear' = this.proveedorSelect().id == 0 ? 'Crear' : 'Editar'
+    if (this.proveedorForm.invalid) { return }
 
     this.alert.sweetAlert('question', '¿Confirmar?', `¿Está seguro que desea ${accion}?`)
-    .then(isConfirm => {
-      if(!isConfirm){return}
-      switch(accion) {
-        case 'Crear' : {
-          const newProveedor : CrearProveedor = {
-            direccion : this.proveedorForm.value.direccion,
-            nombre : this.proveedorForm.value.nombre,
-            ruc : this.proveedorForm.value.ruc,
-            tipo : this.proveedorForm.value.tipo,
-          }
-          this.insertar(newProveedor)
-          
-        }; break;
+      .then(isConfirm => {
+        if (!isConfirm) { return }
+        switch (accion) {
+          case 'Crear': {
+            const newProveedor: CrearProveedor = {
+              direccion: this.proveedorForm.value.direccion,
+              nombre: this.proveedorForm.value.nombre,
+              ruc: this.proveedorForm.value.ruc,
+              tipo: this.proveedorForm.value.tipo,
+            }
+            this.insertar(newProveedor)
 
-        case 'Editar' : {
-          const editProveedor : EditarProveedor = {
-            direccion : this.proveedorForm.value.direccion,
-            nombre : this.proveedorForm.value.nombre,
-            ruc : this.proveedorForm.value.ruc,
-            tipo : this.proveedorForm.value.tipo,
-            id : this.proveedorSelect().id
+          }; break;
+
+          case 'Editar': {
+            const editProveedor: EditarProveedor = {
+              direccion: this.proveedorForm.value.direccion,
+              nombre: this.proveedorForm.value.nombre,
+              ruc: this.proveedorForm.value.ruc,
+              tipo: this.proveedorForm.value.tipo,
+              id: this.proveedorSelect().id
+            }
+            this.editar(editProveedor)
+
           }
-          this.editar(editProveedor)
-          
         }
-      }
-    })
-    
+      })
+
   }
 
-  insertar = (newProveedor : CrearProveedor) => {
+  insertar = (newProveedor: CrearProveedor) => {
+    if (!this.permisos.INSERTAR) {
+      this.alert.showAlert(`Usted no tiene acceso a ${this.permisos.INSERTAR}`, 'error')
+      return
+    }
     this.repository.crear(newProveedor).subscribe({
-      next : (res: ResponseProveedor) => {
-        this.alert.showAlert(`Proveedor creado correctamente, ${res.message}`, 'success')
-         this.proveedorAccion.set('Agregar')
-        this.closeDialog()
+      next: (res: ResponseProveedor) => {
+        this.alert.showAlert(
+          `Proveedor creado correctamente, ${res.message}`,
+          'success'
+        );
+        this.proveedorAccion.set('Agregar');
+        this.closeDialog();
       },
-      error : (res : ResponseProveedor) => {
-        this.alert.showAlert(`Error en crea el proveedor, ${res.message}`, 'error')
+
+      error: (err: ApiError) => {
+        this.alert.showAlert(err.error.message, 'error');
       }
+
     })
   }
 
-  editar = (editProveedor : EditarProveedor) => {
+  editar = (editProveedor: EditarProveedor) => {
+    if (!this.permisos.ACTUALIZAR) {
+      this.alert.showAlert(`Usted no tiene acceso a ${this.permisos.ACTUALIZAR}`, 'error')
+      return
+    }
     this.repository.editar(editProveedor).subscribe({
-      next : (res: ResponseProveedor) => {
+      next: (res: ResponseProveedor) => {
         this.alert.showAlert(`Proveedor editado correctamente, ${res.message}`, 'success')
         this.proveedorAccion.set('Editar')
         this.closeDialog()
       },
-      error : (res: ResponseProveedor) => {
-        this.alert.showAlert(`Error al editar el proveedor, ${res.message}`, 'error')
+      error: (err: ResponseProveedor) => {
+        this.alert.showAlert(`Error al editar el proveedor, ${err.errors.message}`, 'error')
       }
     })
   }
 
 
-    patchValue = () => {
+  patchValue = () => {
     this.proveedorForm.patchValue({
-      nombre : this.proveedorSelect().nombre,
-      direccion : this.proveedorSelect().direccion,
-      ruc : this.proveedorSelect().ruc.trim(),
-      tipo : this.proveedorSelect().tipo
+      nombre: this.proveedorSelect().nombre,
+      direccion: this.proveedorSelect().direccion,
+      ruc: this.proveedorSelect().ruc.trim(),
+      tipo: this.proveedorSelect().tipo
     })
   }
   closeDialog() {

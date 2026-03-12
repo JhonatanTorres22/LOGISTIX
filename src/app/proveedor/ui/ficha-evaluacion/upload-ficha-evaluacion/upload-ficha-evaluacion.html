@@ -1,0 +1,41 @@
+<!-- <div class="card"> -->
+    <p-fileUpload #fileUpload name="archivo" [customUpload]="true" [accept]="'.pdf'" [maxFileSize]="5000000"
+        [auto]="true" [showUploadButton]="false" [showCancelButton]="false" mode="advanced" dragDropSupport="true"
+        (uploadHandler)="onUpload($event)" chooseLabel="Seleccionar archivo">
+
+        <ng-template pTemplate="content">
+
+            @if (!archivo) {
+            <div class="flex flex-column align-items-center justify-content-center
+                           border-2 border-dashed border-primary border-round
+                           surface-100 gap-3 cursor-pointer" style="min-height: 180px"
+                (click)="openFileDialog(fileUpload)">
+
+                <i class="pi pi-cloud-upload text-4xl text-primary"></i>
+                <span class="text-lg font-semibold">Suba su archivo PDF</span>
+                <span class="text-sm text-600">Arrastre aquí o haga clic</span>
+            </div>
+            }
+            @else {
+
+            <div class="grid">
+
+                <div class="col-12 md:col-12">
+                    <div class="border-round shadow-2 overflow-hidden surface-0 h-full">
+
+                        <div class="flex align-items-center px-3 py-2 surface-900 text-white">
+                            <span class="text-sm font-medium">
+                                {{ archivo.file?.name }}
+                            </span>
+                        </div>
+
+                        <embed [src]="archivo.preview" type="application/pdf" class="w-full"
+                            style="height: 80vh; border: none" />
+                    </div>
+                </div>
+
+            </div>
+            }
+        </ng-template>
+    </p-fileUpload>
+<!-- </div> -->

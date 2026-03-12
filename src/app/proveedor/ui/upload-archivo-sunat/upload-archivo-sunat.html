@@ -1,0 +1,39 @@
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '50rem' }" (onHide)="closeDialog()">
+    <ng-template #header>
+        <div class="inline-flex items-center justify-center gap-2">
+            <span class="font-bold whitespace-nowrap"> ACTUALIZAR ARCHIVO {{titulo}} </span>
+        </div>
+    </ng-template>
+
+    @if (loading) {
+    <ui-loading-progress-bar></ui-loading-progress-bar>
+    }
+    @else {
+    @if (archivoActual) {
+
+    <div class="mb-4 flex items-center gap-3 p-3 border-round bg-gray-50">
+
+        <i class="pi pi-file-pdf text-red-500 text-xl"></i>
+
+        <span class="text-sm font-medium">
+            {{ archivoActual }}
+        </span>
+
+        <ui-button icon="pi pi-eye" label="Ver" size="small" (onClick)="verArchivoActual()">
+        </ui-button>
+
+    </div>
+
+    }
+    <div class="pt-4" [formGroup]="formActualizarArchivo">
+        <ui-upload-file formControlName="archivo"></ui-upload-file>
+    </div>
+
+
+    <ng-template #footer>
+        <ui-button label="CERRAR" icon="pi pi-times" color="secondary" (click)="closeDialog()" />
+        <ui-button label="GUARDAR" icon="pi pi-save" color="primary" (onClick)="actualizarArchivoSunat()"
+            [disabled]="formActualizarArchivo.invalid" />
+    </ng-template>
+    }
+</p-dialog>

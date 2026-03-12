@@ -1,0 +1,206 @@
+@if (loading) {
+<ui-loading-progress-bar></ui-loading-progress-bar>
+}
+@else {
+@if (listProveedorConProductos.length == 0) {
+<ui-card-not-items text="No hay productos asociados a proveedores"></ui-card-not-items>
+}
+@else {
+<!-- <pre> {{ listProveedorConProductos |json }} </pre> -->
+
+<p-table size="small" #dtProveedor selectionMode="single" [value]="listProveedorConProductos" dataKey="idProveedor"
+  [tableStyle]="{ 'min-width': '60rem' }" [globalFilterFields]="['nombre', 'ruc', 'tipo']">
+
+  <ng-template #caption>
+    <div class="flex items-center gap-4 w-full">
+
+      <div class="flex-1">
+        <p-iconfield iconPosition="left" class="w-full">
+          <p-inputicon>
+            <i class="pi pi-search"></i>
+          </p-inputicon>
+          <input pInputText class="w-full" type="text" placeholder="Buscar Proveedor"
+            (input)="dtProveedor.filterGlobal($any($event.target).value, 'contains')" />
+        </p-iconfield>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <ui-button label="Ver Gráfico" icon="pi pi-chart-line" (onClick)="visibleGraficoPrecio = true">
+        </ui-button>
+
+      </div>
+
+    </div>
+  </ng-template>
+
+  <ng-template #header>
+    <tr>
+      <th style="width: 5rem"></th>
+      <th>NOMBRE</th>
+      <th>RUC</th>
+      <th>TIPO</th>
+    </tr>
+  </ng-template>
+
+  <ng-template #body let-proveedor let-expanded="expanded">
+    <!-- {{proveedor | json}} -->
+    <tr [ngClass]="{ 'fila-expandida': expanded }">
+      <td>
+        <p-button type="button" pRipple [pRowToggler]="proveedor" [text]="true" severity="secondary" [rounded]="true"
+          [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></p-button>
+      </td>
+      <td>{{ proveedor.nombre }}</td>
+      <td>{{ proveedor.ruc }}</td>
+      <td>
+        <p-tag [value]="proveedor.tipo" severity="info">
+        </p-tag>
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template #expandedrow let-proveedor>
+    <!-- <pre> {{proveedor | json}} </pre> -->
+    <tr>
+      <td colspan="5">
+        <!-- Barra de búsqueda y botones de acción -->
+        <div class="flex items-center gap-4 w-full mb-4">
+          <div class="flex-1">
+            <p-iconfield iconPosition="left" class="w-full">
+              <p-inputicon><i class="pi pi-search"></i></p-inputicon>
+              <input class="w-full" pInputText type="text" placeholder="Buscar Producto"
+                (input)="dtProductos.filterGlobal($any($event.target).value, 'contains')" />
+            </p-iconfield>
+          </div>
+
+          <div class="flex items-center gap-2 shrink-0">
+
+            @if (!proveedor.modoAgregar) {
+            <ui-button label="Agregar Otros Productos" icon="pi pi-plus" (click)="activarModoAgregar(proveedor)">
+            </ui-button>
+            }
+
+            @if (proveedor.modoAgregar) {
+            <ui-button label="Cancelar" severity="secondary" icon="pi pi-times" (click)="cancelarAgregar(proveedor)">
+            </ui-button>
+
+            <ui-button label="Agregar" icon="pi pi-save" (click)="agregarProductosMasivo(proveedor)"
+              [disabled]="!proveedor.puedeAgregar">
+            </ui-button>
+            }
+
+            @if (!proveedor.modoAgregar) {
+              @if (proveedor.puedeEditar) {
+                <ui-button label="Editar" icon="pi pi-pencil" (click)="actualizarProductosMasivos(proveedor)"
+                [disabled]="!proveedor.puedeEditar">
+                </ui-button>
+              }
+
+            <ui-button label="Guardar Histórico" icon="pi pi-save" (click)="guardarProductoHistorico(proveedor)">
+            </ui-button>
+            }
+
+          </div>
+        </div>
+
+        <!-- Tabla de productos asignados -->
+        <p-table editMode="cell" size="small" #dtProductos
+          [value]="proveedor.modoAgregar ? proveedor.productosDisponibles : proveedor.productos"
+          [globalFilterFields]="['nombre','modelo','descripcion','unidad','marca.nombre']" selectionMode="single"
+          [rows]="20" [paginator]="true" dataKey="idProveedorProducto">
+
+          <ng-template #header>
+    <tr>
+      @if (proveedor.modoAgregar) {
+      <th style="width:3rem">
+        <p-checkbox [binary]="true" (onChange)="toggleAll(proveedor, $event)">
+        </p-checkbox>
+      </th>
+      }
+      <!-- <pre>  {{ proveedor | }} </pre> -->
+      <th>Imagen</th>
+      <th>Producto</th>
+      <th>Modelo</th>
+      <th>Marca</th>
+      <th>Descripción</th>
+      <th>Unidad</th>
+      <th>Precio</th>
+      <th>Vigencia</th>
+      @if (proveedor.productos.length > 0) {
+        <th>Accion</th>
+      }
+    </tr>
+  </ng-template>
+
+  <ng-template #body let-prod>
+    <!-- <pre> {{ prod | json }} </pre> -->
+    <tr>
+      @if (proveedor.modoAgregar) {
+      <td>
+        <p-checkbox [(ngModel)]="prod.selected" [binary]="true" (onChange)="actualizarEstadoAgregar(proveedor)">
+        </p-checkbox>
+      </td>
+      }
+      <td><img [src]="prod.urlImagen" [alt]="prod.nombreProducto" width="40" height="40"
+          class="rounded object-contain bg-gray-50" /></td>
+      <td>{{ prod.nombre }}</td>
+      <td>{{ prod.modelo }}</td>
+      <td>{{ prod.marca?.nombreMarca || prod.marca?.nombre }}</td>
+      <td>{{ prod.descripcion }}</td>
+      <td>{{ prod.unidad }}</td>
+
+      <td pEditableColumn>
+        <p-cellEditor>
+          <ng-template pTemplate="input">
+            @if(prod.precioOriginal === 0 || prod.selected){
+            <p-inputNumber [(ngModel)]="prod.precio" mode="currency" currency="PEN" locale="es-PE" [min]="0.01"
+              [minFractionDigits]="2" [maxFractionDigits]="8" [useGrouping]="true"
+              (onBlur)="onPrecioChange(prod, proveedor)">
+            </p-inputNumber>
+            }
+            @if(prod.precioOriginal > 0){
+            <span> S/. {{ prod.precio | number:'1.2-2' }} </span>
+            }
+          </ng-template>
+          <ng-template pTemplate="output">
+            S/. {{ prod.precio | number:'1.2-2' }}
+          </ng-template>
+        </p-cellEditor>
+      </td>
+
+      <td pEditableColumn>
+        <p-cellEditor>
+          <ng-template pTemplate="input">
+            @if((prod.vigencia === '0001-01-01T00:00:00' || prod.vigencia === null) || prod.selected){
+            <p-datePicker [(ngModel)]="prod.vigencia" placeholder="Seleccionar fecha" dateFormat="dd/mm/yy"
+              [appendTo]="'body'" [minDate]="hoy" [showIcon]="true" (onSelect)="onVigenciaChange(prod, proveedor)">
+            </p-datePicker>
+            }
+            @if(prod.vigencia !== '0001-01-01T00:00:00'){
+            <span> {{ prod.vigencia | date:'dd/MM/yyyy' }} </span>
+            }
+          </ng-template>
+          <ng-template pTemplate="output">
+            {{ prod.vigencia ? (prod.vigencia | date:'dd/MM/yyyy') : '—' }}
+          </ng-template>
+        </p-cellEditor>
+      </td>
+
+      @if (prod.precio > 0) {        
+        <td>
+          <ui-icon-button (onClick)="eliminarProveedorProducto(prod)" icon="pi pi-trash" color="danger" ></ui-icon-button>
+        </td>
+      }
+    </tr>
+  </ng-template>
+</p-table>
+
+</td>
+</tr>
+</ng-template>
+</p-table>
+
+}
+}
+
+@if (visibleGraficoPrecio) {
+<app-grafico-precio-productos [(visible)]="visibleGraficoPrecio"></app-grafico-precio-productos>
+}

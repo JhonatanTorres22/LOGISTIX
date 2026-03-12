@@ -1,0 +1,20 @@
+<div class="pt-4 flex flex-column gap-4" [formGroup]="formBanco">
+    
+    <ui-select label="Seleccionar Banco" [options]="listTipoBanco" formControlName="nombreBanco"></ui-select>
+
+    <ui-input label="Número de Cuenta" formControlName="numeroCuenta"
+    [maxlength]="maxLength"[minlength]="minLengthNCuenta"[expReg]="expLock"></ui-input>
+
+    <ui-input label="CCI" formControlName="cci"
+    [maxlength]="maxLengthCci"[minlength]="minLengthCci"[expReg]="expLockCci"></ui-input>
+
+    @if (mostrarDetraccion) {
+        <ui-input label="Cta. Detracción" formControlName="ctaDetraccion"
+        [minlength]="minLengthDetraccion"[expReg]="expLock"></ui-input>
+    }
+
+    <div class="flex justify-end gap-2 mt-4">
+        <ui-button label="Cancelar" icon="pi pi-times" color="secondary" (onClick)="cancelar()"></ui-button>
+        <ui-button label="Guardar" icon="pi pi-save" color="primary"  (onClick)="onSubmit()" [disabled]="formBanco.invalid"></ui-button>
+    </div>
+</div>

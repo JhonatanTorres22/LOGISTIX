@@ -26,12 +26,35 @@ export const appRoutes: Routes = [
       {
         path: 'categoria',
         loadChildren: () => import('./app/categoria/categoria-module').then(m => m.CategoriaModule)
+      },
+      {
+        path: 'producto-proveedor',
+        loadChildren: () => import('./app/proveedor-producto/proveedor-producto-module').then(m => m.ProveedorProductoModule)
+      },
+      {
+        path: 'configuracion',
+        loadChildren: () => import('./app/configuracion/configuracion-module').then(m => m.ConfiguracionModule)
+      },
+      {
+        path: 'solicitud-compra',
+        loadChildren: () => import('./app/proceso-compras/proceso-compras-module').then(m => m.ProcesoComprasModule)
+      },
+      {
+        path: 'alcance',
+        loadChildren: () => import('./app/alcance/alcance-module').then(m => m.AlcanceModule)
+      },
+      {
+        path: 'marca',
+        loadChildren: () => import('./app/marca/marca-module').then(m => m.MarcaModule)
+      },
+      {
+        path: 'unidad-medida',
+        loadChildren: () => import('./app/unidad-medida/unidad-medida-module').then(m => m.UnidadMedidaModule)
       }
     ]
   },
   {
     path: '',
-    // component: EmptyComponent,
     children: [
       {
         path: '',

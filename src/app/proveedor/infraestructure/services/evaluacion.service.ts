@@ -2,8 +2,8 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { map, Observable } from "rxjs";
 import { environment } from "src/environments/environment";
-import { CrearEvaluacion, Criterio } from "../../domain/models/evaluacion.model";
-import { DataCriterioDTO } from "../dto/evaluacion.dto";
+import { CrearEvaluacion, Criterio, DataCriterio, DataEvaluacion, EditarEvaluacion, ResponseEvaluacion } from "../../domain/models/evaluacion.model";
+import { DataCriterioDTO, DataEvaluacionDTO } from "../dto/evaluacion.dto";
 import { EvaluacionMapper } from "../../domain/mappers/evaluacion.mapper";
 
 @Injectable({
@@ -11,28 +11,32 @@ import { EvaluacionMapper } from "../../domain/mappers/evaluacion.mapper";
 })
 
 export class EvaluacionService {
-    private urlApi : string
-    private urlListarCriterio : string
-    private urlCrearEvaluacion : string
+    private urlApi : string = environment.EndPoint
+    private urlListarCriterio : string = '/api/criterio/Listar'
+    private urlCrearEvaluacion : string = '/api/evaluacion/Insertar'
+    private urlListarEvaluacion : string = '/api/evaluacion/Listar/'
+    private urlEditarEvaluacion : string = '/api/evaluacion/Actualizar'
     constructor(
         private http : HttpClient
-    ){
-        this.urlApi = environment.EndPoint,
-        this.urlListarCriterio = '/api/criterio/Listar'
-        this.urlCrearEvaluacion = '/api/evaluacion/Insertar'
-    }
+    ){}
 
-    obtenerCriterios = () : Observable<Criterio[]> => {
+    obtenerCriterios = () : Observable<DataCriterio> => {
         return this.http.get<DataCriterioDTO>(this.urlApi + this.urlListarCriterio)
-        .pipe(map(api => api.data.map(EvaluacionMapper.toDomainCriterio)))
+        .pipe(map(api => EvaluacionMapper.toDomainDataCriterio(api)))
     }
 
-    obtenerEvaluacion = () => {
-
+    obtenerEvaluacion = (id:number) : Observable<DataEvaluacion> => {
+        return this.http.get<DataEvaluacionDTO>(this.urlApi + this.urlListarEvaluacion + id)
+        .pipe(map(api => EvaluacionMapper.toDomainDataEvaluacion(api)))
     }
 
-    crear = (crear : CrearEvaluacion[]) : Observable<void> => {
+    crear = (crear : CrearEvaluacion[]) : Observable<ResponseEvaluacion> => {
         const newEvaluacion = EvaluacionMapper.toApiCrearEvaluacionMasivo(crear)
-        return this.http.post<void>(this.urlApi + this.urlCrearEvaluacion, newEvaluacion)
+        return this.http.post<ResponseEvaluacion>(this.urlApi + this.urlCrearEvaluacion, newEvaluacion)
+    }
+
+    editar = (editar : EditarEvaluacion[]): Observable<ResponseEvaluacion> => {
+        const editEvaluacion = EvaluacionMapper.toApiEditar(editar)
+        return this.http.put<ResponseEvaluacion>(this.urlApi + this.urlEditarEvaluacion, editEvaluacion)
     }
 }

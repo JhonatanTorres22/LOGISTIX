@@ -2,12 +2,10 @@ import { Injectable, inject } from '@angular/core';
 import { Router, CanActivateChild, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 
 import { AuthService } from 'src/app/auth/infraestructure/services/auth.service';
-import { AuthenticationService } from '../services/authentication.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthGuardChild implements CanActivateChild {
   private router = inject(Router);
-  private authenticationService = inject(AuthenticationService);
   private authService = inject(AuthService)
 
   /**
@@ -23,20 +21,13 @@ export class AuthGuardChild implements CanActivateChild {
    */
 
   canActivateChild(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
-    // const currentUser = this.authenticationService.currentUserValue;
+
     const token = this.authService.getToken()    
     if (token) {
       const { roles } = route.data;
-      // if (roles && !roles.includes(currentUser.user.role)) {
-      //   // User not authorized, redirect to unauthorized page
-      //   this.router.navigate(['/unauthorized']);
-      //   return false;
-      // }
-      // User is logged in and authorized for child routes
+
       return true;
     }
-
-    // User not logged in, redirect to login page
     this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
     return false;
   }
