@@ -13,25 +13,31 @@ import { CdkDragPlaceholder } from "@angular/cdk/drag-drop";
 import { UiIconButton } from "@/core/components/ui-icon-button/ui-icon-button";
 import { CronogramaSignal } from '@/proceso-compras/domain/signals/cronograma.signal';
 import { UiCardNotItemsComponent } from "@/core/components/ui-card-not-items/ui-card-not-items.component";
+import { UiLoadingProgressBarComponent } from "@/core/components/ui-loading-progress-bar/ui-loading-progress-bar.component";
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-list-doc-tributario-por-aprobar',
-  imports: [CommonModule, ButtonModule, DataViewModule, UiIconButton, UiCardNotItemsComponent],
+  imports: [CommonModule, ButtonModule, DataViewModule, UiIconButton, UiCardNotItemsComponent, UiLoadingProgressBarComponent],
   templateUrl: './list-doc-tributario-por-aprobar.html',
   styleUrl: './list-doc-tributario-por-aprobar.scss'
 })
 export class ListDocTributarioPorAprobar {
+  loading : boolean = false
   private repository = inject(CronogramaRepository)
   private alert = inject(AlertService)
   private signal = inject(CronogramaSignal)
   listDocTributarioPorAprobar = this.signal.listDocTributarioPorAprobar
-  constructor(public layoutService: LayoutService) { }
+  constructor(public layoutService: LayoutService,
+    private router: Router,
+  ) { }
 
   ngOnInit() {
     this.obtenerDocTributarioPorAprobar()
   }
 
   obtenerDocTributarioPorAprobar() {
+    this.loading = true
     this.repository.obtenerDocTributarioPorAprobar().subscribe({
       next: (data) => {
         this.listDocTributarioPorAprobar.set(data.data)
@@ -54,14 +60,17 @@ export class ListDocTributarioPorAprobar {
           `Listando documentos tributarios por aprobar, ${data.message}`,
           'success'
         )
+        this.loading = false
       },
       error: (err: ApiError) => {
+        this.loading = false
         this.alert.showAlert(`Error al listar, ${err.error.message}`, 'error')
       }
     })
   }
 
   seleccionarMensaje(mensaje: OrdenCompraPorFirmar) {
+    this.router.navigate(['/solicitud-compra'])
     this.layoutService.codigoSolicitudCompraNavbar.set(mensaje.idSolicitudCompra)
   }
 

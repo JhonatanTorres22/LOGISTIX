@@ -9,6 +9,7 @@ export const environment = {
   production: false,
   apiUrl: 'https://mock-data-api-nextjs.vercel.app',
   EndPoint : 'https://logistix.somee.com/logistix'
+  // EndPoint : 'https://silogi.somee.com/silogi'
 };
 
 /*

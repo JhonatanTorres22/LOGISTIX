@@ -1,5 +1,4 @@
-import { ApiError, ApiResponse } from '@/core/interceptors/error-message.model';
-import { DataCarpetas, InsertarCarpetas, InsertarCarpetasConAnexo, ListarCarpetas } from '@/proceso-compras/domain/models/carpetas.models';
+import { InsertarCarpetas, InsertarCarpetasConAnexo, ListarCarpetas } from '@/proceso-compras/domain/models/carpetas.models';
 import { CarpetasRepository } from '@/proceso-compras/domain/repository/carpeta.repository';
 import { CarpetaSignal } from '@/proceso-compras/domain/signals/carpeta.signal';
 import { CommonModule } from '@angular/common';
@@ -201,7 +200,12 @@ export class ListCarpetas implements OnInit {
             next: res => {
               this.loading = false
               this.alert.showAlert(`Guardado, ${res.message}`, 'success');
-              const action = this.selectAnexo().nombre == 'Orden Firmada' ? 'INSERTAR CARPETA CON ANEXO EN ORDEN' : 'INSERTAR CARPETA CON ANEXO'
+              const action =
+                this.selectAnexo().nombre === 'Orden Firmada'
+                  ? 'INSERTAR CARPETA CON ANEXO EN ORDEN'
+                  : this.selectAnexo().nombre === 'Cronograma'
+                    ? 'ACTUALIZAR ARCHIVO CRONOGRAMA'
+                    : 'INSERTAR CARPETA CON ANEXO';
               this.actionCarpeta.set(action);
               this.closeDialog();
             },
@@ -224,6 +228,7 @@ export class ListCarpetas implements OnInit {
 
   ngOnDestroy(): void {
     this.actionCarpeta.set('');
+    this.selectCarpeta.set(this.selectCarpetaDefult)
   }
 
 }

@@ -6,6 +6,7 @@ export interface DataSolicitudCompra {
 }
 
 export interface SolicitudCompra {
+  // idProductoServicio: number
   idSolicitudCompra: number
   tipoGasto: string
   idSubTarea: number

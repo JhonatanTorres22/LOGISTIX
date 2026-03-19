@@ -138,7 +138,6 @@ export class ListSolicitudCompra implements OnInit {
       untracked(() => {
         if (accion === 'REFRESH') {
           this.obtenerSolicitud();
-          // this.listarAnexos();
         }
         else {
           this.listarAnexos()
@@ -171,6 +170,7 @@ export class ListSolicitudCompra implements OnInit {
       { text: 'F01L01 - FILIAL ICA', value: 'F01L01' },
       { text: 'F01L02 - FILIAL PORUMA', value: 'F01L02' },
       { text: 'F02L01 - FILIAL HUAURA', value: 'F02L01' },
+      { text: 'INSTITUCIONAL', value: 'INST' },
     ]
 
 
@@ -197,8 +197,10 @@ export class ListSolicitudCompra implements OnInit {
         }
         this.cargarDesdeSolicitud()
         this.loading = false
-        this.alert.showAlert(`Listando correctamente la solicitud, ${data.message}`, 'success')
+        this.alert.showAlert(`Listando solicitud de compra, ${data.message}`, 'success')
         this.loading = false
+        console.log(this.actionAnexo());
+        
         if (this.actionAnexo() !== 'REFRESH') {
           this.listarAnexos()
         }
@@ -211,12 +213,10 @@ export class ListSolicitudCompra implements OnInit {
   }
 
   listarAnexos = () => {
-    console.log('estoy listando los anexos');
 
     this.loading = true
     this.anexoRepository.obtenerAnexo(this.selectSubTarea().codigoSubTarea).subscribe({
       next: (data) => {
-        console.log('Listando Anexos');
 
         this.listAnexos.set(data.data)
         this.alert.showAlert(`Listando los anexos`, 'success')
@@ -247,9 +247,13 @@ export class ListSolicitudCompra implements OnInit {
           const anexoNuevo = fase.anexos.find(a => a.idAnexo === anexoActual.idAnexo);
 
           if (anexoNuevo && anexoNuevo !== anexoActual) {
-            this.selectAnexo.set(anexoNuevo); console.log(this.selectAnexo())
+            this.selectAnexo.set(anexoNuevo); console.log(this.selectAnexo(), 'desde el solicitud compra')
+            console.log(this.actionOrdenFirmada());
+            
             if (this.actionOrdenFirmada() == 'ENVIAR CORREO') {
               this.actionOrdenFirmada.set('ENVIAR CORREO ORDEN FIRMADA')
+              console.log(this.actionOrdenFirmada());
+              
             }
             this.actionAnexo.set(''); return;
           }
@@ -360,6 +364,8 @@ export class ListSolicitudCompra implements OnInit {
     const solicitudes: AgregarSolicitud[] = this.tablaProductos.map(row => {
       const precioTotal = Math.round((row.precio * row.cantidad) * 100) / 100;
 
+      console.log(row);
+      
       return {
         areaResponsable: this.formSolicitudCompra.value.area,
         codigoPlanDeTrabajo: this.formSolicitudCompra.value.codigoPlan,
@@ -370,7 +376,7 @@ export class ListSolicitudCompra implements OnInit {
         idProveedorProducto: row.idProveedorProducto,
         cantidad: row.cantidad,
         unidadMedida: row.unidad,
-        descripcionDelBien: row.descripcion,
+        descripcionDelBien: row.productoNombre,
 
         precioUnitario: row.precio,
         precioTotal: precioTotal,
@@ -380,6 +386,8 @@ export class ListSolicitudCompra implements OnInit {
       };
     });
 
+    console.log(solicitudes);
+    
     this.alert.sweetAlert('question', '¿Confirmar?', '¿Está seguro que desea guardar los productos seleccionados?')
       .then(result => {
         if (!result) { this.loading = false; return }

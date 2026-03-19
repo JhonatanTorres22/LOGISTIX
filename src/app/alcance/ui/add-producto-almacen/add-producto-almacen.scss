@@ -1,7 +1,4 @@
-:host ::ng-deep .p-picklist-buttons .p-button:first-child,
-:host ::ng-deep .p-picklist-buttons .p-button:last-child {
-  display: none !important;
-}
-:host ::ng-deep .p-picklist-buttons .p-button:disabled {
-  opacity: 0.4;
+::ng-deep p-picklist .p-picklist-transfer-buttons button[data-pc-section="movetotargetbutton"]:not(:disabled) {
+  pointer-events: none;
+  opacity: 0.5;
 }

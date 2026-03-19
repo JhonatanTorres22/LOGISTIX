@@ -11,10 +11,10 @@
         @if (modo !== 'tree') {
         <div class="flex justify-content-start mb-2 gap-4">
             <ui-button icon="pi pi-search f-18 m-r-5" label="Volver a buscar Subtarea" (onClick)="volver()"></ui-button>
-            @if (listSolicitud().length > 0) {
+            <!-- @if (listSolicitud().length > 0) {
             <ui-button icon="pi pi-file f-18 m-r-5" label="Ordenar Carpetas"
                 (onClick)="visibleCarpeta = true"></ui-button>
-            }
+            } -->
         </div>
         }
         <div class="flex justify-content-between align-items-start gap-2">
@@ -59,8 +59,8 @@
 
                     <div class="flex justify-content-between gap-4 mb-3 w-full">
 
-                        <ui-input class="w-full" classInput="small" label="Código Plan de Trabajo" formControlName="codigoPlan"
-                            [maxlength]="maxLengthCodigo" [minlength]="minLengthCodigo" 
+                        <ui-input class="w-full" classInput="small" label="Código Plan de Trabajo"
+                            formControlName="codigoPlan" [maxlength]="maxLengthCodigo" [minlength]="minLengthCodigo"
                             [patternErrorMessage]=" 'No permite ingresar números espacios o caracteres especiales' "></ui-input>
                     </div>
                 </div>
@@ -118,7 +118,7 @@
                         permisosSolicitud.VALIDAR_COTIZACION)) ||
                         (anexo.nombre === 'Orden de Compra' && (permisosSolicitud.ORDEN_COMPRA ||
                         permisosSolicitud.VALIDAR_ORDEN_COMPRA)) ||
-                        (anexo.nombre === 'Orden Final' && (permisosSolicitud.ORDEN_COMPRA_FIRMADA ||
+                        (anexo.nombre === 'Orden Firmada' && (permisosSolicitud.ORDEN_COMPRA_FIRMADA ||
                         permisosSolicitud.VALIDAR_ORDEN_COMPRA_FIRMADA)) ||
                         (anexo.nombre === 'Contrato' && (permisosSolicitud.CONTRATO ||
                         permisosSolicitud.VALIDAR_CONTRATO)) ||
@@ -221,6 +221,7 @@
                                     <ng-template pTemplate="body" let-row>
                                         <tr
                                             [ngClass]="{ 'bg-green-50': row.ordenCompra, 'bg-red-50': !row.ordenCompra}">
+                                            @if (listSolicitud().length === 0) {
                                             <td pEditableColumn>
                                                 <p-cellEditor>
                                                     <ng-template pTemplate="input">
@@ -231,11 +232,18 @@
                                                         {{ row.cantidad }}
                                                     </ng-template>
                                                 </p-cellEditor>
+
                                             </td>
+                                            }
+                                            @else {
+                                            <td>
+                                                <span class="ml-3"> {{row.cantidad}} </span>
+                                            </td>
+                                            }
                                             <td> {{row.unidad}} </td>
                                             <td>{{ row.productoNombre }}</td>
-                                            <td>S/. {{row.precio}}</td>
-                                            <td> S/. {{ (row.precio * row.cantidad) }}</td>
+                                            <td>S/. {{row.precio | number:'1.2-2'}}</td>
+                                            <td> S/. {{ (row.precio * row.cantidad) | number:'1.2-2' }}</td>
                                             @if (listSolicitud().length == 0) {
                                             <ui-icon-button icon="pi pi-times" (onClick)="quitarProducto(row)"
                                                 color="danger" tooltip="Eliminar"></ui-icon-button>
@@ -261,15 +269,13 @@
                                 <div class="flex justify-content-between gap-5">
                                     <span class="font-semibold">Presupuesto Programado</span>
                                     <span class="text-blue-600 font-bold">
-                                        S/ {{ presupuestoProgramado }}
+                                        S/ {{ presupuestoProgramado | number:'1.2-2' }}
 
                                     </span>
                                 </div>
                             </div>
                         </div>
-
                     </ng-container>
-
                     }
                 </p-tabpanel>
                 @if (listSolicitud().length > 0 ) {

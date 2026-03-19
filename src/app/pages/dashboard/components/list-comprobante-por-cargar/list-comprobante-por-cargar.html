@@ -1,60 +1,65 @@
 <!-- <pre> {{ listComprobantePorCargar() | json }} </pre> -->
-<p-data-view [value]="listComprobantePorCargar()" [paginator]="true" [rows]="5">
-
-    <ng-template #emptymessage>
-        <ui-card-not-items text="No hay comprobantes por cargar"></ui-card-not-items>
-    </ng-template>
-    <ng-template #header>
-        <div class="font-bold text-sm">
-            COMPROBANTES POR CARGAR
-        </div>
-    </ng-template>
-
-    <ng-template #list let-comprobantes>
-        @for (comprobante of comprobantes; track $index) {
-        <div class="col-12 border-bottom-1 surface-border py-2 text-xs">
-
-            <div class="flex justify-content-between align-items-center mb-1">
-
-                <div class="flex align-items-center gap-2">
-
-                    <span *ngIf="comprobante.idCarpeta > 0"
-                        class="px-2 py-1 border-round text-xs font-bold bg-blue-100 text-blue-800">
-                        {{ comprobante.prefijoCarpeta }}-{{ comprobante.numeracionCarpeta }}
-                    </span>
-
-                    <span class="font-bold">
-                        {{ comprobante.tipoDocumento }}
-                    </span>
-
-                </div>
-                <div class="bg-purple-200 border-round text-purple-800 font-bold text-xs">
-
-                    <span class="px-2 py-1 border-round text-xs font-bold">
-                        {{ comprobante.fechaPago | date:'dd/MM/yyyy' }}
-                    </span>
-                </div>
-
-
-            </div>
-
-            <div class="text-600 mb-1">
-                {{ comprobante.concepto }}
-            </div>
-
-            <div class="flex justify-content-between align-items-center text-700">
-
-                <div class="flex gap-3">
-                    <div>
-                        <b>Monto:</b> S/.{{ comprobante.monto}}
-                    </div>
-                </div>
-
-                <ui-icon-button icon="pi pi-arrow-right"></ui-icon-button>
-
-            </div>
-
-        </div>
-        }
-    </ng-template>
-</p-data-view>
+ @if (loading) {
+    <ui-loading-progress-bar></ui-loading-progress-bar>
+ }
+ @else {
+     <p-data-view [value]="listComprobantePorCargar()" [paginator]="true" [rows]="5">
+     
+         <ng-template #emptymessage>
+             <ui-card-not-items text="No hay comprobantes por subir"></ui-card-not-items>
+         </ng-template>
+         <ng-template #header>
+             <div class="font-bold text-sm">
+                 COMPROBANTES POR SUBIR
+             </div>
+         </ng-template>
+     
+         <ng-template #list let-comprobantes>
+             @for (comprobante of comprobantes; track $index) {
+             <div class="col-12 border-bottom-1 surface-border py-2 text-xs">
+     
+                 <div class="flex justify-content-between align-items-center mb-1">
+     
+                     <div class="flex align-items-center gap-2">
+     
+                         <span *ngIf="comprobante.idCarpeta > 0"
+                             class="px-2 py-1 border-round text-xs font-bold bg-blue-100 text-blue-800">
+                             {{ comprobante.prefijoCarpeta }}-{{ comprobante.numeracionCarpeta }}
+                         </span>
+     
+                         <span class="font-bold">
+                             {{ comprobante.tipoDocumento }}
+                         </span>
+     
+                     </div>
+                     <div class="bg-purple-200 border-round text-purple-800 font-bold text-xs">
+     
+                         <span class="px-2 py-1 border-round text-xs font-bold">
+                             {{ comprobante.fechaPago | date:'dd/MM/yyyy' }}
+                         </span>
+                     </div>
+     
+     
+                 </div>
+     
+                 <div class="text-600 mb-1">
+                     {{ comprobante.concepto }}
+                 </div>
+     
+                 <div class="flex justify-content-between align-items-center text-700">
+     
+                     <div class="flex gap-3">
+                         <div>
+                             <b>Monto:</b> S/.{{ comprobante.monto}}
+                         </div>
+                     </div>
+     
+                     <ui-icon-button icon="pi pi-arrow-right" (onClick)="seleccionarMensaje(comprobante)"></ui-icon-button>
+     
+                 </div>
+     
+             </div>
+             }
+         </ng-template>
+     </p-data-view>
+ }

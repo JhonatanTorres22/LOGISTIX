@@ -45,8 +45,8 @@ export class AddEditConsultaRuc {
   listEvaluacionSunat = this.signal.listEvaluacionSunat
   selectEvaluacionSunat = this.signal.selectEvaluacionSunat
 
-  hoy = new Date(new Date().setHours(0,0,0,0));
-
+  hoy = new Date(new Date().setHours(0, 0, 0, 0));
+  loading: boolean = false
   fechaConsultaForm: FormGroup
   constructor() {
     this.formConsultaRuc = new FormGroup({
@@ -134,12 +134,13 @@ export class AddEditConsultaRuc {
 
   onSubmit = () => {
 
-  if (this.formConsultaRuc.invalid || this.fechaConsultaForm.invalid) {
-    this.formConsultaRuc.markAllAsTouched();
-    this.fechaConsultaForm.markAllAsTouched();
-    return;
-  }
+    if (this.formConsultaRuc.invalid || this.fechaConsultaForm.invalid) {
+      this.formConsultaRuc.markAllAsTouched();
+      this.fechaConsultaForm.markAllAsTouched();
+      return;
+    }
 
+    this.loading = true
     const esEditar = this.modoFormularioRuc === 'EDITAR';
     const esClonar = this.modoFormularioRuc === 'CLONAR';
     const esNuevo = this.modoFormularioRuc === 'AGREGAR';
@@ -149,14 +150,9 @@ export class AddEditConsultaRuc {
         : esClonar ? 'Clonar'
           : 'Crear';
 
-    this.alert.sweetAlert(
-      'question',
-      '¿Confirmar?',
-      `¿Está seguro que desea ${accion}?`
-    )
+    this.alert.sweetAlert('question', '¿Confirmar?', `¿Está seguro que desea ${accion}?`)
       .then(isConfirm => {
-
-        if (!isConfirm) return;
+        if (!isConfirm) { this.loading = false; return };
 
         const consultaSeleccionada = this.selectConsultaRuc();
 
@@ -164,18 +160,13 @@ export class AddEditConsultaRuc {
 
           idSunat: this.selectEvaluacionSunat().idSunat,
           ruc: this.selectProveedor().ruc.trim(),
-
           tipoContribuyente: this.formConsultaRuc.value.tipoContribuyente,
           nombreComercial: this.formConsultaRuc.value.nombreComercial,
-
           fechaInscripcion: this.toIso(this.formConsultaRuc.value.fechaInscripcion),
           fechaInicioDeActividades: this.toIso(this.formConsultaRuc.value.fechaInicioDeActividades),
-
           estadoContribuyente: this.formConsultaRuc.value.estadoContribuyente,
           condicionDelContribuyente: this.formConsultaRuc.value.condicionDelContribuyente,
-
           direccion: this.selectProveedor().direccion,
-
           sistemaEmisionDeComprobante: this.formConsultaRuc.value.sistemaEmisionDeComprobante,
           actividadComercioExterior: this.formConsultaRuc.value.actividadComercioExterior,
           sistemaContabilidad: this.formConsultaRuc.value.sistemaContabilidad,
@@ -183,23 +174,18 @@ export class AddEditConsultaRuc {
           actividadSecundaria: this.formConsultaRuc.value.actividadSecundaria,
           comprobantesDePago: this.formConsultaRuc.value.comprobantesDePago,
           sistemaDeEmisionElectronica: this.formConsultaRuc.value.sistemaDeEmisionElectronica,
-
           emisorElectronicoDesde: this.toIso(this.formConsultaRuc.value.emisorElectronico),
           facturaDesde: this.toIso(this.formConsultaRuc.value.facturaDesde),
           boletaDesde: this.toIso(this.formConsultaRuc.value.boletaDesde),
-          afiliadoAlPleDesde: this.toIso(this.formConsultaRuc.value.afiliadoAlPleDesde),
-
+          afiliadoAlPleDesde: this.toIso(this.formConsultaRuc.value.afiliadoAlPleDesde) ?? '1900-01-01T15:00:00.000Z',
           padrones: this.formConsultaRuc.value.padrones,
-
         };
-
+        console.log(consultaBase, 'copnsulta base');
         if (esEditar) {
-
           const consultaEditar: EditarConsultaRUC = {
             ...consultaBase,
             idConsultaRuc: consultaSeleccionada!.idConsultaRuc
           };
-
           this.editar(consultaEditar);
           return;
         }
@@ -221,14 +207,15 @@ export class AddEditConsultaRuc {
       next: (res: ApiResponse) => {
         // this.cerrarFormulario.emit();
         this.alert.showAlert(`Editando, ${res.message}`, 'success')
-        if(res.isSuccess){
+        if (res.isSuccess) {
           this.actualizarFechaConsulta()
         }
         // this.actionConsultaRuc.set('EDITAR')
       },
       error: (err: ApiError) => {
+        this.loading = false
         console.log(err);
-        
+
         this.alert.showAlert(`Error, ${err.error.message}`, 'error')
       }
     })
@@ -237,43 +224,47 @@ export class AddEditConsultaRuc {
   guardar = (newConsulta: InsertarConsultaRuc) => {
     this.repository.agregarConsultaRuc(newConsulta).subscribe({
       next: (res: ApiResponse) => {
-        
+
         this.alert.showAlert(`guardando, ${res.message}`, 'success')
-        if(res.isSuccess){
+        if (res.isSuccess) {
           this.actualizarFechaConsulta()
         }
         // this.actionConsultaRuc.set('GUARDAR')
       },
       error: (err: ApiError) => {
+        this.loading = false
         console.log(err);
         this.alert.showAlert(`Error, ${err.error.message}`, 'error')
       }
     })
   }
 
-   private evaluacionRepository = inject(EvaluacionSunatRepository)
-   actionFechaConsulta = this.signal.actionFechaConsulta
-     actionCerrarDrawer = this.signal.actionCerrarDrawer
-      actualizarFechaConsulta = () => {
-        let actualizarFecha: ActualizarFechaConsulta = {
-          fechaConsultaSunat: new Date(this.fechaConsultaForm.value.fechaConsulta).toISOString(),
-          idSunat: this.selectEvaluacionSunat().idSunat,
-          tipoArchivoSunat: 'CR'
-        }
-    
-        this.evaluacionRepository.actualizarFechaConsulta(actualizarFecha).subscribe({
-          next: (res: ApiResponse) => {
-            this.alert.showAlert(`Fecha Actualizada, ${res.message}`)
-            this.actionConsultaRuc.set('GUARDAR')
-            this.actionFechaConsulta.set('ACTUALIZAR FECHA')
-            this.actionCerrarDrawer.set('CERRAR DRAWER')
-            this.cerrarFormulario.emit();
-          },
-          error: (err: ApiError) => {
-            this.alert.showAlert(`Error, ${err.error.message}`, 'error')
-          }
-        })
+  private evaluacionRepository = inject(EvaluacionSunatRepository)
+  actionFechaConsulta = this.signal.actionFechaConsulta
+  actionCerrarDrawer = this.signal.actionCerrarDrawer
+  actualizarFechaConsulta = () => {
+    let actualizarFecha: ActualizarFechaConsulta = {
+      fechaConsultaSunat: new Date(this.fechaConsultaForm.value.fechaConsulta).toISOString(),
+      idSunat: this.selectEvaluacionSunat().idSunat,
+      tipoArchivoSunat: 'CR'
+    }
+
+    this.evaluacionRepository.actualizarFechaConsulta(actualizarFecha).subscribe({
+      next: (res: ApiResponse) => {
+        this.loading = false
+        this.alert.showAlert(`Fecha Actualizada, ${res.message}`)
+        this.actionConsultaRuc.set('GUARDAR')
+        this.actionFechaConsulta.set('ACTUALIZAR FECHA')
+        this.actionCerrarDrawer.set('CERRAR DRAWER')
+        this.cerrarFormulario.emit();
+      },
+      error: (err: ApiError) => {
+        this.loading = false
+        this.alert.showAlert(`Error, ${err.error.message}`, 'error')
       }
+    })
+  }
+
   toDate(date: any): Date | null {
     if (!date) return null;
 
@@ -285,6 +276,8 @@ export class AddEditConsultaRuc {
   patchValue = () => {
     const data = this.selectConsultaRuc();
 
+    console.log(this.formConsultaRuc.patchValue);
+    
     this.formConsultaRuc.patchValue({
       nombreComercial: data.nombreComercial,
       estadoContribuyente: data.estadoContribuyente,
@@ -302,23 +295,22 @@ export class AddEditConsultaRuc {
       fechaInicioDeActividades: this.toDate(data.fechaInicioDeActividades),
       facturaDesde: this.toDate(data.facturaDesde),
       boletaDesde: this.toDate(data.boletaDesde),
-      afiliadoAlPleDesde: this.toDate(data.afiliadoAlPleDesde),
+      afiliadoAlPleDesde: data.afiliadoAlPleDesde === '1900-01-01T15:00:00' ? null : this.toDate(data.afiliadoAlPleDesde),
 
       padrones: data.padrones,
       emisorElectronico: this.toDate(data.emisorElectronicoDesde),
     });
 
-   if (this.modoFormularioRuc !== 'CLONAR') {
-  this.fechaConsultaForm.patchValue({
-    fechaConsulta: this.toDate(this.selectEvaluacionSunat().fechaConsultaRuc)
-  });
-}
+    if (this.modoFormularioRuc !== 'CLONAR') {
+      this.fechaConsultaForm.patchValue({
+        fechaConsulta: this.toDate(this.selectEvaluacionSunat().fechaConsultaRuc)
+      });
+    }
   }
 
-  
-cancelar() {
-  this.cerrarFormulario.emit();
-}
+  cancelar() {
+    this.cerrarFormulario.emit();
+  }
 
 
 }

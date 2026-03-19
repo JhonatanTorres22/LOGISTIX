@@ -12,6 +12,7 @@ export interface ProductoDTO {
     nombre: string,
     modelo: string,
     descripcion: string,
+    tipo : string
     unidadDeMedida: string,
     precioReferencial: number,
     url: string,

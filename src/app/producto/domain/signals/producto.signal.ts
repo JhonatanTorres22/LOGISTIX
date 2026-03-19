@@ -18,6 +18,7 @@ productoDefault: TablaProductoCategoria = {
   unidad: '',
   precioReferencial: 0,
   urlImagen: '',
+  tipo : '',
   marca: {
     idMarca: 0,
     nombreMarca: '',

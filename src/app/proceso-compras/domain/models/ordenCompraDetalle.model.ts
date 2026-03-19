@@ -72,3 +72,8 @@ export interface OrdenCompraPorFirmar {
   prefijoCarpeta : string
   numeracionCarpeta : string
 }
+
+export interface ValidarProductoAlmacen {
+  idProductoServicio : number,
+  idAlmacen : number
+}

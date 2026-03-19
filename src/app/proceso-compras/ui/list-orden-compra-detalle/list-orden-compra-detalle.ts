@@ -13,6 +13,8 @@ import { ListClonadorProductos } from "../list-clonador-productos/list-clonador-
 import { PdfOrdenCompra } from "../pdf-orden-compra/pdf-orden-compra";
 import { AnexoPorFaseSignal } from '@/proceso-compras/domain/signals/anexoPorFase.signal';
 import { ProveedorProductoSignal } from '@/proveedor-producto/domain/signals/proveedor-producto.signal';
+import { PermissionService } from '@/auth/infraestructure/services/permisos.service';
+import { PERMISOS } from '@/auth/infraestructure/services/permisos.constants';
 
 @Component({
   selector: 'app-list-orden-compra-detalle',
@@ -38,16 +40,30 @@ export class ListOrdenCompraDetalle implements OnInit {
   visibleGenerarOrden: boolean = false
   visiblePdfOrdenCompra: boolean = false
 
+  precioTotalOrdenCompra: number = 0
+  permissionService = inject(PermissionService)
+  solicitudPermiso = PERMISOS.SOLICITUDCOMPRA;
+  permisosSolicitud = this.permissionService.resolve(this.solicitudPermiso)
   constructor() {
+
     effect(() => {
-      if (!this.actionOrdenCompra()) { return }
-      if (this.actionOrdenCompra()) {
-        this.obtenerOrdenCompraDetalle()
-        this.actionOrdenCompra.set(false)
-      }
-    })
+
+      const action = this.actionOrdenCompra();
+
+      if (!action) return;
+
+      console.log(action,'accion del orden compra detalle');
+      
+      this.obtenerOrdenCompraDetalle();
+
+        this.actionOrdenCompra.set(false);
+      console.log(action, 'despues de setearlo a false');
+      
+
+    });
   }
   ngOnInit(): void {
+    console.log('golpeando desde el ngoninit');
     this.obtenerOrdenCompraDetalle();
   }
 
@@ -67,8 +83,8 @@ export class ListOrdenCompraDetalle implements OnInit {
         precioTotal: p.precioTotal,
         direccion: p.direccion,
         ruc: p.ruc,
-        idProveedor : p.idProveedor,
-        idAnexoPorFaseCronograma : p.idAnexoPorFaseCronograma
+        idProveedor: p.idProveedor,
+        idAnexoPorFaseCronograma: p.idAnexoPorFaseCronograma
         // si NO quieres proveedor/ruc acá, bórralos y listo
       }));
 
@@ -79,6 +95,8 @@ export class ListOrdenCompraDetalle implements OnInit {
   }
 
   obtenerOrdenCompraDetalle = () => {
+    console.log('desde el método');
+    
     this.loading = true;
 
     this.repository.obtenerOrdenCompraDetalle(this.listSolicitudCompra()[0].idSolicitudCompra)
@@ -116,6 +134,8 @@ export class ListOrdenCompraDetalle implements OnInit {
           });
 
           this.nuevaLista = ordenes;
+
+          this.calcularTotalOrdenes()
         },
         error: (err: ApiError) => {
           this.alert.showAlert(`Error, ${err.error.message}`, 'error');
@@ -180,34 +200,34 @@ export class ListOrdenCompraDetalle implements OnInit {
     this.nuevaLista = [...this.nuevaLista];
   }
 
-
-  getTotalOrdenes(): number {
-    return this.nuevaLista.reduce((acc, item) => {
+  calcularTotalOrdenes() {
+    this.precioTotalOrdenCompra = this.nuevaLista.reduce((acc, item) => {
       return acc + (item.precioUnitario * item.cantidad);
     }, 0);
   }
 
+
   cantidadOriginal: { [id: number]: number } = {};
 
-iniciarEdicion(row: any) {
-  this.cantidadOriginal[row.idOrdenCompra] = row.cantidad;
-}
-
-cancelarEdicion(row: any) {
-
-  const original = this.cantidadOriginal[row.idOrdenCompra];
-
-  if (original !== undefined) {
-    row.cantidad = original;
+  iniciarEdicion(row: any) {
+    this.cantidadOriginal[row.idOrdenCompra] = row.cantidad;
   }
 
-  delete this.cantidadOriginal[row.idOrdenCompra];
+  cancelarEdicion(row: any) {
 
-  this.recalcularTotales();
-}
+    const original = this.cantidadOriginal[row.idOrdenCompra];
+
+    if (original !== undefined) {
+      row.cantidad = original;
+    }
+
+    delete this.cantidadOriginal[row.idOrdenCompra];
+
+    this.recalcularTotales();
+  }
 
   editarOrdenCompra = (ordenCompraDetalle: any) => {
-    if(this.getTotalOrdenes() >   this.listOrdenCompra()[0].presupuestoProgramado){
+    if (this.precioTotalOrdenCompra > this.listOrdenCompra()[0].presupuestoProgramado) {
       this.alert.showAlert(`Está excediendo el presupuesto del POA`, 'error')
       return
     }

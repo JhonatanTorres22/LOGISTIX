@@ -2,7 +2,7 @@ import { ApiError } from '@/core/interceptors/error-message.model';
 import { OrdenCarpetaRepository } from '@/panel-solicitudes/domain/repository/orden-carpeta.repository';
 import { OrdenCarpetaSignal } from '@/panel-solicitudes/domain/signals/orden-carpetas.signal';
 import { CommonModule } from '@angular/common';
-import { Component, effect, inject, OnInit } from '@angular/core';
+import { Component, effect, inject, OnInit, signal } from '@angular/core';
 import { TreeNode } from 'primeng/api';
 import { TreeModule } from "primeng/tree";
 import { AlertService } from 'src/assets/demo/services/alert.service';
@@ -29,13 +29,14 @@ export class TreeSolicitudes implements OnInit {
   listOrdenCarpeta = this.signal.listOrdenCarpetas
   subtarea = this.signalGipeo.selectSubTarea
   listTotalSolicitudesCompra = this.signal.listTodasSolicitudesCompra
-  nodes: TreeNode[] = []
+  nodes = signal<TreeNode[]>([])
   loading: boolean = false
 
   treeCollapsed: boolean = false;
   private layoutService = inject(LayoutService)
   codigoSolicitudCompraNavbar = this.layoutService.codigoSolicitudCompraNavbar
 
+  actionOrdenCompraCarpet = this.signal.actionOrdenCompraCarpeta
 
   private userService = inject(AuthService)
   userData = this.userService.getUserData()
@@ -43,19 +44,48 @@ export class TreeSolicitudes implements OnInit {
   ) {
     effect(() => {
       const id = this.codigoSolicitudCompraNavbar();
-      if (id && this.nodes.length > 0) {
-        const node = this.nodes.find(n =>
+      const nodes = this.nodes();
+
+      if (id && nodes.length > 0) {
+        const node = nodes.find(n =>
           n.key === `solicitud-${id}`
         );
+
         if (node) {
           const solicitud = node.data;
           this.subtarea.set(solicitud);
-
           this.obtenerOrdenCompra(node, id);
         }
       }
     });
-  }
+
+    effect(() => {
+
+      const action = this.actionOrdenCompraCarpet();
+      const nodes = this.nodes();
+      const solicitud = this.subtarea();
+
+      if (!action) return;
+      if (nodes.length === 0) return;
+      if (!solicitud) return;
+
+      if (action === 'archivoAsignado') {
+
+        const node = nodes.find(n =>
+          n.data.codigoSubTarea === solicitud.codigoSubTarea
+        );
+
+        if (!node) return;
+
+        this.obtenerOrdenCompra(node, node.data.idSolicitudCompra);
+
+        this.actionOrdenCompraCarpet.set('');
+      }
+
+    });
+  };
+
+
 
   ngOnInit(): void {
     this.obtenerTodasSolicitudesCompra();
@@ -81,18 +111,20 @@ export class TreeSolicitudes implements OnInit {
 
     this.repository.obtenerTotalSolicitudCompra(id).subscribe({
       next: (resp) => {
-        this.nodes = resp.data.map((s: any) => ({
-          key: `solicitud-${s.idSolicitudCompra}`,
-          label: `${s.datosActividad}`,
-          expanded: false,
-          leaf: false,
-          data: s,
-          children: [],
-          styleClass:
-            s.cantidadAnexo === 0
-              ? 'solicitud-sin-anexo'
-              : 'solicitud-con-anexo'
-        }));
+        this.nodes.set(
+          resp.data.map((s: any) => ({
+            key: `solicitud-${s.idSolicitudCompra}`,
+            label: `${s.datosActividad}`,
+            expanded: false,
+            leaf: false,
+            data: s,
+            children: [],
+            styleClass:
+              s.cantidadAnexo === 0
+                ? 'solicitud-sin-anexo'
+                : 'solicitud-con-anexo'
+          }))
+        );
 
         this.loading = false;
       },
@@ -189,52 +221,52 @@ export class TreeSolicitudes implements OnInit {
     };
   }
 
-private buildCronogramas(cronogramas: any[]): TreeNode[] {
+  private buildCronogramas(cronogramas: any[]): TreeNode[] {
 
-  if (!cronogramas || cronogramas.length === 0) {
-    return [];
+    if (!cronogramas || cronogramas.length === 0) {
+      return [];
+    }
+
+    return cronogramas.map(c => ({
+
+      key: `cronograma-${c.idCronogramaPagoProveedor}`,
+
+      label: `Cronograma - ${new Date(c.fecha).toLocaleDateString()}`,
+
+      expanded: false,
+
+      data: c,
+
+      children: [
+
+        ...(c.documentoTributario ? [{
+          key: `docTrib-${c.idCronogramaPagoProveedor}`,
+          label: 'Documento Tributario',
+          data: c.documentoTributario
+        }] : []),
+
+        ...(c.informeProveedor ? [{
+          key: `infProv-${c.idCronogramaPagoProveedor}`,
+          label: 'Informe Proveedor',
+          data: c.informeProveedor
+        }] : []),
+
+        ...(c.informeResponsable ? [{
+          key: `infResp-${c.idCronogramaPagoProveedor}`,
+          label: 'Informe Responsable',
+          data: c.informeResponsable
+        }] : []),
+
+        ...(c.comprobantePago ? [{
+          key: `compPago-${c.idCronogramaPagoProveedor}`,
+          label: 'Comprobante de Pago',
+          data: c.comprobantePago
+        }] : [])
+
+      ]
+
+    }));
   }
-
-  return cronogramas.map(c => ({
-
-    key: `cronograma-${c.idCronogramaPagoProveedor}`,
-
-    label: `Cronograma - ${new Date(c.fecha).toLocaleDateString()}`,
-
-    expanded: false,
-
-    data: c,
-
-    children: [
-
-      ...(c.documentoTributario ? [{
-        key: `docTrib-${c.idCronogramaPagoProveedor}`,
-        label: 'Documento Tributario',
-        data: c.documentoTributario
-      }] : []),
-
-      ...(c.informeProveedor ? [{
-        key: `infProv-${c.idCronogramaPagoProveedor}`,
-        label: 'Informe Proveedor',
-        data: c.informeProveedor
-      }] : []),
-
-      ...(c.informeResponsable ? [{
-        key: `infResp-${c.idCronogramaPagoProveedor}`,
-        label: 'Informe Responsable',
-        data: c.informeResponsable
-      }] : []),
-
-      ...(c.comprobantePago ? [{
-        key: `compPago-${c.idCronogramaPagoProveedor}`,
-        label: 'Comprobante de Pago',
-        data: c.comprobantePago
-      }] : [])
-
-    ]
-
-  }));
-}
 
   private buildArchivoNode(archivo: string): TreeNode {
 
@@ -249,38 +281,38 @@ private buildCronogramas(cronogramas: any[]): TreeNode[] {
     };
   }
 
-getIconClass(node: TreeNode): string {
+  getIconClass(node: TreeNode): string {
 
-  if (node.key?.startsWith('solicitud')) {
-    return node.data?.cantidadAnexo === 0
-      ? 'pi pi-exclamation-triangle text-red'
-      : 'pi pi-folder';
+    if (node.key?.startsWith('solicitud')) {
+      return node.data?.cantidadAnexo === 0
+        ? 'pi pi-exclamation-triangle text-red'
+        : 'pi pi-folder';
+    }
+
+    if (node.key?.startsWith('carpeta')) {
+      return 'pi pi-folder';
+    }
+
+    if (node.key?.startsWith('anexo')) {
+      return 'pi pi-folder';
+    }
+
+    // 🔥 CRONOGRAMA ES CARPETA
+    if (node.key?.startsWith('cronograma')) {
+      return 'pi pi-folder';
+    }
+
+    // 🔥 SOLO ARCHIVOS SON PDF
+    if (
+      node.key?.startsWith('docTrib') ||
+      node.key?.startsWith('infProv') ||
+      node.key?.startsWith('infResp') ||
+      node.key?.startsWith('compPago') ||
+      node.key?.startsWith('archivo')
+    ) {
+      return 'pi pi-file-pdf';
+    }
+
+    return '';
   }
-
-  if (node.key?.startsWith('carpeta')) {
-    return 'pi pi-folder';
-  }
-
-  if (node.key?.startsWith('anexo')) {
-    return 'pi pi-folder';
-  }
-
-  // 🔥 CRONOGRAMA ES CARPETA
-  if (node.key?.startsWith('cronograma')) {
-    return 'pi pi-folder';
-  }
-
-  // 🔥 SOLO ARCHIVOS SON PDF
-  if (
-    node.key?.startsWith('docTrib') ||
-    node.key?.startsWith('infProv') ||
-    node.key?.startsWith('infResp') ||
-    node.key?.startsWith('compPago') ||
-    node.key?.startsWith('archivo')
-  ) {
-    return 'pi pi-file-pdf';
-  }
-
-  return '';
-}
 }

@@ -10,9 +10,9 @@ import { AlertService } from 'src/assets/demo/services/alert.service';
 import { UiButtonComponent } from "@/core/components/ui-button/ui-button.component";
 import { AnexoPorFaseRepository } from '@/proceso-compras/domain/repository/anexoSolicitud.repository';
 import { AnexoPorFaseSignal } from '@/proceso-compras/domain/signals/anexoPorFase.signal';
-import { InsertarAnexoPorFase, ResponseAnexoPorFase } from '@/proceso-compras/domain/models/anexoPorFase.model';
+import { AprobarAnexoPorFase, InsertarAnexoPorFase, ResponseAnexoPorFase } from '@/proceso-compras/domain/models/anexoPorFase.model';
 import { UiLoadingProgressBarComponent } from "@/core/components/ui-loading-progress-bar/ui-loading-progress-bar.component";
-import { ApiError } from '@/core/interceptors/error-message.model';
+import { ApiError, ApiResponse } from '@/core/interceptors/error-message.model';
 import { ListCarpetas } from "../list-carpetas/list-carpetas";
 import { CarpetaSignal } from '@/proceso-compras/domain/signals/carpeta.signal';
 import { DrawerModule } from "primeng/drawer";
@@ -27,6 +27,7 @@ import { ListarBanco } from '@/proveedor/domain/models/banco.model';
 import { CronogramaRepository } from '@/proceso-compras/domain/repository/cronograma.repository';
 import { CronogramaSignal } from '@/proceso-compras/domain/signals/cronograma.signal';
 import { UiCardNotItemsComponent } from "@/core/components/ui-card-not-items/ui-card-not-items.component";
+import { OrdenCarpetaSignal } from '@/panel-solicitudes/domain/signals/orden-carpetas.signal';
 
 const pdfMake: any = pdfMakeImport;
 const pdfFonts: any = pdfFontsImport;
@@ -100,7 +101,7 @@ export class PdfOrdenCompra {
   ngOnChanges(changes: SimpleChanges) {
     if (changes['visible'] && this.visible) {
       // if(this.selectProveedorProducto()[0].idAnexoPorFaseCronograma === 0){
-        this.obtenerCronograma()
+      this.obtenerCronograma()
       // }
     }
   }
@@ -667,7 +668,8 @@ export class PdfOrdenCompra {
   };
 
 
-
+  private signalOrdenCarpeta = inject(OrdenCarpetaSignal)
+  actionOrdenCompraCarpeta = this.signalOrdenCarpeta.actionOrdenCompraCarpeta
   actionOrdenFirmada = this.anexoSignal.actionOrdenFirmada
   actualizarArchivo = () => {
     console.log('actualizar archivo');
@@ -702,16 +704,16 @@ export class PdfOrdenCompra {
     this.anexoRepository.actualizarArchivo(formData).subscribe({
       next: (data) => {
         this.alert.showAlert('Archivo actualizado correctamente', 'success');
-        this.actionAnexo.set('ARCHIVO')
-        console.log(data);
-
         this.loading = false
         this.selectAnexo.set(this.listAnexo()[0].fases[1].anexos[2])
-        // this.selectAnexo().nombre == 'Orden Firmada' ? '' : ''
         this.closeDrawer()
         if (this.selectAnexo().nombre == 'Orden Firmada') {
+          
           this.actionOrdenFirmada.set('ENVIAR CORREO')
           console.log(this.actionOrdenFirmada());
+          // this.actionOrdenCompraCarpeta.set('archivoAsignado')
+          this.aprobarOrdenCompraFirmada()
+          this.actionAnexo.set('REFRESH')
         }
         console.log(this.selectAnexo());
 
@@ -724,6 +726,28 @@ export class PdfOrdenCompra {
     })
   }
 
+  aprobarOrdenCompraFirmada = () => {
+    let aprobar: AprobarAnexoPorFase = {
+      idAnexosPorFase: this.idNuevoAnexoPorFase
+    }
+
+    this.anexoRepository.aprobarAnexo(aprobar).subscribe({
+      next: (data: ApiResponse) => {
+        this.loading = false
+        this.alert.showAlert(`Archivo Aprobado, ${data.message}`, 'success')
+        // anexoPorFase.estado = 2;
+        // this.actionAnexo.set('Aprobar');
+      },
+      error: (err: ApiError) => {
+        console.log(err);
+
+        this.alert.showAlert(`Error al aprobar el archivo, ${err.userMessage}`, 'error')
+        this.loading = false
+      }
+    })
+
+
+  }
 
   // enviarConstanciaFirma = () => {
 

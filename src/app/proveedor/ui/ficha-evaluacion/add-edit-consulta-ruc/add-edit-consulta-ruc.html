@@ -1,15 +1,20 @@
 <!-- {{modoFormularioRuc | json}} -->
  <!-- <pre> {{selectConsultaRuc() | json}} </pre> -->
  <!-- <pre> {{modoFormularioRuc}} </pre> -->
-<p-card header="" styleClass="shadow-3">
+@if (loading) {
+    <ui-loading-progress-bar></ui-loading-progress-bar>
+}
+@else {
+    <p-card header="" styleClass="shadow-3">
      <div [formGroup]="formConsultaRuc" class="p-fluid grid">
 
     <div class="col-12 md:col-6 mb-3">
-        <ui-select 
+        <ui-input label="Tipo Contribuyente" formControlName="tipoContribuyente"></ui-input>
+        <!-- <ui-select 
             [options]="tipoContribuyente" 
             label="Tipo Contribuyente" 
             formControlName="tipoContribuyente">
-        </ui-select>
+        </ui-select> -->
     </div>
 
     <div class="col-12 md:col-6 mb-3">
@@ -36,35 +41,43 @@
     </div>
 
     <div class="col-12 md:col-6 mb-3">
-        <ui-select 
+        <ui-input label="Estado del Contribuyente" 
+            formControlName="estadoContribuyente"></ui-input>
+        <!-- <ui-select 
             [options]="estadoContribuyente" 
             label="Estado del Contribuyente" 
             formControlName="estadoContribuyente">
-        </ui-select>
+        </ui-select> -->
     </div>
 
     <div class="col-12 md:col-6 mb-3">
-        <ui-select 
+        <ui-input label="Condición del Contribuyente"
+            formControlName="condicionDelContribuyente"></ui-input>
+        <!-- <ui-select 
             [options]="condicionContribuyente" 
             label="Condición del Contribuyente"
             formControlName="condicionDelContribuyente">
-        </ui-select>
+        </ui-select> -->
     </div>
 
     <div class="col-12 md:col-6 mb-3">
-        <ui-select 
+        <ui-input label="Sistema Emisión de Comprobante" 
+            formControlName="sistemaEmisionDeComprobante"></ui-input>
+        <!-- <ui-select 
             [options]="sistemaEmision" 
             label="Sistema Emisión de Comprobante" 
             formControlName="sistemaEmisionDeComprobante">
-        </ui-select>
+        </ui-select> -->
     </div>
 
     <div class="col-12 md:col-6 mb-3">
-        <ui-select 
+        <ui-input label="Sistema Contabilidad" 
+            formControlName="sistemaContabilidad"></ui-input>
+        <!-- <ui-select 
             [options]="sistemaContabilidad" 
             label="Sistema Contabilidad" 
             formControlName="sistemaContabilidad">
-        </ui-select>
+        </ui-select> -->
     </div>
 
     <div class="col-12 mb-3">
@@ -170,3 +183,4 @@
 
 </div>
 </p-card>
+}

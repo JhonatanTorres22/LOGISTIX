@@ -6,7 +6,7 @@ import { AgregarSolicitud, DataSolicitudCompra, EditarSolicitudCompraDetalle, El
 import { SolicitudCompraMapper } from "../../domain/mapper/solicitud-compra.mapper";
 import { DataSolicitudCompraDTO } from "../dto/solicitud-compra.dto";
 import { ApiResponse } from "@/core/interceptors/error-message.model";
-import { AgregarOrdenCompraDetalle, DataOrdenCompra, DataOrdenCompraPorFirmar, EditarOrdenCompraDetalle, EliminarOrdenCompraDetalle } from "@/proceso-compras/domain/models/ordenCompraDetalle.model";
+import { AgregarOrdenCompraDetalle, DataOrdenCompra, DataOrdenCompraPorFirmar, EditarOrdenCompraDetalle, EliminarOrdenCompraDetalle, ValidarProductoAlmacen } from "@/proceso-compras/domain/models/ordenCompraDetalle.model";
 import { OrdenCompraDetalleMapper } from "@/proceso-compras/domain/mapper/ordenCompraDetalle.mapper";
 import { DataOrdenCompraDTO, DataOrdenCompraPorFirmarDTO } from "../dto/ordenCompraDetalle.dto";
 
@@ -34,6 +34,7 @@ export class SolicitudCompraService {
 
 
     private urlListarOrdenCompraPorFirmar : string = '/api/OrdenCompraDetalle/PorFirmar'
+    private urlValidarProductoPorAlmacen : string = '/api/ProductoPorAlmacen/Validar'
     private http = inject(HttpClient)
 
     obtener = (codigo : number) : Observable<DataSolicitudCompra> => {
@@ -87,5 +88,10 @@ export class SolicitudCompraService {
     obtenerOrdenCompraPorFirmar() : Observable<DataOrdenCompraPorFirmar> {
         return this.http.get<DataOrdenCompraPorFirmarDTO>(this.urlApi + this.urlListarOrdenCompraPorFirmar)
         .pipe(map(api => OrdenCompraDetalleMapper.toDomainDataOrdenPorFirmar(api)))
+    }
+
+    validarProductoPorAlmacen (validar : ValidarProductoAlmacen[]) : Observable<ApiResponse>{
+        const validarProducto = OrdenCompraDetalleMapper.toApiValidarProductoPorAlmacen(validar)
+        return this.http.post<ApiResponse>(this.urlApi + this.urlValidarProductoPorAlmacen, validarProducto)
     }
 }

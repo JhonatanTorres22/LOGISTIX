@@ -18,10 +18,11 @@ import { CommonModule } from '@angular/common';
 import { FloatLabelModule } from "primeng/floatlabel";
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { AddEditMarca } from "@/marca/ui/add-edit-marca/add-edit-marca";
+import { UiSelectComponent } from "@/core/components/ui-select/ui-select.component";
 
 @Component({
   selector: 'app-add-edit-producto',
-  imports: [CommonModule, DialogModule, FormsModule, AutoCompleteModule, ReactiveFormsModule, SelectModule, UiInputComponent, UiButtonComponent, UiLoadingProgressBarComponent, FloatLabelModule, AddEditMarca],
+  imports: [CommonModule, DialogModule, FormsModule, AutoCompleteModule, ReactiveFormsModule, SelectModule, UiInputComponent, UiButtonComponent, UiLoadingProgressBarComponent, FloatLabelModule, AddEditMarca, UiSelectComponent],
   templateUrl: './add-edit-producto.html',
   styleUrl: './add-edit-producto.scss'
 })
@@ -74,6 +75,11 @@ export class AddEditProducto implements OnInit {
   {text: 'BLISTER', value : 'BLISTER'}, {text: 'SOBRES', value : 'SOBRES'}
   ];
 
+  tipo : UiSelect[] = [
+    {text: 'PRODUCTO', value: 'PRODUCTO'},
+    {text: 'SERVICIO', value: 'SERVICIO'}
+  ]
+
 
 
   constructor(private alert: AlertService) {
@@ -106,7 +112,8 @@ export class AddEditProducto implements OnInit {
         Validators.required,
         Validators.minLength(8)
       ]),
-      marca: new FormControl('', Validators.required)
+      marca: new FormControl('', [Validators.required]),
+      tipo : new FormControl('', [Validators.required])
     });
 
     effect(() => {
@@ -152,7 +159,8 @@ private resetForm() {
     descripcion: producto?.descripcionProducto || '',
     unidad: producto?.unidad || '',
     urlImagen: producto?.urlImagen || '',
-    marca: producto?.marca || null
+    marca: producto?.marca || null,
+    tipo : producto?.tipo || ''
   });
 }
 
@@ -178,6 +186,7 @@ private resetForm() {
           unidad: this.formProducto.value.unidad,
           urlImagen: this.formProducto.value.urlImagen,
           idMarca: this.formProducto.value.marca.idMarca,
+          tipo: this.formProducto.value.tipo,
           id: producto.id
         };
 

@@ -1,34 +1,39 @@
+@if (loading) {
+<ui-loading-progress-bar></ui-loading-progress-bar>
+}
+@else {
 <p-dataView [value]="listOrdenPorFirmar()" [paginator]="true" [rows]="5" emptyMessage="">
 
-     <ng-template #emptymessage>
-         <ui-card-not-items text="No tiene Órdenes por firmar"></ui-card-not-items>
+    <ng-template #emptymessage>
+        <ui-card-not-items text="No tiene Órdenes por firmar"></ui-card-not-items>
     </ng-template>
     <ng-template #header>
         <div class="font-bold text-sm">
             ÓRDENES POR FIRMAR
         </div>
     </ng-template>
-        <ng-template #list let-items>
-            @for (item of items; track item.idCarpeta) {
-    
-            <div class="p-3 border-bottom-1 surface-border hover:surface-100 transition-duration-200">
-                <div class="flex justify-content-between align-items-start mb-2">
-                    <p-tag [value]="item.prefijoCarpeta + ' - ' + item.numeracionCarpeta" severity="info"></p-tag>
-                    <small class="text-purple-800 bg-purple-100 border-round font-bold">
-                        <span class="m-2">{{ item.fechaOrdenCompra | date:'dd/MM/yyyy' }}</span>
-                    </small>
-                </div>
-    
-                <div class="flex justify-content-between align-items-center">
-                    <div class="font-semibold text-sm">
-                        {{ item.datosActividad }}
-                    </div>
-                    <button pButton icon="pi pi-arrow-right" class="p-button-text p-button-sm"
-                        (click)="seleccionarMensaje(item)">
-                    </button>
-                </div>
+    <ng-template #list let-items>
+        @for (item of items; track item.idCarpeta) {
+
+        <div class="p-3 border-bottom-1 surface-border hover:surface-100 transition-duration-200">
+            <div class="flex justify-content-between align-items-start mb-2">
+                <p-tag [value]="item.prefijoCarpeta + ' - ' + item.numeracionCarpeta" severity="info"></p-tag>
+                <small class="text-purple-800 bg-purple-100 border-round font-bold">
+                    <span class="m-2">{{ item.fechaOrdenCompra | date:'dd/MM/yyyy' }}</span>
+                </small>
             </div>
-            }
-        </ng-template>
+
+            <div class="flex justify-content-between align-items-center">
+                <div class="font-semibold text-sm">
+                    {{ item.datosActividad }}
+                </div>
+                <button pButton icon="pi pi-arrow-right" class="p-button-text p-button-sm"
+                    (click)="seleccionarMensaje(item)">
+                </button>
+            </div>
+        </div>
+        }
+    </ng-template>
 
 </p-dataView>
+}

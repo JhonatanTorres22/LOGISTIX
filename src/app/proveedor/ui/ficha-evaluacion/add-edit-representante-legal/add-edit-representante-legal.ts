@@ -55,7 +55,7 @@ export class AddEditRepresentanteLegal implements OnInit {
       nDocumento: new FormControl('', [Validators.required, Validators.pattern(this.expRegDoc), Validators.maxLength(this.maxLengthDoc), Validators.minLength(this.minLengthDoc)]),
       nombre: new FormControl('', [Validators.required,  Validators.pattern(this.expRegNombre), Validators.maxLength(this.maxLengthNombre), Validators.minLength(this.minLengthNombre)]),
       cargo: new FormControl('', [Validators.required, Validators.pattern(this.expRegNombre), Validators.maxLength(this.maxLengthNombre), Validators.minLength(this.minLengthNombre)]),
-      fecha: new FormControl('', [Validators.required])
+      fecha: new FormControl('')
     })
 
     this.fechaConsultaForm = new FormGroup({
@@ -88,7 +88,7 @@ export class AddEditRepresentanteLegal implements OnInit {
               tipoDocumento: this.representanteForm.value.tipoDocumento,
               nombreRL: this.representanteForm.value.nombre,
               cargoRL: this.representanteForm.value.cargo,
-              fechaDesde: this.representanteForm.value.fecha
+              fechaDesde: this.representanteForm.value.fecha ?? '1900-01-01T15:00:00.000Z'
             }
             this.agregarRepresentante(agregar)
 
@@ -102,7 +102,7 @@ export class AddEditRepresentanteLegal implements OnInit {
               tipoDocumento: this.representanteForm.value.tipoDocumento,
               nombreRL: this.representanteForm.value.nombre,
               cargoRL: this.representanteForm.value.cargo,
-              fechaDesde: new Date(this.representanteForm.value.fecha).toISOString(),
+              fechaDesde: new Date(this.representanteForm.value.fecha).toISOString() ?? '1900-01-01T15:00:00.000Z',
             }
             this.editarRepresentante(editar)
           }
@@ -184,7 +184,8 @@ actionCerrarDrawer = this.evaluacionSunatSignal.actionCerrarDrawer
       nDocumento: this.selectRepresentanteLegal().nDocumento,
       nombre: this.selectRepresentanteLegal().nombreRL,
       cargo: this.selectRepresentanteLegal().cargoRL,
-      fecha: this.toDate(this.selectRepresentanteLegal().fechaDesde),
+      fecha : this.selectRepresentanteLegal().fechaDesde === '1900-01-01T15:00:00' ? null :this.toDate(this.selectRepresentanteLegal().fechaDesde)
+      // fecha: this.toDate(this.selectRepresentanteLegal().fechaDesde),
     })
     this.fechaConsultaForm.patchValue({
       fechaConsulta: this.toDate(this.selectEvaluacionSunat().fechaRepresentanteLegal)
