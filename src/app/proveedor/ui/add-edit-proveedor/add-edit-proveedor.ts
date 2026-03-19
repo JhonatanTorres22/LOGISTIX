@@ -9,10 +9,11 @@ import { ProveedorRepository } from '@/proveedor/domain/repositories/proveedor.r
 import { AlertService } from 'src/assets/demo/services/alert.service';
 import { PERMISOS } from '@/auth/infraestructure/services/permisos.constants';
 import { ApiError } from '@/core/interceptors/error-message.model';
+import { UiButtonComponent } from "@/core/components/ui-button/ui-button.component";
 
 @Component({
   selector: 'app-add-edit-proveedor',
-  imports: [SharedModule, UiInputComponent],
+  imports: [SharedModule, UiInputComponent, UiButtonComponent],
   templateUrl: './add-edit-proveedor.html',
   styleUrl: './add-edit-proveedor.scss'
 })
@@ -110,6 +111,8 @@ export class AddEditProveedor {
       },
 
       error: (err: ApiError) => {
+        console.log(err);
+        
         this.alert.showAlert(err.error.message, 'error');
       }
 
@@ -128,6 +131,7 @@ export class AddEditProveedor {
         this.closeDialog()
       },
       error: (err: ResponseProveedor) => {
+        console.log(err);
         this.alert.showAlert(`Error al editar el proveedor, ${err.errors.message}`, 'error')
       }
     })

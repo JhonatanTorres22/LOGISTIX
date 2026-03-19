@@ -36,4 +36,7 @@ export class OrdenCarpetaSignal {
 
     listTodasSolicitudesCompraDefault : SolicitudesComprasCompletas[] = []
     listTodasSolicitudesCompra = signal(this.listTodasSolicitudesCompraDefault)
+
+
+    actionOrdenCompraCarpeta = signal<string>('');
 }

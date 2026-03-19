@@ -124,7 +124,7 @@
       <th>Unidad</th>
       <th>Precio</th>
       <th>Vigencia</th>
-      @if (proveedor.productos.length > 0) {
+      @if (!proveedor.modoAgregar) {
         <th>Accion</th>
       }
     </tr>

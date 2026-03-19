@@ -21,31 +21,37 @@
             </ui-input>
 
             <ui-input label="DIRECCION" formControlName="direccion" [maxlength]="maxLengthDireccion"
-                [minlength]="minLengthDireccion" 
+                [minlength]="minLengthDireccion"
                 [patternErrorMessage]="'No debe incluir espacios al final de la palabra'">
             </ui-input>
 
-            <div class="flex ">
-                <div class="flex flex-wrap gap-4">
-                    <div class="flex items-center">
-                        <p-radiobutton name="pizza" value="PERSONA NATURAL" formControlName="tipo"
-                            inputId="ingredient1" />
-                        <label class="ml-2">PERSONA NATURAL</label>
-                    </div>
+            <div class="flex justify-content-between w-full">
 
-                    <div class="flex items-center">
-                        <p-radiobutton name="pizza" value="PERSONA JURÍDICA" formControlName="tipo"
-                            inputId="ingredient2" />
-                        <label class="ml-2">PERSONA JURÍDICA</label>
-                    </div>
+                <div class="flex align-items-center">
+                    <p-radiobutton name="tipoPersona" value="PERSONA NATURAL CON NEGOCIO" formControlName="tipo"
+                        inputId="pn1" />
+                    <label class="ml-2" for="pn1">PERSONA NATURAL CON NEGOCIO</label>
                 </div>
+
+                <div class="flex align-items-center">
+                    <p-radiobutton name="tipoPersona" value="PERSONA NATURAL SIN NEGOCIO" formControlName="tipo"
+                        inputId="pn2" />
+                    <label class="ml-2" for="pn2">PERSONA NATURAL SIN NEGOCIO</label>
+                </div>
+
+                <div class="flex align-items-center">
+                    <p-radiobutton name="tipoPersona" value="PERSONA JURÍDICA" formControlName="tipo" inputId="pj1" />
+                    <label class="ml-2" for="pj1">PERSONA JURÍDICA</label>
+                </div>
+
             </div>
         </form>
     </div>
 
     <ng-template #footer>
-        <p-button label="CANCELAR" [text]="true" severity="secondary" (click)="closeDialog()" />
-        <p-button label="GUARDAR" [outlined]="true" severity="primary" [disabled]="proveedorForm.invalid"
-            (onClick)="onSubmit()" />
+        <ui-button label="CANCELAR" icon="pi pi-times"  color="secondary" (click)="closeDialog()"></ui-button>
+        <ui-button label="GUARDAR" icon="pi pi-save" color="primary" [disabled]="proveedorForm.invalid"
+            (onClick)="onSubmit()"></ui-button>
+
     </ng-template>
 </p-dialog>

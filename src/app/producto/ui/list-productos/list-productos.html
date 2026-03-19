@@ -5,12 +5,12 @@
 @if (tablaCategoria().length) {
 <p-table #dtProductos size="small" [value]="tablaCategoria()" rowGroupMode="subheader" groupRowsBy="nombre"
     dataKey="idCategoria" [tableStyle]="{ 'min-width': '70rem' }" [expandedRowKeys]="expandedCategorias"
-    (onRowExpand)="expandirCategoria($event)" (onRowCollapse)="collapsarCategoria($event)" 
-    [globalFilterFields]="[
+    (onRowExpand)="expandirCategoria($event)" (onRowCollapse)="collapsarCategoria($event)" [globalFilterFields]="[
 'nombreProducto',
 'modeloProducto',
 'marca.nombreMarca',
 'descripcionProducto',
+'tipo',
 'unidad'
 ]">
 
@@ -33,6 +33,7 @@
             <th pSortableColumn="modeloProducto" style="width:20%">MODELO</th>
             <th pSortableColumn="marca" style="width:20%">MARCA</th>
             <th pSortableColumn="descripcion" style="width:30%">DESCRIPCIÓN</th>
+            <th pSortableColumn="tipo" style="width:30%">TIPO</th>
             <th pSortableColumn="unidad" style="width:15%">UNIDAD</th>
             <th pSortableColumn="accion" style="width:20%">ACCIONES</th>
         </tr>
@@ -40,13 +41,13 @@
 
     <ng-template pTemplate="groupheader" let-row let-expanded="expanded">
         <tr>
-            <td colspan="7" class="w-full">
+            <td colspan="8" class="w-full">
                 <div class="flex w-full items-center justify-between">
                     <div class="flex items-center gap-2">
                         <button type="button" pButton pRipple [pRowToggler]="row" text rounded plain
                             [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'">
                         </button>
-                        <span class="font-bold text-lg">
+                        <span class="font-bold text-md">
                             {{ row.nombre }}
                         </span>
                     </div>
@@ -60,12 +61,11 @@
 
     </ng-template>
     <ng-template pTemplate="expandedrow" let-producto let-rowIndex="rowIndex">
-        <!-- <pre>{{ producto | json }}</pre> -->
         @if (producto.nombreProducto) {
         <tr>
             <td>
                 <img [src]="producto.urlImagen" [alt]="producto.nombreProducto"
-                    class="w-20 h-20 rounded object-contain bg-gray-50" />
+                    class="w-12 h-12 rounded object-contain bg-gray-50" />
             </td>
             <td>
                 {{ producto.nombreProducto }}
@@ -80,6 +80,9 @@
 
             <td>
                 {{producto.descripcionProducto}}
+            </td>
+            <td>
+                <p-tag [value]="producto.tipo" [severity]="producto.tipo === 'PRODUCTO' ? 'success' : 'warn'" rounded></p-tag>
             </td>
 
             <td>

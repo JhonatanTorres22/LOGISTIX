@@ -102,16 +102,16 @@ export class ListProveedorProducto implements OnInit {
           return;
         }
 
-        // 1️⃣ Mapear proveedores con productos asignados
+        // Mapear proveedores con productos asignados
         this.listProveedorConProductos = mapProveedorToView(
           res.proveedores.data,
           res.proveedorProductos.data
         );
 
-        // 2️⃣ Aplanar todos los productos de categorías (solo una vez)
+        // Aplanar todos los productos de categorías (solo una vez)
         const todosProductos = res.categorias.data.flatMap((c: any) => c.productos);
 
-        // 3️⃣ Generar productos disponibles por proveedor
+        // Generar productos disponibles por proveedor
         this.listProveedorConProductos.forEach(proveedor => {
 
           const productosAsignadosIds = new Set(
@@ -119,12 +119,35 @@ export class ListProveedorProducto implements OnInit {
           );
 
           proveedor.productosDisponibles = todosProductos
-            .filter(prod => !productosAsignadosIds.has(prod.id))
+            .filter(prod => {
+
+              if (productosAsignadosIds.has(prod.id)) return false;
+
+              const tipoProveedor = proveedor.tipo;
+
+              const tipoProducto = prod.tipo?.toUpperCase();
+
+              if (tipoProveedor === 'PERSONA NATURAL SIN NEGOCIO') {
+                return tipoProducto === 'SERVICIO';
+              }
+
+              if (tipoProveedor === 'PERSONA NATURAL CON NEGOCIO') {
+                return tipoProducto === 'PRODUCTO';
+              }
+
+              if (tipoProveedor === 'PERSONA JURÍDICA') {
+                return true;
+              }
+
+              return true;
+
+            })
             .map(prod => ({
               id: prod.id,
               nombre: prod.nombreProducto,
               modelo: prod.modeloProducto || 'SIN MODELO',
               descripcion: prod.descripcionProducto || '',
+              tipo: prod.tipo,
               unidad: prod.unidad || 'UNIDAD',
               urlImagen: prod.urlImagen || 'assets/img/no-image.png',
               marca: prod.marca || {

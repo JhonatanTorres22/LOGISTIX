@@ -1,5 +1,5 @@
-import { AgregarOrdenCompraDetalleDTO, DataOrdenCompraDTO, DataOrdenCompraPorFirmarDTO, EditarOrdenCompraDetalleDTO, EliminarOrdenCompraDetalleDTO, ListarOrdenCompraDTO, OrdenCompraPorFirmarDTO } from "@/proceso-compras/infraestructure/dto/ordenCompraDetalle.dto";
-import { AgregarOrdenCompraDetalle, DataOrdenCompra, DataOrdenCompraPorFirmar, EditarOrdenCompraDetalle, EliminarOrdenCompraDetalle, ListarOrdenCompra, OrdenCompraPorFirmar } from "../models/ordenCompraDetalle.model";
+import { AgregarOrdenCompraDetalleDTO, DataOrdenCompraDTO, DataOrdenCompraPorFirmarDTO, EditarOrdenCompraDetalleDTO, EliminarOrdenCompraDetalleDTO, ListarOrdenCompraDTO, OrdenCompraPorFirmarDTO, ValidarProductoAlmacenDTO } from "@/proceso-compras/infraestructure/dto/ordenCompraDetalle.dto";
+import { AgregarOrdenCompraDetalle, DataOrdenCompra, DataOrdenCompraPorFirmar, EditarOrdenCompraDetalle, EliminarOrdenCompraDetalle, ListarOrdenCompra, OrdenCompraPorFirmar, ValidarProductoAlmacen } from "../models/ordenCompraDetalle.model";
 
 export class OrdenCompraDetalleMapper {
 
@@ -71,6 +71,13 @@ export class OrdenCompraDetalleMapper {
         }))
     }
 
+    static toApiValidarProductoPorAlmacen(param : ValidarProductoAlmacen[]): ValidarProductoAlmacenDTO[]{
+        return param.map(ordenCompra => ({
+            codigoAlmacen : ordenCompra.idAlmacen,
+            codigoProductoServicio : ordenCompra.idProductoServicio
+        }))
+    }
+
     static toDomainDataOrdenPorFirmar(param: DataOrdenCompraPorFirmarDTO): DataOrdenCompraPorFirmar {
         return {
             data: param.data.map(this.toDomainOrdenCompraPorFirmar),
@@ -91,5 +98,7 @@ export class OrdenCompraDetalleMapper {
             numeracionCarpeta: param.numeracion
         }
     }
+
+    
  
 }

@@ -4,9 +4,9 @@
 @else {
   <!-- <pre> {{codigoSolicitudCompraNavbar()}} </pre> -->
    <!-- <pre> {{listOrdenCarpeta() |json}} </pre> -->
-  <!-- <pre> {{nodes | json}} </pre> -->
+  <!-- <pre> {{nodes() | json}} </pre> -->
 
-@if (nodes.length > 0) {
+@if (nodes().length > 0) {
 <div class="tree-layout" [class.collapsed]="treeCollapsed">
 
   <div class="tree-panel">
@@ -17,7 +17,7 @@
 
     <div class="tree-container">
       <p-tree
-        [value]="nodes"
+        [value]="nodes()"
         selectionMode="single"
         (onNodeSelect)="onNodeSelect($event)"
         styleClass="vscode-tree"

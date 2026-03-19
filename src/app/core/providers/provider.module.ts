@@ -53,6 +53,8 @@ import { RepresentanteLegalRepositoryImpl } from "@/proveedor/infraestructure/re
 import { UnidadMedida } from "@/unidad-medida/ui/unidad-medida";
 import { UnidadMedidaRepository } from "@/unidad-medida/domain/repositories/unidad-medida.repository";
 import { UnidadMedidaRepositoryImpl } from "@/unidad-medida/infraestructure/repositories/unidad-medida.repository.impl";
+import { ProductoAlmacenRepository } from "@/alcance/domain/repository/producto-almacen.repository";
+import { ProductoAlmacenRepositoryImpl } from "@/alcance/infraestructure/repository/producto-almacen.repository.impl";
 
 
 @NgModule({
@@ -84,7 +86,8 @@ import { UnidadMedidaRepositoryImpl } from "@/unidad-medida/infraestructure/repo
             {provide : EvaluacionSunatRepository, useClass : EvaluacionSunatRepositoryImpl},
             {provide : DeudaCoactivaRepository, useClass : DeudaCoactivaRepositoryImpl},
             {provide : RepresentanteLegalRepository, useClass : RepresentanteLegalRepositoryImpl},
-            {provide : UnidadMedidaRepository, useClass : UnidadMedidaRepositoryImpl}
+            {provide : UnidadMedidaRepository, useClass : UnidadMedidaRepositoryImpl},
+            {provide : ProductoAlmacenRepository, useClass : ProductoAlmacenRepositoryImpl}
         ]
     ]
 })

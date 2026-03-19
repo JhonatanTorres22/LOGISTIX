@@ -7,7 +7,7 @@ import { AlertService } from 'src/assets/demo/services/alert.service';
 import { AnexoPorFase, InsertarAnexoPorFase, ResponseAnexoPorFase } from '@/proceso-compras/domain/models/anexoPorFase.model';
 import { AnexoPorFaseRepository } from '@/proceso-compras/domain/repository/anexoSolicitud.repository';
 import { AnexoPorFaseSignal } from '@/proceso-compras/domain/signals/anexoPorFase.signal';
-import { AgregarOrdenCompraDetalle } from '@/proceso-compras/domain/models/ordenCompraDetalle.model';
+import { AgregarOrdenCompraDetalle, ValidarProductoAlmacen } from '@/proceso-compras/domain/models/ordenCompraDetalle.model';
 import { switchMap } from 'rxjs';
 import { SolicitudCompraSignal } from '@/proceso-compras/domain/signals/solicitud-compra.signal';
 import { PdfOrdenCompra } from "../pdf-orden-compra/pdf-orden-compra";
@@ -48,12 +48,15 @@ export class ListClonadorProductos {
   actionAnexo = this.anexoSignal.actionAnexo
   totalPresupuestoProgramado = this.anexoSignal.totalPresupuestoProgramado
 
+  totalPrecioClonados: number = 0;
   constructor() {
 
   }
 
   drop(event: CdkDragDrop<any>) {
 
+    console.log(event.previousContainer.data);
+    
     if (this.clonados.length > 0) {
       this.alert.showAlert(`Tiene ${this.clonados.length} productos`, 'warning')
       return;
@@ -74,18 +77,34 @@ export class ListClonadorProductos {
     this.clonados = [...this.clonados, ...clones];
 
     this.clonados.sort((a, b) => a.proveedor.localeCompare(b.proveedor));
+    this.calcularTotalClonados();
   }
+
 
   generarId(): string {
     return 'id-' + Date.now() + '-' + Math.floor(Math.random() * 1000000);
   }
 
+  calcularTotalClonados() {
+  this.totalPrecioClonados = this.clonados.reduce((acc, item) => {
+    return acc + (item.precio * item.cantidad);
+  }, 0);
+}
+
   generarAnexoPorFase = () => {
-    if(this.getTotalClonados() > this.totalPresupuestoProgramado()){
+      const anexos = this.listAnexo();
+
+  if (!anexos || anexos.length === 0) {
+    this.alert.showAlert('No existe solicitud de compra', 'error');
+    return;
+  }
+  
+    if(this.totalPrecioClonados > this.totalPresupuestoProgramado()){
       this.alert.showAlert(`Se ha excedido el presupuesto programado`, 'error')
       return
     }
 
+    this.loading = true
     const generar: InsertarAnexoPorFase = {
       idAnexo: 3,
       idSolicitudCompra: this.listAnexo()[0].idSolicitudCompra
@@ -97,7 +116,7 @@ export class ListClonadorProductos {
       next: (res: ResponseAnexoPorFase) => {
         this.idNuevoAnexoPorFase = res.data
         this.loading = false
-        console.log(res);
+        // console.log(res);
         this.alert.showAlert(`Agregado, ${res.message}`, 'success')
         if (res.isSuccess) {
           this.generarOrdenDeCompra()
@@ -110,11 +129,38 @@ export class ListClonadorProductos {
     })
   }
 
+  validarProductoPorAlmacen = () => {
+    // this.loading = true
+    const validarProducto : ValidarProductoAlmacen[] = 
+    this.clonados.map(p => ({
+      idAlmacen : 3,
+      idProductoServicio : p.idProveedorProducto
+    }))
+    console.log(validarProducto,'validar producto');
+    
+    this.alert.sweetAlert('question', '¿Confirmar?', '¿Está seguro que desea validar?')
+    .then(result => {
+      if(!result){this.loading = false; return}
+
+      this.ordenCompraRepository.validarProductoPorAlmacen(validarProducto).subscribe({
+        next : (res: ApiResponse) => {
+          this.alert.showAlert(`Validado, ${res.message}`, 'success')
+          this.loading = false
+          if(res.isSuccess){
+            this.generarAnexoPorFase()
+          }
+        },
+        error : (err : ApiError) => {
+          this.alert.showAlert(`Validado, ${err.error.message}`, 'error')
+          this.loading = false
+        }
+      })
+
+    })
+  }
 
 
-  generarOrdenDeCompra() {
-    this.listAnexo()[0].fases[1].anexos[1]
-
+  generarOrdenDeCompra = () => {
     console.log(this.idNuevoAnexoPorFase);
 
     const idSolicitud = this.listAnexo()[0].idSolicitudCompra;
@@ -137,8 +183,8 @@ export class ListClonadorProductos {
       next: (res: ApiResponse) => {
         this.loading = false
         this.alert.showAlert(`Agregar Orden Compra, ${res.message}`, 'success')
-        this.actionOrdenCompra.set(res.isSuccess)
         this.actionAnexo.set('REFRESH')
+        this.actionOrdenCompra.set(res.isSuccess)
         this.close()
       },
       error: (err: ApiError) => {
@@ -156,10 +202,11 @@ export class ListClonadorProductos {
       .some(p => p.ordenCompra);
   }
 
-  getTotalClonados(): number {
-  return this.clonados.reduce((acc, item) => {
-    return acc + (item.precio * item.cantidad);
-  }, 0);
+  hayFilasInvalidas(): boolean {
+  return this.clonados.some(p =>
+    !p.cantidad || p.cantidad <= 0 ||
+    !p.precio || p.precio <= 0
+  );
 }
 
   close = () => {

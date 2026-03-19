@@ -27,6 +27,7 @@ import { CarpetaSignal } from '@/proceso-compras/domain/signals/carpeta.signal';
 import { Observable } from 'rxjs';
 import { SolicitudCompraRepository } from '@/proceso-compras/domain/repository/solicitud-compra.repository';
 import { OrdenCompraDetalleSignal } from '@/proceso-compras/domain/signals/ordenCompraDetalle.signal';
+import { OrdenCarpetaSignal } from '@/panel-solicitudes/domain/signals/orden-carpetas.signal';
 
 @Component({
   selector: 'app-list-cronogramas',
@@ -73,7 +74,11 @@ export class ListCronogramas implements OnInit {
   private carpetaSignal = inject(CarpetaSignal)
   actionCarpeta = this.carpetaSignal.actionCarpeta
 
+  private signalOrdenCarpeta = inject(OrdenCarpetaSignal)
+  actionOrdenCompraCarpeta = this.signalOrdenCarpeta.actionOrdenCompraCarpeta
+  actionOrdenCompra = this.signal.actionOrdenCompra
   visibleCarpeta: boolean = false
+  idAnexoPorFaseCronograma: number = 0
   constructor() {
     this.cronogramaForm = new FormGroup({
       cuotas: new FormControl(null),
@@ -93,7 +98,7 @@ export class ListCronogramas implements OnInit {
     effect(() => {
 
       if (!this.actionCarpeta()) return;
-      if (this.actionCarpeta() === 'INSERTAR CARPETA CON ANEXO') {
+      if (this.actionCarpeta() === 'ACTUALIZAR ARCHIVO CRONOGRAMA') {
 
         this.actualizarArchivoCronograma();
         this.actionCarpeta.set('');
@@ -135,9 +140,42 @@ export class ListCronogramas implements OnInit {
         c.get('tipoDocumento')?.setValue(value, { emitEvent: false });
       });
     });
-
-
   }
+
+  modoArchivo: 'CREAR' | 'EDITAR' | null = null;
+  // guardarArchivo = () => {
+  //  console.log(this.selectCronograma());
+   
+  //   if (!this.modoArchivo) return;
+  //   this.idAnexoPorFaseCronograma = this.selectArchivoAnexo().idAnexosPorFase
+  //   console.log(this.idAnexoPorFaseCronograma);
+    
+  //   this.modoArchivo == 'CREAR'
+  //     ? this.visibleCarpeta = true
+  //   : this.actualizarArchivoCronograma()
+  // }
+  guardarArchivo = () => {
+  const lista = this.listCronograma();
+  console.log(lista);
+
+  if (!this.modoArchivo) return;
+
+  this.idAnexoPorFaseCronograma = this.selectArchivoAnexo().idAnexosPorFase;
+  console.log(this.idAnexoPorFaseCronograma);
+
+  const hayAlgunArchivo = lista.some(item =>
+    item.comprobante ||
+    item.documentoTributario ||
+    item.informeProveedor ||
+    item.informeResponsable
+  );
+
+  if (hayAlgunArchivo) {
+    this.actualizarArchivoCronograma();
+  } else {
+    this.visibleCarpeta = true;
+  }
+};
 
   activarAnexoCronograma = () => {
     this.loading = true
@@ -185,7 +223,7 @@ export class ListCronogramas implements OnInit {
       });
   }
 
-proveedorPorAnexo: Record<number,string> = {};
+  proveedorPorAnexo: Record<number, string> = {};
   cronogramasEsperados: {
     proveedor: string;
     idAnexosPorFase: number;
@@ -218,20 +256,20 @@ proveedorPorAnexo: Record<number,string> = {};
 
           });
 
-const anexos = this.listOrdenCompra()[0]?.anexosPorFases ?? [];
+          const anexos = this.listOrdenCompra()[0]?.anexosPorFases ?? [];
 
-for (const anexo of anexos) {
+          for (const anexo of anexos) {
 
-  for (const orden of anexo.ordenCompra ?? []) {
+            for (const orden of anexo.ordenCompra ?? []) {
 
-    if (orden.idAnexoPorFaseCronograma) {
-      this.proveedorPorAnexo[orden.idAnexoPorFaseCronograma] =
-        orden.nombreProveedor;
-    }
+              if (orden.idAnexoPorFaseCronograma) {
+                this.proveedorPorAnexo[orden.idAnexoPorFaseCronograma] =
+                  orden.nombreProveedor;
+              }
 
-  }
+            }
 
-}
+          }
 
         },
         error: (err: ApiError) => {
@@ -284,7 +322,7 @@ for (const anexo of anexos) {
 
   insertarCronograma = () => {
     this.loading = true;
-     const idAnexoOrden = this.anexoOrdenSeleccionado?.idAnexosPorFase;
+    const idAnexoOrden = this.anexoOrdenSeleccionado?.idAnexosPorFase;
     const cronograma: InsertarCronogramaPago[] =
       this.cronogramasForm.value.map((c: any) => ({
         fecha: this.toBackendISOExact(new Date(c.fecha)),
@@ -292,11 +330,11 @@ for (const anexo of anexos) {
         monto: Number(c.monto),
         conceptoTributario: c.concepto,
         tipoDocumentoTributario: c.tipoDocumento,
-        idAnexoPorFaseOrdenCompra:idAnexoOrden,
+        idAnexoPorFaseOrdenCompra: idAnexoOrden,
       }));
 
-      console.log(cronograma);
-      
+    console.log(cronograma);
+
 
     this.repository.insertarCronograma(cronograma).subscribe({
       next: (data: any) => {
@@ -306,6 +344,10 @@ for (const anexo of anexos) {
         this.cronogramaForm.get('cuotas')?.reset();
         this.cronogramaForm.get('tipoDocumento')?.reset();
         this.obtenerCronograma();
+        
+        this.actionOrdenCompra.set(true)
+        console.log('listar orden compra detalle');
+        
       },
       error: (err: ApiError) => {
         this.alert.showAlert(`${err.userMessage}`, 'error');
@@ -441,6 +483,8 @@ for (const anexo of anexos) {
 
 
   actualizarArchivoCronograma = () => {
+    console.log('actualizar archivo');
+
     if (this.archivoForm.invalid) return;
     this.loading = true
 
@@ -472,7 +516,11 @@ for (const anexo of anexos) {
         this.archivoForm.reset();
         // this.actionAnexo.set('1');
         this.obtenerCronograma();
+        this.actionOrdenCompraCarpeta.set('archivoAsignado')
+        console.log(this.actionOrdenCompraCarpeta());
+
         this.selectCronograma.set(this.selectCronogramaDefault);
+
       },
       error: (err: ApiError) => {
         console.log(err);
@@ -493,23 +541,23 @@ for (const anexo of anexos) {
   anexoOrdenSeleccionado: any = null;
   collapsarCronograma = (collapsed: boolean, item: ArchivoAnexo, index: number) => {
 
-  if (!collapsed) {
+    if (!collapsed) {
 
-    this.collapsedId.set(item.idAnexosPorFase);
-    this.selectArchivoAnexo.set(item);
+      this.collapsedId.set(item.idAnexosPorFase);
+      this.selectArchivoAnexo.set(item);
 
-    const orden = this.listOrdenCompra()?.[0];
-    this.anexoOrdenSeleccionado = orden?.anexosPorFases?.[index];
+      const orden = this.listOrdenCompra()?.[0];
+      this.anexoOrdenSeleccionado = orden?.anexosPorFases?.[index];
 
-    console.log(this.anexoOrdenSeleccionado, 'anexoordenseleccionado');
-    
-    this.obtenerCronograma();
+      console.log(this.anexoOrdenSeleccionado, 'anexoordenseleccionado');
 
-  } else {
-    this.collapsedId.set(null);
+      this.obtenerCronograma();
+
+    } else {
+      this.collapsedId.set(null);
+    }
+
   }
-
-}
 
   selectedCronograma = (cronograma: ListarCronograma, tipo: 'comprobante' | 'docTributario' | 'infProveedor' | 'infResponsable') => {
     this.listCronograma().forEach(c => c.uploadTipo = null);

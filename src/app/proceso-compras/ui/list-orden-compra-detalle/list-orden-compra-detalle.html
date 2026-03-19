@@ -7,7 +7,7 @@
 }
 @else{
 @if (nuevaLista.length == 0) {
-<ui-card-not-items text="No se ha encontrado órdenes de compra creadas" [showButton]="true"
+<ui-card-not-items text="No se ha encontrado órdenes de compra creadas" [showButton]="permisosSolicitud.ORDEN_COMPRA || permisosSolicitud.ESCRITURA"
   label="Crear orden de compra" (onClick)="visibleGenerarOrden = true"></ui-card-not-items>
 }
 @else {
@@ -19,7 +19,9 @@
       <div class="informativo bg-blue-100 border-round text-blue-800 border-dashed border-1">
         <span class="p-4">Tiene órdenes de compra por generar</span>
       </div>
-      <ui-button (onClick)="visibleGenerarOrden = true" icon="pi pi-save" label="Generar Orden de Compra"></ui-button>
+      @if (permisosSolicitud.ORDEN_COMPRA || permisosSolicitud.ESCRITURA) {
+        <ui-button (onClick)="visibleGenerarOrden = true" icon="pi pi-save" label="Generar Orden de Compra"></ui-button>
+      }
     </div>
   </ng-template>
 
@@ -51,22 +53,29 @@
       <th>Precio Unitario</th>
       <th>Precio Total</th>
       <th>Dirección</th>
-      <th>Acciones</th>
+      @if (permisosSolicitud.ORDEN_COMPRA || permisosSolicitud.ESCRITURA) {
+        <th>Acciones</th>
+      }
     </tr>
   </ng-template>
 
   <ng-template pTemplate="body" let-rowData let-editing="editing">
     <tr [pEditableRow]="rowData">
       <td>
-        <p-cellEditor>
-          <ng-template pTemplate="input">
-            <p-inputNumber [(ngModel)]="rowData.cantidad" [min]="0" (ngModelChange)="recalcularTotales()">
-            </p-inputNumber>
-          </ng-template>
-          <ng-template pTemplate="output">
-            {{ rowData.cantidad }}
-          </ng-template>
-        </p-cellEditor>
+        @if (permisosSolicitud.ORDEN_COMPRA || permisosSolicitud.ESCRITURA) {
+          <p-cellEditor>
+            <ng-template pTemplate="input">
+              <p-inputNumber [(ngModel)]="rowData.cantidad" [min]="0" (ngModelChange)="recalcularTotales()">
+              </p-inputNumber>
+            </ng-template>
+            <ng-template pTemplate="output">
+              {{ rowData.cantidad }}
+            </ng-template>
+          </p-cellEditor>
+        }
+        @else {
+          {{rowData.cantidad}}
+        }
       </td>
       <td>{{ rowData.unidadMedida }}</td>
       <td>{{ rowData.descripcionDelBien }}</td>
@@ -75,17 +84,22 @@
       <td>S/. {{ rowData.precioUnitario }}</td>
       <td>S/. {{ rowData.precioUnitario * rowData.cantidad }}</td>
       <td>{{ rowData.direccion }}</td>
-
-      <td>
-        <div class="flex items-center justify-center gap-2">
-          <button *ngIf="!editing" pButton pRipple type="button" pInitEditableRow icon="pi pi-pencil" text rounded
-            severity="secondary" (click)="iniciarEdicion(rowData)"></button>
-          <button *ngIf="editing" pButton pRipple type="button" (click)="editarOrdenCompra(rowData)" pSaveEditableRow
-            icon="pi pi-check" text rounded severity="secondary"></button>
-          <button *ngIf="editing" pButton pRipple type="button" pCancelEditableRow icon="pi pi-times" text rounded
-            severity="secondary" (click)="cancelarEdicion(rowData)"></button>
-        </div>
-      </td>
+      @if (permisosSolicitud.ORDEN_COMPRA || permisosSolicitud.ESCRITURA) {
+        <td>
+          <div class="flex items-center justify-center gap-2">
+            @if (!editing) {
+              <button pButton pRipple type="button" pInitEditableRow icon="pi pi-pencil" text rounded
+                severity="secondary" (click)="iniciarEdicion(rowData)"></button>
+            }
+            @if (editing) {
+              <button pButton pRipple type="button" (click)="editarOrdenCompra(rowData)" pSaveEditableRow
+                icon="pi pi-check" text rounded severity="secondary"></button>
+              <button pButton pRipple type="button" pCancelEditableRow icon="pi pi-times" text rounded
+                severity="secondary" (click)="cancelarEdicion(rowData)"></button>
+            }
+          </div>
+        </td>
+      }
     </tr>
   </ng-template>
 </p-table>
@@ -97,7 +111,7 @@
     <div class="flex justify-content-between gap-5">
       <span class="font-semibold">Presupuesto Programado</span>
       <span class="text-blue-600 font-bold">
-        S/ {{ listOrdenCompra()[0].presupuestoProgramado }}
+        S/ {{ listOrdenCompra()[0].presupuestoProgramado | number:'1.2-2' }}
       </span>
     </div>
 
@@ -105,10 +119,10 @@
       <span class="font-semibold">Total Orden</span>
 
       <span class="font-bold" 
-      [ngClass]="{'text-green-600': getTotalOrdenes() <= listOrdenCompra()[0].presupuestoProgramado,
-      'text-red-600':  getTotalOrdenes() > listOrdenCompra()[0].presupuestoProgramado }">
+      [ngClass]="{'text-green-600': precioTotalOrdenCompra <= listOrdenCompra()[0].presupuestoProgramado,
+      'text-red-600':  precioTotalOrdenCompra > listOrdenCompra()[0].presupuestoProgramado }">
 
-        S/ {{ getTotalOrdenes() }}
+        S/ {{ precioTotalOrdenCompra | number:'1.2-2' }}
 
       </span>
 
@@ -117,7 +131,7 @@
   </div>
 
 </div>
-@if(getTotalOrdenes() > listOrdenCompra()[0].presupuestoProgramado){
+@if(precioTotalOrdenCompra > listOrdenCompra()[0].presupuestoProgramado){
 <div class="text-red-500 text-right mt-2 font-semibold">
   ⚠ El total de la orden supera el presupuesto programado
 </div>

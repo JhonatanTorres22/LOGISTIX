@@ -24,6 +24,7 @@ import { ProveedorProductoSignal } from '@/proveedor-producto/domain/signals/pro
 import { AuthService } from '@/auth/infraestructure/services/auth.service';
 import { SolicitudCompraRepository } from '@/proceso-compras/domain/repository/solicitud-compra.repository';
 import { OrdenCompraDetalleSignal } from '@/proceso-compras/domain/signals/ordenCompraDetalle.signal';
+import { OrdenCarpetaSignal } from '@/panel-solicitudes/domain/signals/orden-carpetas.signal';
 
 @Component({
   selector: 'app-upload-archivo',
@@ -80,6 +81,9 @@ export class UploadArchivo implements OnInit {
   listOrdenCompra = this.signal.listOrdenCompraDetalle
 
   idNuevoAnexoPorFase: number = 0
+
+    private signalOrdenCarpeta = inject(OrdenCarpetaSignal)
+  actionOrdenCompraCarpeta = this.signalOrdenCarpeta.actionOrdenCompraCarpeta
   constructor(
     private alert: AlertService
   ) {
@@ -112,8 +116,12 @@ export class UploadArchivo implements OnInit {
     })
 
     effect(() => {
+      console.log(this.actionOrdenFirmada());
+      
       if (this.actionOrdenFirmada() == '') return;
       if (this.actionOrdenFirmada() === 'ENVIAR CORREO ORDEN FIRMADA') {
+        console.log(this.actionOrdenFirmada(), 'desde upload');
+        
         const archivos = this.selectAnexo().archivos;
         const ultimoAnexo = archivos[archivos.length - 1];
         this.archivoAnexoPorFaseActual = ultimoAnexo.archivo;
@@ -330,6 +338,9 @@ seleccionarProveedor(item: any) {
           this.actionAnexo.set('1');
           return
         }
+        this.actionOrdenCompraCarpeta.set('archivoAsignado')
+        console.log(this.actionOrdenCompraCarpeta(), 'desde upload archivo');
+        
         // this.obtenerOrdenCompraDetalle()
       },
       error: (err: ApiError) => {
@@ -452,7 +463,7 @@ seleccionarProveedor(item: any) {
       areaSolicitante: this.listAnexo()[0].areaResponsable,
       // enlace: 'archivoAnexoPorFaseActual ${environment.EndPoint}/wwwroot/Archivos/${archivo.archivo}',
       enlace: ` ${environment.EndPoint}/wwwroot/Archivos/${this.archivoAnexoPorFaseActual}`,
-      monto: `S/. ${montoTotal}`,
+      monto: `S/. ${montoTotal.toFixed(2)}`,
       nombreFirmante: this.userData?.apellidosyNombres || '',
       nombreSolicitante: 'JHONATAN TORRES MENESES',
       ordenCompra: `${this.selectCarpeta().prefijo}-${this.selectCarpeta().numeracion}`,
@@ -463,6 +474,9 @@ seleccionarProveedor(item: any) {
     this.anexoRepository.enviarConstanciaFirma(enviarConstancia).subscribe({
       next: () => {
         this.alert.showAlert(`Enviando correo`, 'success')
+        if(this.selectAnexo().nombre == 'Orden Firmada'){
+          this.actionOrdenCompraCarpeta.set('archivoAsignado')
+        }
       },
       error: (err) => {
         console.log(err);
@@ -483,9 +497,6 @@ seleccionarProveedor(item: any) {
 
     // Guardamos si tiene archivo en la variable
     this.tieneArchivoActual = info.tieneArchivo;
-
-    console.log('Id seleccionado:', this.idNuevoAnexoPorFase);
-    console.log('Tiene archivo?:', this.tieneArchivoActual);
 
     this.mostrarSubirArchivo = false;
     this.archivoForm.reset();
@@ -515,8 +526,11 @@ seleccionarProveedor(item: any) {
       next: () => {
         this.loading = false
         this.alert.showAlert('Archivo actualizado correctamente', 'success');
-        this.actionAnexo.set('1');
+        // this.actionAnexo.set('1');
         this.obtenerOrdenCompraDetalle()
+        this.actionOrdenCompraCarpeta.set('archivoAsignado')
+        console.log(this.actionOrdenCompraCarpeta(), 'orden compra desde upload');
+        
         this.closeDialog();
       },
       error: (err: ApiError) => {

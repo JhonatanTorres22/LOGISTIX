@@ -12,10 +12,12 @@ export class Producto {
         public nombreProducto: string,
         public modeloProducto: string,
         public descripcionProducto: string,
+        public tipo : string,
         public unidad: string,
         public precioReferencial: number,
         public urlImagen: string,
-        public marca : ListarMarca |null
+        public marca : ListarMarca |null,
+        public asignadoAlmacen? : boolean
 
     ) { }
 }

@@ -75,3 +75,8 @@ export interface OrdenCompraPorFirmarDTO {
   prefijoArea : string
   numeracion : string
 }
+
+export interface ValidarProductoAlmacenDTO {
+  codigoProductoServicio : number,
+  codigoAlmacen : number
+}

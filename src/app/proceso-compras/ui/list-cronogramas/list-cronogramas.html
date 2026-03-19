@@ -6,6 +6,7 @@
     </ng-template>
 
     <!-- <pre> {{ listOrdenCompra() | json }} </pre> -->
+     <!-- <pre> {{ listCronograma() | json }} </pre> -->
     @let anexoCronograma = listAnexo()[0].fases[2].anexos[1];
     @let total = listAnexo()[0].fases[1].anexos[1].archivos.length;
     @let activados = anexoCronograma.archivos.length;
@@ -15,6 +16,7 @@
     <ui-loading-progress-bar></ui-loading-progress-bar>
     }
     @else{
+    <!-- ACTIVAMOS EL CRONOGRAMA -->
     @if (pendientes > 0) {
     @for (item of cronogramasEsperados.slice(activados); track item.idAnexosPorFase) {
 
@@ -122,6 +124,7 @@
                 }
 
                 @else if (cronograma.uploadTipo) {
+
                 <div class="mb-4 p-3 shadow-3 rounded surface-card">
                     <div class="flex justify-between items-center mb-2">
                         <span class="font-bold text-sm">
@@ -135,20 +138,20 @@
                     <div [formGroup]="archivoForm">
                         <ui-upload-file formControlName="archivo"></ui-upload-file>
                     </div>
-
+                    <!-- <pre> {{ selectCronograma() | json }} </pre> -->
                     <div class="flex justify-end mt-3 gap-2">
                         <p-button severity="secondary" label="Cancelar" (onClick)="cancelarUpload(cronograma)">
                         </p-button>
 
                         <ui-button label="Guardar" icon="pi pi-save" color="primary"
-                            (onClick)="actualizarArchivoCronograma()" [disabled]="archivoForm.invalid">
+                            (onClick)="modoArchivo = 'CREAR'; guardarArchivo()" [disabled]="archivoForm.invalid">
                         </ui-button>
                     </div>
                 </div>
 
                 }
                 @else {
-                    {{cronograma.estado | json}}
+                    <!-- {{cronograma.estado | json}} -->
                 <div class="mb-4 p-2 shadow-3 rounded surface-card">
                     <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between">
 
@@ -336,6 +339,5 @@
 </p-dialog>
 
 @if (visibleCarpeta) {
-
-<app-list-carpetas [(visible)]="visibleCarpeta" [modo]="'SELECCIONAR'"></app-list-carpetas>
+<app-list-carpetas [idNuevoAnexoPorFase]="idAnexoPorFaseCronograma" [(visible)]="visibleCarpeta" [modo]="'SELECCIONAR'"></app-list-carpetas>
 }

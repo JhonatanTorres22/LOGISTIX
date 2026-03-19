@@ -1,4 +1,8 @@
-<p-data-view [value]="listDocTributarioPorAprobar()" [paginator]="true" [rows]="5">
+@if (loading) {
+    <ui-loading-progress-bar></ui-loading-progress-bar>
+}
+@else {
+    <p-data-view [value]="listDocTributarioPorAprobar()" [paginator]="true" [rows]="5">
 
     <ng-template #emptymessage>
         <ui-card-not-items text="No hay documentos tributarios por aprobar"></ui-card-not-items>
@@ -50,7 +54,7 @@
                     </div>
                 </div>
 
-                <ui-icon-button icon="pi pi-arrow-right"></ui-icon-button>
+                <ui-icon-button icon="pi pi-arrow-right" (onClick)="seleccionarMensaje(docTributario)"></ui-icon-button>
 
             </div>
 
@@ -59,4 +63,5 @@
     </ng-template>
 </p-data-view>
 
+}
 <!-- <pre> {{ listDocTributarioPorAprobar | json }} </pre> -->

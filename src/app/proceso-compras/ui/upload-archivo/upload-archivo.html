@@ -25,7 +25,6 @@
     (selectAnexo().nombre == 'Documentacion Preliminar' && permisosSolicitud.DOCUMENTACION_PRELIMINAR) ||
     (selectAnexo().nombre == 'Cotización' && permisosSolicitud.COTIZACION) ||
     (selectAnexo().nombre == 'Orden de Compra' && permisosSolicitud.ORDEN_COMPRA && mostrarSubirArchivo) ||
-    (selectAnexo().nombre == 'Orden Firmada' && permisosSolicitud.ORDEN_COMPRA_FIRMADA) ||
     (selectAnexo().nombre == 'Contrato' && permisosSolicitud.CONTRATO) ||
     (selectAnexo().nombre == 'Cronograma' && permisosSolicitud.CRONOGRAMA) ||
     (selectAnexo().nombre == 'Acta' && permisosSolicitud.ACTA) ||
@@ -101,7 +100,7 @@
                         }
 
                         @if(selectAnexo().nombre == 'Orden de Compra' && archivo.estado == 0){
-                            {{archivo.estado | json}}
+                            <!-- {{archivo.estado | json}} -->
 
                         @let datos = obtenerDatosOrden(archivo.idAnexosPorFase);
 

@@ -111,6 +111,7 @@ export class ImportProductos implements OnInit {
           unidad: ((row['unidad'] || row['UNIDAD'] || '') as string).trim().toUpperCase(),
           // precioReferencial: Number(row['precio'] || row['PRECIO'] || 0),
           urlImagen: ((row['urlImagen'] || row['URLIMAGEN'] || '') as string).trim(),
+          tipo : ((row['modelo'] || row['MODELO'] || '') as string).trim().toUpperCase(),
           idMarca: marcaEncontrada.idMarca
         });
       }

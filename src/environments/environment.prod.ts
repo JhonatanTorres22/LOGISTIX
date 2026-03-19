@@ -5,4 +5,5 @@ export const environment = {
   production: true,
   apiUrl: 'https://mock-data-api-nextjs.vercel.app/',
   EndPoint : 'https://logistix.somee.com/logistix'
+  // EndPoint : 'https://silogi.somee.com/silogi'
 };

@@ -1,9 +1,5 @@
 import { Component } from '@angular/core';
-import { NotificationsWidget } from './components/notificationswidget';
 import { StatsWidget } from './components/statswidget';
-import { RecentSalesWidget } from './components/recentsaleswidget';
-import { BestSellingWidget } from './components/bestsellingwidget';
-import { RevenueStreamWidget } from './components/revenuestreamwidget';
 import { ListOrdenPorFirmar } from "./components/list-orden-por-firmar/list-orden-por-firmar";
 import { ListDocTributarioPorAprobar } from "./components/list-doc-tributario-por-aprobar/list-doc-tributario-por-aprobar";
 import { ListComprobantePorCargar } from "./components/list-comprobante-por-cargar/list-comprobante-por-cargar";

@@ -49,7 +49,7 @@ import { CronogramaSignal } from '@/proceso-compras/domain/signals/cronograma.si
     <div class="card mb-0">
       <div class="flex justify-content-between mb-3">
         <div>
-          <span class="block text-muted-color font-medium mb-2">Comprobantes Por Cargar</span>
+          <span class="block text-muted-color font-medium mb-2">Comprobantes Por Subir</span>
           <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{listComprobantePorCargar().length}}</div>
         </div>
         <div class="flex align-items-center justify-content-center bg-cyan-100 dark:bg-cyan-400/10 border-round"

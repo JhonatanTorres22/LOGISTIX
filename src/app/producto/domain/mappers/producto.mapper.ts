@@ -14,6 +14,7 @@ static toDomain = (param: ProductoCategoriaDTO): ProductoCategoria => {
                 e.nombre,
                 e.modelo,
                 e.descripcion,
+                e.tipo,
                 e.unidadDeMedida,
                 e.precioReferencial,
                 e.url,
@@ -47,7 +48,8 @@ static toDomain = (param: ProductoCategoriaDTO): ProductoCategoria => {
             nombre : param.nombreProducto,
             unidadDeMedida : param.unidad,
             url : param.urlImagen,
-            codigoMarca : param.idMarca
+            codigoMarca : param.idMarca,
+            tipo : param.tipo
         }
     }
 
@@ -64,7 +66,8 @@ static toDomain = (param: ProductoCategoriaDTO): ProductoCategoria => {
             url : param.urlImagen,
             codigoCategoria : param.idCategoria,
             codigoMarca : param.idMarca,
-            codigoProducto : param.id
+            codigoProducto : param.id,
+            tipo : param.tipo
         }
     }
 

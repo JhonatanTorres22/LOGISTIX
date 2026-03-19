@@ -55,7 +55,7 @@ export class ListAlcance implements OnInit {
         this.loading = false
       },
       error: (err: ApiError) => {
-        this.alert.showAlert(`Listando el alcance, ${err.userMessage}`, 'error')
+        this.alert.showAlert(`Listando el alcance, ${err.error.message}`, 'error')
         this.loading = false
       }
     })
@@ -91,7 +91,7 @@ export class ListAlcance implements OnInit {
         this.alert.showAlert(`Alcance eliminado correctamente, ${data.message}`, 'success')
       },
       error: (err: ApiError) => {
-        this.alert.showAlert(`Error al eliminar el alcance, ${err.userMessage}`, 'error')
+        this.alert.showAlert(`Error al eliminar el alcance, ${err.error.message}`, 'error')
         this.loading = false
       }
     })

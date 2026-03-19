@@ -26,11 +26,13 @@
             [minlength]="minLengthDescripcion" [expReg]="expLockNombreModeloDescripcion"
             [patternErrorMessage]="'No debe incluir espacios de la palabra'"></ui-input>
 
+            <ui-select formControlName="tipo" [options]="tipo" label="TIPO" ></ui-select>
+
         <p-float-label class="w-full" variant="on">
             <p-autocomplete class="w-full" formControlName="unidad" [suggestions]="filteredUnidades"
                 (completeMethod)="buscarUnidad($event)" optionLabel="text" optionValue="value"
                 placeholder="Buscar unidad" [dropdown]="true" [minLength]="1" [forceSelection]="true"
-                emptyMessage="No se encontró la unidad">
+                emptyMessage="No se encontró la unidad" appendTo="body">
             </p-autocomplete>
             <label for="Unidad de Medida">Unidad de Medida</label>
         </p-float-label>
@@ -39,7 +41,7 @@
 
         <p-float-label class="w-full" variant="on">
             <p-autocomplete class="w-full" inputId="marca" formControlName="marca" [suggestions]="filteredMarcas"
-                (completeMethod)="buscarMarca($event)" optionLabel="nombreMarca" placeholder="Seleccione una marca"
+                (completeMethod)="buscarMarca($event)" optionLabel="nombreMarca" [forceSelection]="true" placeholder="Seleccione una marca"
                 [dropdown]="true" appendTo="body">
 
                 <ng-template pTemplate="footer">
@@ -55,12 +57,14 @@
             <label for="marca">Marca</label>
         </p-float-label>
 
+        <!-- <pre> {{formProducto.value | json}} </pre> -->
+
     </div>
 
     <ng-template #footer>
         <ui-button color="secondary" label="Cancelar" icon="pi pi-times" (onClick)="closeDialog()"></ui-button>
         <!-- <p-button severity="secondary" label="Cancelar" icon="pi pi-times" (onClick)="closeDialog()"></p-button> -->
-        <ui-button label="GUARDAR" icon="pi pi-save" color="primary" [disabled]="formProducto.invalid"
+        <ui-button label="GUARDAR" icon="pi pi-save" color="primary" [disabled]="formProducto.invalid || formProducto.value.marca?.idMarca === 0"
             (onClick)="onSubmit()" />
     </ng-template>
 </p-dialog>
