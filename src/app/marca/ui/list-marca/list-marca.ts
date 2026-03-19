@@ -3,7 +3,7 @@ import { EliminarMarca, ListarMarca } from '@/marca/domain/models/marca.model';
 import { MarcaRepository } from '@/marca/domain/repositories/marca.repository';
 import { MarcaSignal } from '@/marca/domain/signals/marca.signal';
 import { Component, effect, inject, OnInit } from '@angular/core';
-import { AlertService } from 'dist/sakai-ng/browser/assets/demo/services/alert.service';
+// import { AlertService } from 'dist/sakai-ng/browser/assets/demo/services/alert.service';
 import { UiLoadingProgressBarComponent } from "@/core/components/ui-loading-progress-bar/ui-loading-progress-bar.component";
 import { TableModule } from "primeng/table";
 import { IconFieldModule } from "primeng/iconfield";
@@ -15,6 +15,7 @@ import { CommonModule } from '@angular/common';
 import { UiCardNotItemsComponent } from "@/core/components/ui-card-not-items/ui-card-not-items.component";
 import { AddEditMarca } from "../add-edit-marca/add-edit-marca";
 import { UiIconButton } from "@/core/components/ui-icon-button/ui-icon-button";
+import { AlertService } from 'src/assets/demo/services/alert.service';
 
 @Component({
   selector: 'app-list-marca',

@@ -5,9 +5,10 @@ import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { Card } from "@/core/components/card/card";
 import { UiButtonComponent } from "@/core/components/ui-button/ui-button.component";
 import { UiCardNotItemsComponent } from "@/core/components/ui-card-not-items/ui-card-not-items.component";
-import { AlertService } from 'dist/sakai-ng/browser/assets/demo/services/alert.service';
+// import { AlertService } from 'dist/sakai-ng/browser/assets/demo/services/alert.service';
 import { UiLoadingProgressBarComponent } from "@/core/components/ui-loading-progress-bar/ui-loading-progress-bar.component";
 import { ListarAlmacen } from '@/alcance/domain/models/almacen.model';
+import { AlertService } from 'src/assets/demo/services/alert.service';
 
 @Component({
   selector: 'app-list-almacen',
