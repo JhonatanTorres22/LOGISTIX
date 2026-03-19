@@ -3,10 +3,11 @@ import { StatsWidget } from './components/statswidget';
 import { ListOrdenPorFirmar } from "./components/list-orden-por-firmar/list-orden-por-firmar";
 import { ListDocTributarioPorAprobar } from "./components/list-doc-tributario-por-aprobar/list-doc-tributario-por-aprobar";
 import { ListComprobantePorCargar } from "./components/list-comprobante-por-cargar/list-comprobante-por-cargar";
+import { GraficoDoughnut } from "./components/grafico-doughnut/grafico-doughnut";
 
 @Component({
     selector: 'app-dashboard',
-    imports: [StatsWidget, ListOrdenPorFirmar, ListDocTributarioPorAprobar, ListComprobantePorCargar],
+    imports: [StatsWidget, ListOrdenPorFirmar, ListDocTributarioPorAprobar, ListComprobantePorCargar, GraficoDoughnut],
     template: `
 <div class="grid w-full">
 
@@ -25,7 +26,10 @@ import { ListComprobantePorCargar } from "./components/list-comprobante-por-carg
             </div>
 
             <div class="col-12 lg:col-6">
-                <app-list-doc-tributario-por-aprobar></app-list-doc-tributario-por-aprobar>
+                <div class="flex flex-column gap-3">
+                    <app-list-doc-tributario-por-aprobar></app-list-doc-tributario-por-aprobar>
+                    <app-grafico-doughnut></app-grafico-doughnut>
+                </div>
             </div>
 
         </div>
