@@ -20,10 +20,8 @@ import { PermissionService } from '@/auth/infraestructure/services/permisos.serv
 import { PERMISOS } from '@/auth/infraestructure/services/permisos.constants';
 import { GenerarFirma } from "../generar-firma/generar-firma";
 import { CommonModule } from '@angular/common';
-import { ProveedorRepository } from '@/proveedor/domain/repositories/proveedor.repository';
 import { BancoSignal } from '@/proveedor/domain/signals/banco.signal';
 import { BancoRepository } from '@/proveedor/domain/repositories/banco.repository';
-import { ListarBanco } from '@/proveedor/domain/models/banco.model';
 import { CronogramaRepository } from '@/proceso-compras/domain/repository/cronograma.repository';
 import { CronogramaSignal } from '@/proceso-compras/domain/signals/cronograma.signal';
 import { UiCardNotItemsComponent } from "@/core/components/ui-card-not-items/ui-card-not-items.component";
