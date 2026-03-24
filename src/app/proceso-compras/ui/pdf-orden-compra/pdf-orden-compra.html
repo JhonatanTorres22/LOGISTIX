@@ -3,9 +3,6 @@
 }
 @else{
 <p-drawer [(visible)]="visible" [fullScreen]="true" [header]="selectAnexo().nombre" (onHide)="closeDrawer()">
-  <!-- <pre> {{listCronograma() | json}} </pre> -->
-  <!-- <pre>{{ selectProveedorProducto() | json }} </pre> -->
-   <!-- <pre> {{firmaGerenteBase64 | json}} </pre> -->
    @if (selectProveedorProducto()[0].idAnexoPorFaseCronograma === 0) {
     <ui-card-not-items text="No se puede generar el pdf de la orden de compra, porque no tiene cronogramas asociados"></ui-card-not-items>
    }
@@ -15,9 +12,10 @@
          @if (selectAnexo().nombre === 'Orden Firmada' && firmaGerenteBase64 !== null) {
          <ui-button [label]=" 'Generar' + ' ' + selectAnexo().nombre" (onClick)="generar()" classButton="mb-2"></ui-button>
          }
-         @if ((permisosSolicitud.ORDEN_COMPRA_FIRMADA || permisosSolicitud.ESCRITURA || permisosSolicitud.LECTURA) &&
+         @if ((permisosSolicitud.ORDEN_COMPRA_FIRMADA || permisosSolicitud.ESCRITURA) &&
          selectAnexo().nombre == 'Orden Firmada') {
-         <ui-button (onClick)="visibleFirma = true" label="Ingresar Firma"></ui-button>
+         <ui-button (onClick)="visibleFirma = true" label="Firma Manual" classButton="mb-2"></ui-button>
+         <ui-button (onClick)="usarFirmaDesdeAssets()" label="Firma Pre Definida" classButton="mb-2"></ui-button>
          }
        </div>
        @if (pdfUrl) {

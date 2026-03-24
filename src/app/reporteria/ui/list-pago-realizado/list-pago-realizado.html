@@ -1,0 +1,148 @@
+<p-card>
+    <ng-template pTemplate="header">
+        <div class="flex align-items-center justify-content-between px-4 pt-3 pb-2">
+            <div class="flex align-items-center gap-2">
+                <i class="pi pi-wallet text-2xl text-primary"></i>
+                <span class="text-xl font-bold">Pagos Realizados</span>
+            </div>
+            <p-tag [value]="pagosFiltradosActuales.length + ' registros'" severity="info" icon="pi pi-list" />
+        </div>
+    </ng-template>
+    <!-- <pre> {{pagosFiltradosActuales | json}} </pre>
+    <pre> {{listPagosRealizados() | json}} </pre> -->
+    <!--FILTROS-->
+    <div class="grid mb-4 w-full">
+
+        <!-- Tipo de Pago -->
+        <div class="col-12 md:col-3 flex flex-column gap-1">
+            <label class="font-semibold text-sm">
+                <i class="pi pi-credit-card mr-1"></i>Tipo de Pago
+            </label>
+            <p-select [options]="tipoPagoOptions" [(ngModel)]="filtroTipoPago" optionLabel="label" optionValue="value"
+                placeholder="Todos" [showClear]="true" styleClass="w-full" (onChange)="aplicarFiltros()" />
+        </div>
+
+        <!-- Local -->
+        <div class="col-12 md:col-3 flex flex-column gap-1">
+            <label class="font-semibold text-sm">
+                <i class="pi pi-map-marker mr-1"></i>Alcance
+            </label>
+            <p-select [options]="alcanceOptions" [(ngModel)]="filtroAlcance" optionLabel="label" optionValue="value"
+                placeholder="Todos" [showClear]="true" styleClass="w-full" (onChange)="aplicarFiltros()" />
+        </div>
+
+        <!-- Fecha de Pago -->
+        <div class="col-12 md:col-3 flex flex-column gap-1">
+            <label class="font-semibold text-sm">
+                <i class="pi pi-calendar mr-1"></i>Fecha de Pago Realizado
+            </label>
+            <p-date-picker [(ngModel)]="filtroFecha" dateFormat="dd/mm/yy" [showIcon]="true" placeholder="dd/mm/aaaa"
+                [showClear]="true" styleClass="w-full" (onSelect)="aplicarFiltros()" (onClear)="aplicarFiltros()" />
+        </div>
+
+        <!-- Botón limpiar -->
+        <div class="col-12 md:col-3 flex align-items-end">
+            <ui-button label="Limpiar" icon="pi pi-filter-slash" color="secondary" (onClick)="limpiarFiltros()"
+                styleClass="w-full" />
+        </div>
+
+    </div>
+
+    <!-- ══ TABLA ════════════════════════════════════════════════ -->
+    <p-table [value]="pagosFiltradosActuales" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10,20,50,100,1000]"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Mostrando {first} - {last} de {totalRecords} registros" [sortMode]="'multiple'"
+        styleClass="p-datatable-gridlines p-datatable-striped" responsiveLayout="scroll">
+
+        <!-- Cabeceras -->
+        <ng-template pTemplate="header">
+            <tr>
+                <th pSortableColumn="nombreProveedor" style="min-width:200px">
+                    Proveedor <p-sortIcon field="nombreProveedor" />
+                </th>
+                <th pSortableColumn="local" style="min-width:130px">
+                    Local <p-sortIcon field="local" />
+                </th>
+                <th pSortableColumn="monto" style="min-width:130px; text-align:right">
+                    Monto (S/.) <p-sortIcon field="monto" />
+                </th>
+                <th pSortableColumn="fechaPago" style="min-width:140px">
+                    Fecha de Pago Programado<p-sortIcon field="fechaPago" />
+                </th>
+                <th pSortableColumn="fechaPago" style="min-width:140px">
+                    Concepto<p-sortIcon field="conceptoCronograma" />
+                </th>
+                <th pSortableColumn="fechaPago" style="min-width:140px">
+                    Fecha de Pago Realizado<p-sortIcon field="fechaPagoRealizado" />
+                </th>
+                <th pSortableColumn="tipoPago" style="min-width:100px">
+                    Tipo de Documento <p-sortIcon field="tipoDocumento" />
+                </th>
+                <th pSortableColumn="tipoPago" style="min-width:160px">
+                    Tipo de Pago <p-sortIcon field="tipoPago" />
+                </th>
+            </tr>
+        </ng-template>
+
+        <!-- Filas -->
+        <ng-template pTemplate="body" let-pago>
+            <tr>
+                <td>
+                    <span class="flex align-items-center gap-2">
+                        <i class="pi pi-building text-color-secondary"></i>
+                        {{ pago.nombreProveedor }}
+                    </span>
+                </td>
+                <td>
+                    <span class="flex align-items-center gap-1">
+                        <i class="pi pi-map-marker text-primary"></i>
+                        {{ pago.alcance }}
+                    </span>
+                </td>
+                <td style="text-align:right; font-weight:600">
+                    S/. {{ pago.monto | number:'1.2-2' }}
+                </td>
+                <td>
+                    <span class="flex align-items-center gap-1">
+                        <i class="pi pi-calendar text-color-secondary"></i>
+                        {{ pago.fechaPagoCronograma  | date:'dd/MM/yyyy' }}
+                    </span>
+                </td>
+
+                <td>
+                    <span class="flex align-items-center gap-1">
+                        {{ pago.conceptoCronograma }}
+                    </span>
+                </td>
+                <td>
+                    <span class="flex align-items-center gap-1">
+                        <i class="pi pi-calendar text-color-secondary"></i>
+                        {{ pago.fechaPagoRealizado  | date:'dd/MM/yyyy' }}
+                    </span>
+                </td>
+                <td>
+                    <p-tag [value]="pago.tipoDocumento" severity="info"
+                        icon="pi pi-file-pdf"/>
+                </td>
+                <td>
+                    <p-tag [value]="pago.tipoPago" [severity]="getSeverity(pago.tipoPago)"
+                        [icon]="getIcon(pago.tipoPago)" />
+                </td>
+            </tr>
+        </ng-template>
+
+        <!-- Sin resultados -->
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="8">
+                <div class="flex flex-column align-items-center gap-3 py-6 text-color-secondary">
+                    <i class="pi pi-inbox" style="font-size:2.5rem"></i>
+                    <span class="text-sm">No hay pagos realizados con los filtros aplicados.</span>
+                    <p-button label="Limpiar filtros" icon="pi pi-refresh" severity="secondary"
+                        [outlined]="true" size="small" (onClick)="limpiarFiltros()" />
+                </div>
+            </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>

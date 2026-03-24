@@ -1,7 +1,7 @@
 import { CronogramaRepository } from "@/proceso-compras/domain/repository/cronograma.repository";
 import { inject, Injectable } from "@angular/core";
 import { CronogramaService } from "../services/cronograma.service";
-import { AprobarCronogramaPago, DataComprobantePorCargar, DataCronograma, DataDocTributarioPorAprobar, EditarCronograma, EliminarCronograma, InsertarCronogramaPago, ObservarCronogramaPago } from "@/proceso-compras/domain/models/cronograma.model";
+import { ActualizarPagoRealizado, AprobarCronogramaPago, DataComprobantePorCargar, DataCronograma, DataDocTributarioPorAprobar, DataPagosRealizados, EditarCronograma, EliminarCronograma, InsertarCronogramaPago, ObservarCronogramaPago } from "@/proceso-compras/domain/models/cronograma.model";
 import { Observable } from "rxjs";
 import { ApiResponse } from "@/core/interceptors/error-message.model";
 
@@ -52,5 +52,13 @@ export class CronogramaRepositoryImpl implements CronogramaRepository {
     }
     obtenerComprobantePorCargar(): Observable<DataComprobantePorCargar> {
         return this.service.obtenerComprobantePorCargar()
+    }
+
+    /*PAGOS REALIZADOS */
+    actualizarPagoRealizado(actualizar: ActualizarPagoRealizado): Observable<ApiResponse> {
+        return this.service.actualizarPagoRealizado(actualizar)
+    }
+    obtenerPagosRealizados(): Observable<DataPagosRealizados> {
+        return this.service.obtenerPagosRealizados()
     }
 }

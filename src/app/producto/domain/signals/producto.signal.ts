@@ -1,6 +1,7 @@
 import { Injectable, signal } from "@angular/core";
 import { Producto, ProductoCategoria, TablaProductoCategoria } from "../models/producto.model";
 import { ListarMarca } from "@/marca/domain/models/marca.model";
+import { ListarProductosNoValidos } from "@/producto/infraestructure/dto/producto.dto";
 
 @Injectable({
   providedIn: 'root'
@@ -49,4 +50,8 @@ productoDefault: TablaProductoCategoria = {
     this.productoAccion.set('');
     this.cargado.set(false);
   }
+
+   /* PRODUCTOS NO VÁLIDOS */ 
+
+   listProductosNoValidos = signal<ListarProductosNoValidos[]>([])
 }

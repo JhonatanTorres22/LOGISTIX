@@ -2,7 +2,7 @@ import { ApiError } from '@/core/interceptors/error-message.model';
 import { OrdenCarpetaRepository } from '@/panel-solicitudes/domain/repository/orden-carpeta.repository';
 import { OrdenCarpetaSignal } from '@/panel-solicitudes/domain/signals/orden-carpetas.signal';
 import { CommonModule } from '@angular/common';
-import { Component, effect, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
 import { TreeNode } from 'primeng/api';
 import { TreeModule } from "primeng/tree";
 import { AlertService } from 'src/assets/demo/services/alert.service';
@@ -14,10 +14,13 @@ import { DividerModule } from "primeng/divider";
 import { UiCardNotItemsComponent } from "@/core/components/ui-card-not-items/ui-card-not-items.component";
 import { CardModule } from "primeng/card";
 import { LayoutService } from '@/layout/service/layout.service';
+import { SelectModule } from "primeng/select";
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-tree-solicitudes',
-  imports: [TreeModule, CommonModule, UiLoadingProgressBarComponent, ListSolicitudCompra, DividerModule, UiCardNotItemsComponent, CardModule],
+  imports: [TreeModule, CommonModule, UiLoadingProgressBarComponent, FormsModule,
+    ListSolicitudCompra, DividerModule, UiCardNotItemsComponent, CardModule, SelectModule],
   templateUrl: './tree-solicitudes.html',
   styleUrl: './tree-solicitudes.scss'
 })
@@ -314,5 +317,27 @@ export class TreeSolicitudes implements OnInit {
     }
 
     return '';
+  }
+
+  estadosFiltro = [
+    { value: 1, label: 'Orden de Compra', icon: 'pi pi-shopping-cart' },
+    { value: 2, label: 'Orden de Compra Firmada', icon: 'pi pi-check-circle' },
+    { value: 3, label: 'Cronograma por Aprobar', icon: 'pi pi-clock' },
+    { value: 4, label: 'Cronograma por Carga', icon: 'pi pi-upload' },
+  ];
+
+  filtroActivo = signal<number | null>(null);
+
+  nodesFiltrados = computed(() => {
+    const filtro = this.filtroActivo();
+    const todos = this.nodes();
+    if (filtro === null) return todos;
+    return todos.filter(n => n.data?.estadoSolicitud === filtro);
+  });
+
+  filtroActivoModel: number | null = null;
+
+  onFiltroChange(event: any) {
+    this.filtroActivo.set(event.value ?? null);
   }
 }

@@ -28,6 +28,7 @@ import { OrdenCarpetaSignal } from '@/panel-solicitudes/domain/signals/orden-car
 
 @Component({
   selector: 'app-upload-archivo',
+  standalone : true,
   imports: [ProcesoComprasModule, Dialog, ProcesoComprasModule, FieldsetModule, UploadFileComponent, CheckboxModule, DataViewModule, ListCarpetas, CardModule, PdfOrdenCompra],
   templateUrl: './upload-archivo.html',
   styleUrl: './upload-archivo.scss'

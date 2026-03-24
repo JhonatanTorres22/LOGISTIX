@@ -40,13 +40,13 @@ pdfMake.vfs = pdfFonts.vfs;
 export class PdfOrdenCompra {
   signalProveedorProducto = inject(ProveedorProductoSignal)
   selectProveedorProducto = this.signalProveedorProducto.selectProveedorProducto
-  @Input() modo: 'GENERAR' | 'FIRMAR' = 'GENERAR';
-  @Input() urlPdfExistente?: string;
+  // @Input() urlPdfExistente?: string;
 
+  @Input() modo: 'GENERAR' | 'FIRMAR' = 'GENERAR';
   @Input() visible: boolean = false;
   @Output() visibleChange = new EventEmitter<boolean>();
 
-  repository = inject(SolicitudCompraRepository)
+  // repository = inject(SolicitudCompraRepository)
   anexoRepository = inject(AnexoPorFaseRepository)
   anexoSignal = inject(AnexoPorFaseSignal)
   listAnexo = this.anexoSignal.listAnexos
@@ -60,7 +60,7 @@ export class PdfOrdenCompra {
 
   carpetaSignal = inject(CarpetaSignal)
   actionCarpeta = this.carpetaSignal.actionCarpeta
-  selectCarpeta = this.carpetaSignal.carpetaSelect
+  // selectCarpeta = this.carpetaSignal.carpetaSelect
 
   permissionService = inject(PermissionService)
   solicitudPermiso = PERMISOS.SOLICITUDCOMPRA;
@@ -79,10 +79,6 @@ export class PdfOrdenCompra {
 
 
   firmaGerenteBase64: string | null = null
-  // private authService = inject(AuthService)
-  //   userData = this.authService.getUserData()
-  // archivoAnexoPorFaseActual: string | null = null
-
   constructor(private sanitizer: DomSanitizer,
     private http: HttpClient,
     private alert: AlertService) {
@@ -158,6 +154,19 @@ export class PdfOrdenCompra {
   onFirmaRecibida(base64: string) {
     this.firmaGerenteBase64 = base64;
     this.generarPdfBlob();
+  }
+
+  usarFirmaDesdeAssets() {
+    fetch('assets/images/firma-prueba.png')
+      .then(res => res.blob())
+      .then(blob => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          this.firmaGerenteBase64 = reader.result as string;
+          this.generarPdfBlob();
+        };
+        reader.readAsDataURL(blob);
+      });
   }
 
   private normalizarProductos(data: any[]): any[] {
@@ -706,7 +715,7 @@ export class PdfOrdenCompra {
         this.selectAnexo.set(this.listAnexo()[0].fases[1].anexos[2])
         this.closeDrawer()
         if (this.selectAnexo().nombre == 'Orden Firmada') {
-          
+
           this.actionOrdenFirmada.set('ENVIAR CORREO')
           console.log(this.actionOrdenFirmada());
           // this.actionOrdenCompraCarpeta.set('archivoAsignado')

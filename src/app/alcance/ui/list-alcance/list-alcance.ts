@@ -10,10 +10,15 @@ import { UiButtonComponent } from "@/core/components/ui-button/ui-button.compone
 import { UiLoadingProgressBarComponent } from "@/core/components/ui-loading-progress-bar/ui-loading-progress-bar.component";
 import { AddEditAlcance } from "../add-edit-alcance/add-edit-alcance";
 import { UiCardNotItemsComponent } from "@/core/components/ui-card-not-items/ui-card-not-items.component";
+import { ButtonModule } from "primeng/button";
+import { DividerModule } from "primeng/divider";
+import { TagModule } from "primeng/tag";
+import { TooltipModule } from 'primeng/tooltip';
+import { UiIconButton } from "@/core/components/ui-icon-button/ui-icon-button";
 
 @Component({
   selector: 'app-list-alcance',
-  imports: [CommonModule, Card, UiButtonComponent, UiLoadingProgressBarComponent, AddEditAlcance, UiCardNotItemsComponent],
+  imports: [CommonModule, Card, UiButtonComponent, TooltipModule, UiLoadingProgressBarComponent, AddEditAlcance, UiCardNotItemsComponent, ButtonModule, DividerModule, TagModule, UiIconButton],
   templateUrl: './list-alcance.html',
   styleUrl: './list-alcance.scss'
 })

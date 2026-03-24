@@ -1,64 +1,124 @@
 @if (loading) {
 <ui-loading-progress-bar></ui-loading-progress-bar>
 }
-<div class="flex justify-content-end mb-4">
-<ui-button label="Agregar Alcance" icon="pi pi-plus" severity="primary" raised
-    (onClick)="seleccionarAlcance(selectAlcanceDefault)">
-</ui-button>
-</div>
 
-@if (listAlcance().length > 0) {
+<div class="grid">
 
-<div class="flex flex-wrap gap-4">
-    @for (alcance of listAlcance(); track $index) {
-    <app-card [showHeader]="false" 
-        cardClass="w-12 h-18rem surface-card shadow-2 border-round-xl p-4 hover:shadow-4 transition-all">
-        <div class="flex flex-column h-full justify-between">
+    <!-- Cards de alcances existentes -->
+    @for (alcance of listAlcance(); track alcance.id) {
+    <div class="col-12 md:col-6 lg:col-4 xl:col-3">
+        <div class="
+        surface-card
+        border-round-xl
+        border-1 surface-border
+        h-full
+        flex flex-column
+        p-4
+        transition-all transition-duration-200
+        hover:shadow-3
+        hover:border-primary-300
+      " style="min-height: 220px;">
 
-            <div class="flex flex-column gap-3">
-
-                <div class="flex align-items-center gap-2">
-                    <i class="pi pi-map-marker text-primary text-2xl"></i>
-                    <span class="text-lg font-semibold uppercase">
+            <!-- Header de la card -->
+            <div class="flex align-items-start justify-content-between mb-3">
+                <div class="flex align-items-center gap-2 flex-1 min-w-0">
+                    <div class="
+              w-2rem h-2rem flex-shrink-0
+              border-circle
+              bg-primary-100
+              flex align-items-center justify-content-center
+            ">
+                        <i class="pi pi-map-marker text-primary text-sm"></i>
+                    </div>
+                    <span
+                        class="font-bold text-900 text-base uppercase white-space-nowrap overflow-hidden text-overflow-ellipsis">
                         {{ alcance.descripcion }}
                     </span>
                 </div>
+                <p-tag value="Activo" severity="success" styleClass="text-xs flex-shrink-0 ml-2"> </p-tag>
+            </div>
 
-                <div class="flex align-items-center gap-2">
-                    <i class="pi pi-home text-color-secondary"></i>
-                    <span class="text-color-secondary text-sm">
+            <!-- Datos del alcance -->
+            <div class="flex flex-column gap-2 flex-1">
+
+                <div class="flex align-items-start gap-2">
+                    <i class="pi pi-building text-color-secondary text-sm mt-1 flex-shrink-0"></i>
+                    <span class="text-color-secondary text-sm line-height-3">
                         {{ alcance.direccion }}
                     </span>
                 </div>
 
                 <div class="flex align-items-center gap-2">
-                    <i class="pi pi-compass text-color-secondary"></i>
-                    <span class="text-color-secondary text-sm">
+                    <i class="pi pi-compass text-color-secondary text-sm flex-shrink-0"></i>
+                    <span
+                        class="text-color-secondary text-xs font-mono white-space-nowrap overflow-hidden text-overflow-ellipsis"
+                        [pTooltip]="alcance.coordenada" tooltipPosition="bottom">
                         {{ alcance.coordenada }}
                     </span>
                 </div>
+
             </div>
 
-            <div class="border-top-1 surface-border my-4"></div>
+            <p-divider styleClass="my-3"></p-divider>
 
-            <div class="flex align-items-center gap-4">
-                <ui-button icon="pi pi-pencil" tooltip="Editar" color="info" rounded (onClick)="seleccionarAlcance(alcance)">
-                </ui-button>
+            <!-- Acciones -->
+            <div class="flex align-items-center justify-content-between">
 
-                <ui-button icon="pi pi-trash"  tooltip="Eliminar" color="danger" rounded (onClick)="confirmEliminarAlcance(alcance)">
-                </ui-button>
-                <ui-button icon="pi pi-eye" tooltip="Ver Almacén" (onClick)="seleccionarAlcanceEmit(alcance)"></ui-button>
+                <div class="flex align-items-center gap-1">
+                    <ui-icon-button icon="pi pi-pencil" tooltip="Editar alcance" (onClick)="seleccionarAlcance(alcance)"></ui-icon-button>
+                    <ui-icon-button icon="pi pi-trash" tooltip="Eliminar alcance" color="danger" (onClick)="confirmEliminarAlcance(alcance)"></ui-icon-button>
+                </div>
+
+                <p-button label="Ver Almacenes" icon="pi pi-arrow-right" iconPos="right" severity="primary" size="small"
+                    [text]="true" (onClick)="seleccionarAlcanceEmit(alcance)">
+                </p-button>
+
             </div>
 
         </div>
-    </app-card>
+    </div>
     }
-</div>
-}
-@else {
-    <ui-card-not-items text="No se encuentran alcances disponibles"></ui-card-not-items>
-}
 
+    <!-- Card para AGREGAR NUEVO ALCANCE -->
+    <div class="col-12 md:col-6 lg:col-4 xl:col-3">
+        <div class="
+        border-2 border-dashed border-primary-300
+        border-round-xl
+        h-full
+        flex flex-column align-items-center justify-content-center
+        gap-3
+        p-5
+        cursor-pointer
+        transition-all transition-duration-200
+        hover:bg-primary-50 hover:border-primary
+        text-primary-400 hover:text-primary
+      " style="min-height: 220px;" (click)="seleccionarAlcance(selectAlcanceDefault)">
+
+            <div class="
+        w-4rem h-4rem
+        border-circle
+        border-2 border-dashed border-primary-300
+        flex align-items-center justify-content-center
+        transition-all transition-duration-200
+      ">
+                <i class="pi pi-plus text-2xl"></i>
+            </div>
+
+            <div class="text-center">
+                <p class="font-semibold text-base m-0">Nuevo Alcance</p>
+                <p class="text-sm text-color-secondary m-0 mt-1">Agregar punto de distribución</p>
+            </div>
+
+        </div>
+    </div>
+
+    @if (listAlcance().length === 0 && !loading) {
+    <div class="col-12">
+        <ui-card-not-items text="No se encuentran alcances disponibles"></ui-card-not-items>
+    </div>
+    }
+
+</div>
 
 @if (visibleAddEditAlcance) {
 <app-add-edit-alcance [(visible)]="visibleAddEditAlcance"></app-add-edit-alcance>

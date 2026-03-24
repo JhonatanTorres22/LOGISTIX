@@ -10,15 +10,19 @@ export class ListarCronograma {
         public monto: number,
         public fecha: string,
         public comprobante: File | null,
-        public tipoDocumentoTributario : string,
+        public tipoDocumentoTributario: string,
         public informeProveedor: File | null,
-        public informeResponsable : File | null,
-        public documentoTributario : File |null,
-        public observacion : string,
+        public informeResponsable: File | null,
+        public documentoTributario: File | null,
+        public observacion: string,
         public conceptoTributario: string,
-        public estado : number,
+        public fechaPagoRealizado: string,
+        public tipoPago: string,
+        public estado: number,
+        public tipoObservacion: string,
         public edit?: boolean,
-        public uploadTipo?: 'comprobante' | 'docTributario' | 'infProveedor' |'infResponsable'| null
+        public uploadTipo?: 'comprobante' | 'docTributario' | 'infProveedor' | 'infResponsable' | null,
+        public editarPago?: boolean
     ) { }
 }
 
@@ -28,27 +32,31 @@ export interface InsertarCronogramaPago {
     monto: number,
     conceptoTributario: string,
     tipoDocumentoTributario: string,
-    idAnexoPorFaseOrdenCompra : number
+    idAnexoPorFaseOrdenCompra: number
 
 }
 export type EditarCronograma = Omit<InsertarCronogramaPago, 'idAnexoPorFase' | 'idAnexoPorFaseOrdenCompra'> & Pick<ListarCronograma, 'idCronogramaPagoProveedor'>
 export type EliminarCronograma = Pick<ListarCronograma, 'idCronogramaPagoProveedor'>
 
 export interface ActualizarComprobanteCronograma {
-cronogramaPagoProveedor_ActualizarComprobante: {
+    cronogramaPagoProveedor_ActualizarComprobante: {
         CodigoCronogramaPagoProveedor: number
     },
     comprobante: File
 }
 
 export interface ActualizarComprobanteFactura {
-    cronogramaPagoProveedor_ActualizarFactura : {
+    cronogramaPagoProveedor_ActualizarFactura: {
         CodigoCronogramaPagoProveedor: number
     },
-    comprobante : File
+    comprobante: File
 }
 
-export type ObservarCronogramaPago = Pick<ListarCronograma, 'idCronogramaPagoProveedor'> & {observacion : string}
+export type ObservarCronogramaPago = Pick<ListarCronograma, 'idCronogramaPagoProveedor'> &
+{
+    observacion: string,
+    tipoObservacion: string
+}
 export type AprobarCronogramaPago = Pick<ListarCronograma, 'idCronogramaPagoProveedor'>
 
 
@@ -75,13 +83,40 @@ export interface ComprobantePorCargar {
 
 
 export interface DataDocTributarioPorAprobar {
-  data: DocTributarioPorAprobar[]
-  isSuccess: boolean
-  message: string
-  errors: any
+    data: DocTributarioPorAprobar[]
+    isSuccess: boolean
+    message: string
+    errors: any
 }
 
 export type DocTributarioPorAprobar = ComprobantePorCargar & {
     documentoTributario: string
     estadoProceso: number
+}
+
+
+export interface ActualizarPagoRealizado {
+    idCronogramaPagoProveedor: number,
+    fechaRealizado: string,
+    tipoPago: string
+}
+
+
+export interface DataPagosRealizados {
+    data: ListarPagosRealizados[]
+    isSuccess: boolean
+    message: string
+    errors: any
+}
+
+export interface ListarPagosRealizados {
+    idCronogramaPagoProveedor : number
+    conceptoCronograma : string,
+    fechaPagoCronograma : string,
+    tipoDocumento: string
+    nombreProveedor: string,
+    monto: number,
+    alcance : string
+    fechaPagoRealizado: string,
+    tipoPago: string
 }

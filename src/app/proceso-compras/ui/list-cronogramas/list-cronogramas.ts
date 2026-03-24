@@ -1,5 +1,5 @@
 import { ApiError, ApiResponse } from '@/core/interceptors/error-message.model';
-import { AprobarCronogramaPago, DataCronograma, EliminarCronograma, InsertarCronogramaPago, ListarCronograma, ObservarCronogramaPago } from '@/proceso-compras/domain/models/cronograma.model';
+import { ActualizarPagoRealizado, AprobarCronogramaPago, DataCronograma, EliminarCronograma, InsertarCronogramaPago, ListarCronograma, ObservarCronogramaPago } from '@/proceso-compras/domain/models/cronograma.model';
 import { CronogramaRepository } from '@/proceso-compras/domain/repository/cronograma.repository';
 import { CommonModule } from '@angular/common';
 import { Component, effect, EventEmitter, inject, Input, OnInit, Output, signal } from '@angular/core';
@@ -28,10 +28,13 @@ import { Observable } from 'rxjs';
 import { SolicitudCompraRepository } from '@/proceso-compras/domain/repository/solicitud-compra.repository';
 import { OrdenCompraDetalleSignal } from '@/proceso-compras/domain/signals/ordenCompraDetalle.signal';
 import { OrdenCarpetaSignal } from '@/panel-solicitudes/domain/signals/orden-carpetas.signal';
+import { UiIconButton } from "@/core/components/ui-icon-button/ui-icon-button";
+import { TagModule } from "primeng/tag";
+import { AuthService } from '@/auth/infraestructure/services/auth.service';
 
 @Component({
   selector: 'app-list-cronogramas',
-  imports: [FormsModule, ReactiveFormsModule, CommonModule, UiInputComponent, UploadFileComponent, UiDatePicker, DialogModule, UiSelectComponent, UiButtonComponent, FieldsetModule, DataViewModule, CheckboxModule, ButtonModule, UiLoadingProgressBarComponent, ListCarpetas],
+  imports: [FormsModule, ReactiveFormsModule, CommonModule, UiInputComponent, UploadFileComponent, UiDatePicker, DialogModule, UiSelectComponent, UiButtonComponent, FieldsetModule, DataViewModule, CheckboxModule, ButtonModule, UiLoadingProgressBarComponent, ListCarpetas, UiIconButton, TagModule],
   templateUrl: './list-cronogramas.html',
   styleUrl: './list-cronogramas.scss'
 })
@@ -62,6 +65,9 @@ export class ListCronogramas implements OnInit {
   private signal = inject(OrdenCompraDetalleSignal)
   listOrdenCompra = this.signal.listOrdenCompraDetalle
 
+  private userService = inject(AuthService)
+  userData = this.userService.getUserData()
+
   collapsedId = signal<number | null>(null);
   cronogramaForm: FormGroup
 
@@ -71,6 +77,7 @@ export class ListCronogramas implements OnInit {
 
   archivoObservandoId: number | null = null
   observarForm: FormGroup
+  pagoRealizadoForm: FormGroup
   private carpetaSignal = inject(CarpetaSignal)
   actionCarpeta = this.carpetaSignal.actionCarpeta
 
@@ -79,6 +86,20 @@ export class ListCronogramas implements OnInit {
   actionOrdenCompra = this.signal.actionOrdenCompra
   visibleCarpeta: boolean = false
   idAnexoPorFaseCronograma: number = 0
+
+  listTipoObservacion: UiSelect[] = [
+    { text: 'ADJUNTAR GUÍA', value: 'ADJUNTAR GUÍA' },
+    { text: 'FIRMAR DOCUMENTOS', value: 'FIRMAR DOCUMENTOS' },
+    { text: 'ADJUNTAR SUSPENSIÓN DE 4TA', value: 'ADJUNTAR SUSPENSIÓN DE 4TA' },
+    { text: 'ADJUNTAR SUSPENSIÓN DE 4TA', value: 'ADJUNTAR SUSPENSIÓN DE 4TA' },
+    { text: 'OTROS', value: 'OTROS' },
+  ]
+
+  listTipoPago: UiSelect[] = [
+    { text: 'TRANSFERENCIA', value: 'TRANSFERENCIA' },
+    { text: 'CHEQUE', value: 'CHEQUE' }
+
+  ]
   constructor() {
     this.cronogramaForm = new FormGroup({
       cuotas: new FormControl(null),
@@ -92,7 +113,13 @@ export class ListCronogramas implements OnInit {
     })
 
     this.observarForm = new FormGroup({
-      observacion: new FormControl('', [Validators.required, Validators.minLength(7)])
+      observacion: new FormControl('', [Validators.required, Validators.minLength(7)]),
+      tipoObservacion: new FormControl('', [Validators.required])
+    })
+
+    this.pagoRealizadoForm = new FormGroup({
+      fechaPagoRealizado: new FormControl('', [Validators.required]),
+      tipoPago: new FormControl('', [Validators.required])
     })
 
     effect(() => {
@@ -145,37 +172,37 @@ export class ListCronogramas implements OnInit {
   modoArchivo: 'CREAR' | 'EDITAR' | null = null;
   // guardarArchivo = () => {
   //  console.log(this.selectCronograma());
-   
+
   //   if (!this.modoArchivo) return;
   //   this.idAnexoPorFaseCronograma = this.selectArchivoAnexo().idAnexosPorFase
   //   console.log(this.idAnexoPorFaseCronograma);
-    
+
   //   this.modoArchivo == 'CREAR'
   //     ? this.visibleCarpeta = true
   //   : this.actualizarArchivoCronograma()
   // }
   guardarArchivo = () => {
-  const lista = this.listCronograma();
-  console.log(lista);
+    const lista = this.listCronograma();
+    console.log(lista);
 
-  if (!this.modoArchivo) return;
+    if (!this.modoArchivo) return;
 
-  this.idAnexoPorFaseCronograma = this.selectArchivoAnexo().idAnexosPorFase;
-  console.log(this.idAnexoPorFaseCronograma);
+    this.idAnexoPorFaseCronograma = this.selectArchivoAnexo().idAnexosPorFase;
+    console.log(this.idAnexoPorFaseCronograma);
 
-  const hayAlgunArchivo = lista.some(item =>
-    item.comprobante ||
-    item.documentoTributario ||
-    item.informeProveedor ||
-    item.informeResponsable
-  );
+    const hayAlgunArchivo = lista.some(item =>
+      item.comprobante ||
+      item.documentoTributario ||
+      item.informeProveedor ||
+      item.informeResponsable
+    );
 
-  if (hayAlgunArchivo) {
-    this.actualizarArchivoCronograma();
-  } else {
-    this.visibleCarpeta = true;
-  }
-};
+    if (hayAlgunArchivo) {
+      this.actualizarArchivoCronograma();
+    } else {
+      this.visibleCarpeta = true;
+    }
+  };
 
   activarAnexoCronograma = () => {
     this.loading = true
@@ -344,10 +371,10 @@ export class ListCronogramas implements OnInit {
         this.cronogramaForm.get('cuotas')?.reset();
         this.cronogramaForm.get('tipoDocumento')?.reset();
         this.obtenerCronograma();
-        
+
         this.actionOrdenCompra.set(true)
         console.log('listar orden compra detalle');
-        
+
       },
       error: (err: ApiError) => {
         this.alert.showAlert(`${err.userMessage}`, 'error');
@@ -600,13 +627,15 @@ export class ListCronogramas implements OnInit {
     this.loading = true
     let observarCronograma: ObservarCronogramaPago = {
       idCronogramaPagoProveedor: cronograma.idCronogramaPagoProveedor,
-      observacion: this.observarForm.value.observacion
+      observacion: this.observarForm.value.observacion,
+      tipoObservacion: this.observarForm.value.tipoObservacion
     }
     console.log(observarCronograma, 'observar')
     this.repository.observarCronogramaPago(observarCronograma).subscribe({
       next: (data: ApiResponse) => {
         this.alert.showAlert(`Cronograma observado, ${data.message}`, 'success')
         cronograma.observacion = this.observarForm.value.observacion
+        cronograma.tipoObservacion = this.observarForm.value.tipoObservacion
         this.loading = false
         this.cancelarObservacion()
         this.obtenerCronograma()
@@ -619,6 +648,45 @@ export class ListCronogramas implements OnInit {
     })
   }
 
+  esFechaVacia(fecha: string): boolean {
+    if (!fecha) return true;
+    const d = new Date(fecha);
+    return d.getFullYear() <= 1;
+  }
+
+  toggleEditPago = (cronograma: ListarCronograma) => {
+    cronograma.editarPago = true;
+  }
+
+  cancelarEditPago = (cronograma: ListarCronograma) => {
+    cronograma.editarPago = false;
+  }
+
+  guardarTipoPago = (cronograma: ListarCronograma) => {
+    this.loading = true
+    let pagoRealizado: ActualizarPagoRealizado = {
+      fechaRealizado: this.pagoRealizadoForm.value.fechaPagoRealizado,
+      idCronogramaPagoProveedor: cronograma.idCronogramaPagoProveedor,
+      tipoPago: this.pagoRealizadoForm.value.tipoPago
+    }
+    console.log(pagoRealizado, 'pago realizado');
+
+    this.repository.actualizarPagoRealizado(pagoRealizado).subscribe({
+      next: (res: ApiResponse) => {
+        this.loading = false
+        this.alert.showAlert(`Guardado, ${res.message}`, 'success')
+        cronograma.fechaPagoRealizado = this.pagoRealizadoForm.value.fechaPagoRealizado
+        cronograma.tipoPago = this.pagoRealizadoForm.value.tipoPago
+        this.cancelarEditPago(cronograma)
+      },
+      error: (err: ApiError) => {
+        this.loading = false
+        this.alert.showAlert(`Error al guardar, ${err.error.message}`, 'error')
+      }
+    })
+  }
+
+
   verArchivoCronograma = (
     cronograma: ListarCronograma,
     campo: 'comprobante' | 'documentoTributario' | 'informeProveedor' | 'informeResponsable'
@@ -626,8 +694,15 @@ export class ListCronogramas implements OnInit {
     const archivo = cronograma[campo];
     if (!archivo) return;
 
+    const carpetas = {
+      comprobante: 'comprobantes',
+      documentoTributario: 'documentosTributarios',
+      informeProveedor: 'informesProveedores',
+      informeResponsable: 'informesResponsables',
+    };
+
     window.open(
-      `${environment.EndPoint}/wwwroot/Cronograma/${archivo}`,
+      `${environment.EndPoint}/wwwroot/${carpetas[campo]}/${archivo}`,
       '_blank'
     );
   };

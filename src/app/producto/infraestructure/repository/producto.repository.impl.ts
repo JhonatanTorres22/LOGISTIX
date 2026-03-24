@@ -3,7 +3,7 @@ import { CrearProducto, DataProducto, EditarProducto, EliminarProducto, Producto
 import { ProductoRepository } from "../../domain/repository/producto.repository";
 import { ProductoService } from "../services/producto.service";
 import { Injectable } from "@angular/core";
-import { DataProductoDTO } from "../dto/producto.dto";
+import { DataProductoDTO, DataProductosNoValidos } from "../dto/producto.dto";
 
 @Injectable({
     providedIn: 'root'
@@ -31,5 +31,10 @@ export class ProductoRepositoryImpl implements ProductoRepository {
     }
     crearMasivo  (producto: CrearProducto[]): Observable<ResponseProducto> {
         return this.service.crearMasivo(producto)
+    }
+
+    /* PRODUCTOS NO VÁLIDOS */
+    obtenerProductosNoValidos(): Observable<DataProductosNoValidos> {
+        return this.service.obtenerNoValidos()
     }
 }

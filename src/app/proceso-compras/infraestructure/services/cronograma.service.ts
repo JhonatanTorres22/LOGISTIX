@@ -1,9 +1,9 @@
-import { AprobarCronogramaPago, DataComprobantePorCargar, DataCronograma, DataDocTributarioPorAprobar, EditarCronograma, EliminarCronograma, InsertarCronogramaPago, ObservarCronogramaPago } from "@/proceso-compras/domain/models/cronograma.model";
+import { ActualizarPagoRealizado, AprobarCronogramaPago, DataComprobantePorCargar, DataCronograma, DataDocTributarioPorAprobar, DataPagosRealizados, EditarCronograma, EliminarCronograma, InsertarCronogramaPago, ObservarCronogramaPago } from "@/proceso-compras/domain/models/cronograma.model";
 import { HttpClient } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
 import { map, Observable } from "rxjs";
 import { environment } from "src/environments/environment";
-import { DataComprobantePorCargarDTO, DataCronogramaDTO, DataDocTributarioPorAprobarDTO } from "../dto/cronograma.dto";
+import { DataComprobantePorCargarDTO, DataCronogramaDTO, DataDocTributarioPorAprobarDTO, DataPagosRealizadosDTO } from "../dto/cronograma.dto";
 import { ApiResponse } from "@/core/interceptors/error-message.model";
 import { CronogramaMapper } from "@/proceso-compras/domain/mapper/cronograma.mapper";
 
@@ -29,6 +29,10 @@ export class CronogramaService {
   private urlListarDocTributarioPorAprobar : string = '/api/CronogramaPagoProveedor/DocumentosTributariosPorAprobar'
   private urlListarComprobantePorCargar : string = '/api/CronogramaPagoProveedor/ComprobantesPorCargar'
 
+
+  private urlActualizarPagoRealizado : string = '/api/CronogramaPagoProveedor/ActualizarPagoRealizado'
+  /* PAGOS REALIZADOS*/
+  private urlListarPagosRealizados : string = '/api/CronogramaPagoProveedor/ListarPagoRealizado'
   obtenerCronograma = (id: number): Observable<DataCronograma> => {
     return this.http.get<DataCronogramaDTO>(this.urlApi + this.urlListarCronograma + id)
       .pipe(map(api => CronogramaMapper.toDomainData(api)))
@@ -85,5 +89,17 @@ export class CronogramaService {
   obtenerComprobantePorCargar = (): Observable<DataComprobantePorCargar> => {
     return this.http.get<DataComprobantePorCargarDTO>(this.urlApi + this.urlListarComprobantePorCargar)
       .pipe(map(api => CronogramaMapper.toDomainDataComprobantePorCargar(api)))
+  }
+
+
+  actualizarPagoRealizado = (actualizarPagoRealizado : ActualizarPagoRealizado) : Observable<ApiResponse> => {
+    const updatePagoRealizado = CronogramaMapper.toApiActualizarPago(actualizarPagoRealizado)
+    return this.http.put<ApiResponse>(this.urlApi + this.urlActualizarPagoRealizado, updatePagoRealizado)
+  }
+
+  /* PAGOS REALIZADOS */
+  obtenerPagosRealizados = (): Observable<DataPagosRealizados> =>{
+    return this.http.get<DataPagosRealizadosDTO>(this.urlApi + this.urlListarPagosRealizados)
+    .pipe(map(api => CronogramaMapper.toDomainDataPagosRealizados(api)))
   }
 }

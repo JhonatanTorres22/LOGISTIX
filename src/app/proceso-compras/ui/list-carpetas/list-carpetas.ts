@@ -13,6 +13,7 @@ import { RadioButtonModule } from "primeng/radiobutton";
 import { FormsModule } from '@angular/forms';
 import { AnexoPorFaseSignal } from '@/proceso-compras/domain/signals/anexoPorFase.signal';
 import { finalize } from 'rxjs';
+import { ApiError } from '@/core/interceptors/error-message.model';
 
 @Component({
   selector: 'app-list-carpetas',
@@ -143,8 +144,10 @@ export class ListCarpetas implements OnInit {
               }
               this.closeDialog();
             },
-            error: err => {
-              this.alert.showAlert(`Error al crear, ${err.userMessage}`, 'error');
+            error: (err: ApiError) => {
+              console.log(err);
+              
+              this.alert.showAlert(`Error al crear, ${err.error.message}`, 'error');
             }
           });
       });
@@ -224,6 +227,7 @@ export class ListCarpetas implements OnInit {
   closeDialog(): void {
     this.visible = false;
     this.visibleChange.emit(false);
+    this.selectCarpeta.set(this.selectCarpetaDefult)
   }
 
   ngOnDestroy(): void {

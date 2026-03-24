@@ -32,3 +32,30 @@ export interface DataProductoDTO {
     message: string,
     errors: null | string
 }
+
+/* PRODUCTOS NO VÁLIDOS */
+
+export interface DataProductosNoValidos {
+    data : ListarProductosNoValidos[],
+    isSuccess: boolean,
+    message: string,
+    errors: null | string
+}
+
+export interface ListarProductosNoValidos {
+    idProductoServicio : number,
+    nombreProductoServicio : string,
+    url : string,
+    proveedores: ListarProveedoresProductosNoValidos[]
+}
+
+export interface ListarProveedoresProductosNoValidos {
+    idProveedor: number,
+    nombreProveedor : string,
+    precioReferencial : number,
+    estadoEvaluacion : string
+}
+
+export interface ProductoFiltroInterno extends ListarProductosNoValidos {
+  // Sin campos extra: se muestra el array proveedores[] directamente en la fila expandida
+}

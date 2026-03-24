@@ -1,0 +1,151 @@
+<p-card>
+    <ng-template pTemplate="title">LISTA DE PRODUCTOS NO VÁLIDOS</ng-template>
+
+    <!-- TOOLBAR -->
+    <div class="flex flex-wrap align-items-center gap-2 pb-3">
+
+        <p-iconfield class="flex-1">
+            <p-inputicon styleClass="pi pi-search" />
+            <input pInputText type="text" placeholder="Buscar producto..." [ngModel]="globalFilterValue"
+                (ngModelChange)="globalFilterValue = $event" class="w-full" />
+        </p-iconfield>
+
+        <p-select [options]="proveedoresOptions()" [ngModel]="selectedProveedorValue"
+            (ngModelChange)="selectedProveedorValue = $event" optionLabel="label" optionValue="value"
+            placeholder="Proveedor" [showClear]="true" styleClass="w-13rem" />
+
+        <p-select [options]="estadosOptions" [ngModel]="selectedEstadoValue"
+            (ngModelChange)="selectedEstadoValue = $event" optionLabel="label" optionValue="value" placeholder="Estado"
+            [showClear]="true" styleClass="w-9rem" />
+
+        <div class="flex align-items-center gap-2 ml-auto">
+            <ui-button icon="pi pi-filter-slash" label="Limpiar" color="secondary"
+                (onClick)="clearFilters()"></ui-button>
+
+            <ui-button [icon]="allExpanded ? 'pi pi-minus-circle' : 'pi pi-plus-circle'"
+                [label]="allExpanded ? 'Colapsar todo' : 'Expandir todo'" color="secondary"
+                (onClick)="allExpanded ? collapseAll() : expandAll()" size="small"></ui-button>
+
+            <ui-button icon="pi pi-file-excel" label="Exportar Excel" color="success" (onClick)="exportToExcel()">
+            </ui-button>
+
+        </div>
+    </div>
+
+    <!-- CONTADOR -->
+    <div class="flex align-items-center gap-2 pb-2">
+        <p-badge [value]="productosFiltrados().length.toString()" severity="info" />
+        <span class="text-sm text-color-secondary">productos</span>
+        @if (hasActiveFilters) {
+        <span class="text-sm text-primary flex align-items-center gap-1">
+            <i class="pi pi-filter-fill" style="font-size:.75rem"></i> Filtros activos
+        </span>
+        }
+    </div>
+
+    @if (loading) {
+    <div class="flex flex-column gap-2">
+        <p-skeleton height="2.5rem" *ngFor="let i of [1,2,3,4,5]" />
+    </div>
+    }
+
+    @if (!loading) {
+    <p-table [value]="productosFiltrados()" dataKey="idProductoServicio" [expandedRowKeys]="expandedRows"
+        (onRowExpand)="onRowExpand($event)" (onRowCollapse)="onRowCollapse($event)" [rowTrackBy]="trackById"
+        [paginator]="true" [rows]="15" [rowsPerPageOptions]="[15, 30, 50, 100]" [showCurrentPageReport]="true"
+        currentPageReportTemplate="{first}-{last} de {totalRecords} productos" [rowHover]="true"
+        styleClass="p-datatable-sm">
+
+        <ng-template #header>
+            <tr>
+                <th style="width:3.5rem"></th>
+                <th style="width:8rem" pSortableColumn="url">Imagen </th>
+                <th pSortableColumn="nombreProductoServicio">
+                    Producto <p-sortIcon field="nombreProductoServicio" />
+                </th>
+                <th style="width:8rem; text-align:center">Proveedores</th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-producto let-expanded="expanded">
+            <tr>
+                <td class="text-center">
+                    <p-button [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'" severity="secondary"
+                        [text]="true" size="small" [pRowToggler]="producto" />
+                </td>
+                <td>
+                    <p-image [src]="producto.url" alt="Image" width="35" [preview]="true" />
+                </td>
+                <td>
+                    <span class="product-name" tooltipPosition="top">
+                        {{ producto.nombreProductoServicio }}
+                    </span>
+                </td>
+                <td class="text-center">
+                    <p-badge [value]="producto.proveedores.length.toString()"
+                        [severity]="producto.proveedores.length > 1 ? 'info' : 'secondary'" />
+                </td>
+                <!-- <td class="text-right">
+               <span class="font-semibold">
+                 S/ {{ getPrecioMin(producto.proveedores) | number:'1.2-2' }}
+               </span>
+             </td> -->
+            </tr>
+        </ng-template>
+
+        <!-- ROW EXPANSION -->
+        <ng-template #expandedrow let-producto>
+            <tr>
+                <td colspan="4" class="p-0">
+                    <div class="expansion-panel">
+                        <!-- <p class="text-sm text-color-secondary flex align-items-center gap-1 mb-2">
+                   <i class="pi pi-building"></i>
+                   Proveedores de <strong class="text-color ml-1">{{ producto.nombreProductoServicio }}</strong>
+                 </p> -->
+                        <p-table [value]="producto.proveedores" styleClass="p-datatable-sm" [showGridlines]="false">
+                            <ng-template pTemplate="header">
+            <tr>
+                <th>Proveedor</th>
+                <th style="width:10rem; text-align:right">Precio Ref.</th>
+                <th style="width:10rem; text-align:center">Estado</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-prov>
+            <tr>
+                <td>
+                    <div class="flex align-items-center gap-2">
+                        <i class="pi pi-user text-color-secondary" style="font-size:.75rem"></i>
+                        <span class="text-sm">{{ prov.nombreProveedor }}</span>
+                    </div>
+                </td>
+                <td class="text-right text-sm font-medium">
+                    S/ {{ prov.precioReferencial | number:'1.2-2' }}
+                </td>
+                <td class="text-center">
+                    <p-tag [value]="prov.estadoEvaluacion" [severity]="getEstadoSeverity(prov.estadoEvaluacion)"
+                        [icon]="getEstadoIcon(prov.estadoEvaluacion)" />
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+    </div>
+    </td>
+    </tr>
+    </ng-template>
+
+    <!-- EMPTY -->
+    <ng-template pTemplate="emptymessage">
+        <tr>
+            <td colspan="4">
+                <div class="flex flex-column align-items-center gap-3 py-6 text-color-secondary">
+                    <i class="pi pi-inbox" style="font-size:2.5rem"></i>
+                    <span class="text-sm">No hay productos con los filtros aplicados.</span>
+                    <p-button *ngIf="hasActiveFilters" label="Limpiar filtros" icon="pi pi-refresh" severity="secondary"
+                        [outlined]="true" size="small" (onClick)="clearFilters()" />
+                </div>
+            </td>
+        </tr>
+    </ng-template>
+    </p-table>
+    }
+</p-card>

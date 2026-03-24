@@ -9,10 +9,15 @@ import { UiCardNotItemsComponent } from "@/core/components/ui-card-not-items/ui-
 import { UiLoadingProgressBarComponent } from "@/core/components/ui-loading-progress-bar/ui-loading-progress-bar.component";
 import { ListarAlmacen } from '@/alcance/domain/models/almacen.model';
 import { AlertService } from 'src/assets/demo/services/alert.service';
+import { ButtonModule } from "primeng/button";
+import { DividerModule } from "primeng/divider";
+import { TagModule } from "primeng/tag";
+import { TooltipModule } from 'primeng/tooltip';
+import { UiIconButton } from "@/core/components/ui-icon-button/ui-icon-button";
 
 @Component({
   selector: 'app-list-almacen',
-  imports: [CommonModule, Card, UiButtonComponent, UiCardNotItemsComponent, UiLoadingProgressBarComponent],
+  imports: [CommonModule, UiCardNotItemsComponent, UiLoadingProgressBarComponent, ButtonModule, DividerModule, TagModule, UiIconButton],
   templateUrl: './list-almacen.html',
   styleUrl: './list-almacen.scss'
 })
