@@ -15,7 +15,10 @@ export interface ListarCronogramaDTO {
     informeResponsable: File | null,
     comprobante: File | null,
     observacion: string,
+    tipoObservacion : string
     estadoProceso: number,
+    fechaPagoRealizado: string,
+    tipoPago : string
 }
 
 export interface InsertarCronogramaPagoDTO {
@@ -35,7 +38,10 @@ export interface ActualizarComprobanteCronogramaDTO {
     comprobante: File
 }
 
-export type ObservarCronogramaPagoDTO = Pick<ListarCronogramaDTO, 'codigoCronogramaPagoProveedor'> & { observacion: string }
+export type ObservarCronogramaPagoDTO = Pick<ListarCronogramaDTO, 'codigoCronogramaPagoProveedor'> & 
+{ observacion: string,
+    tipoObservacion : string
+ }
 export type AprobarCronogramaPagoDTO = Pick<ListarCronogramaDTO, 'codigoCronogramaPagoProveedor'>
 
 
@@ -71,3 +77,28 @@ export type DocTributarioPorAprobarDTO = ComprobantePorCargarDTO & {
     estadoProceso: number
 }
 
+export interface ActualizarPagoRealizadoDTO {
+    codigoCronogramaPagoProveedor : number,
+    fechaPagoRealizado : string,
+    tipoPago : string
+}
+
+export interface DataPagosRealizadosDTO {
+    data: ListarPagosRealizadosDTO[]
+    isSuccess: boolean
+    message: string
+    errors: any
+}
+
+export interface ListarPagosRealizadosDTO {
+    codigoCronogramaPagoProveedor: number,
+    proveedor : string,
+    concepto : string,
+    monto: number, 
+    fechaPago : string,
+    tipoDocumento: string
+    fechaPagoRealizado: string,
+    tipoPago: string,
+    alcance : string
+    // local: string,
+}

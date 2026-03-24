@@ -1,57 +1,93 @@
 @if (loading) {
-<ui-loading-progress-bar></ui-loading-progress-bar>
-}
-@else {
-  <!-- <pre> {{codigoSolicitudCompraNavbar()}} </pre> -->
-   <!-- <pre> {{listOrdenCarpeta() |json}} </pre> -->
-  <!-- <pre> {{nodes() | json}} </pre> -->
-
-@if (nodes().length > 0) {
-<div class="tree-layout" [class.collapsed]="treeCollapsed">
-
-  <div class="tree-panel">
-
-    <button class="collapse-btn" (click)="toggleTree()">
-      <i class="pi pi-bars"></i>
-    </button>
-
-    <div class="tree-container">
-      <p-tree
-        [value]="nodes()"
-        selectionMode="single"
-        (onNodeSelect)="onNodeSelect($event)"
-        styleClass="vscode-tree"
-      >
-        <ng-template let-node pTemplate="default">
-          <div class="custom-node">
-            <i [class]="getIconClass(node)"></i>
-            <span class="node-label"
-                  [class.node-sin-anexo]="node.key?.startsWith('solicitud') && node.data?.cantidadAnexo === 0"
-                  [title]="node.label">
-              {{ node.label }}
-            </span>
-          </div>
-        </ng-template>
-      </p-tree>
-    </div>
-  </div>
-
-  <div class="content-panel">
-    @if (subtarea().codigoSubTarea !== 0) {
-      <div class="empty-state">
-        <app-list-solicitud-compra [modo]="'tree'"></app-list-solicitud-compra>
-      </div>
-    } @else {
-      <div class="empty-state">
-        <ui-card-not-items text="Seleccione una solicitud de compra"></ui-card-not-items>
-      </div>
-    }
-  </div>
-
-</div>
+  <ui-loading-progress-bar></ui-loading-progress-bar>
 } @else {
-<div class="empty-state">
-  <ui-card-not-items text="No hay solicitudes pendientes"></ui-card-not-items>
+
+  <!-- <pre> {{nodes() | json}} </pre> -->
+  @if (nodes().length > 0) {
+    <div class="flex w-full h-full overflow-hidden" [class.tree-collapsed]="treeCollapsed">
+
+      <!-- PANEL IZQUIERDO -->
+      <div class="tree-panel flex flex-column border-right-1 surface-border flex-shrink-0">
+
+        <!-- Header: hamburguesa + filtros -->
+        <!-- Header: hamburguesa + filtro -->
+<div class="flex align-items-center gap-2 p-2">
+  <button class="collapse-btn" (click)="toggleTree()">
+    <i class="pi pi-bars"></i>
+  </button>
+
+  @if (!treeCollapsed) {
+    <p-select
+      [options]="estadosFiltro"
+      [(ngModel)]="filtroActivoModel"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="Todos"
+      [showClear]="true"
+      styleClass="w-full filtro-select"
+      (onChange)="onFiltroChange($event)"
+      appendTo="body"
+    >
+      <!-- Opción seleccionada (lo que se ve en el input) -->
+      <ng-template pTemplate="selectedItem" let-item>
+        <div class="flex align-items-center gap-2" *ngIf="item">
+          <i [class]="item.icon"></i>
+          <span class="text-xs">{{ item.label }}</span>
+        </div>
+      </ng-template>
+
+      <!-- Cada opción del dropdown -->
+      <ng-template pTemplate="item" let-item>
+        <div class="flex align-items-center gap-2">
+          <i [class]="item.icon"></i>
+          <span class="text-sm">{{ item.label }}</span>
+        </div>
+      </ng-template>
+    </p-select>
+  }
 </div>
-}
+
+        <!-- Tree -->
+        @if (!treeCollapsed) {
+          <div class="flex-1 overflow-y-auto overflow-x-hidden px-1">
+            <p-tree
+              [value]="nodesFiltrados()"
+              selectionMode="single"
+              (onNodeSelect)="onNodeSelect($event)"
+              styleClass="vscode-tree"
+            >
+              <ng-template let-node pTemplate="default">
+                <div class="flex align-items-start gap-2">
+                  <i [class]="getIconClass(node)" class="flex-shrink-0 mt-1"></i>
+                  <span
+                    class="node-label text-xs"
+                    [class.node-sin-anexo]="node.key?.startsWith('solicitud') && node.data?.cantidadAnexo === 0"
+                    [title]="node.label"
+                  >
+                    {{ node.label }}
+                  </span>
+                </div>
+              </ng-template>
+            </p-tree>
+          </div>
+        }
+      </div>
+
+      <!-- PANEL DERECHO -->
+      <div class="flex flex-column flex-1 min-w-0 overflow-hidden overflow-y-auto pl-3">
+        @if (subtarea().codigoSubTarea !== 0) {
+          <app-list-solicitud-compra [modo]="'tree'"></app-list-solicitud-compra>
+        } @else {
+          <div class="flex flex-1 justify-content-center align-items-center">
+            <ui-card-not-items text="Seleccione una solicitud de compra"></ui-card-not-items>
+          </div>
+        }
+      </div>
+
+    </div>
+  } @else {
+    <div class="flex flex-1 justify-content-center align-items-center">
+      <ui-card-not-items text="No hay solicitudes pendientes"></ui-card-not-items>
+    </div>
+  }
 }

@@ -1,5 +1,5 @@
-import { ActualizarComprobanteCronogramaDTO, AprobarCronogramaPagoDTO, ComprobantePorCargarDTO, DataComprobantePorCargarDTO, DataCronogramaDTO, DataDocTributarioPorAprobarDTO, DocTributarioPorAprobarDTO, EditarCronogramaDTO, EliminarCronogramaDTO, InsertarCronogramaPagoDTO, ListarCronogramaDTO, ObservarCronogramaPagoDTO } from "@/proceso-compras/infraestructure/dto/cronograma.dto";
-import { ActualizarComprobanteCronograma, AprobarCronogramaPago, ComprobantePorCargar, DataComprobantePorCargar, DataCronograma, DataDocTributarioPorAprobar, DocTributarioPorAprobar, EditarCronograma, EliminarCronograma, InsertarCronogramaPago, ListarCronograma, ObservarCronogramaPago } from "../models/cronograma.model";
+import { ActualizarComprobanteCronogramaDTO, ActualizarPagoRealizadoDTO, AprobarCronogramaPagoDTO, ComprobantePorCargarDTO, DataComprobantePorCargarDTO, DataCronogramaDTO, DataDocTributarioPorAprobarDTO, DataPagosRealizadosDTO, DocTributarioPorAprobarDTO, EditarCronogramaDTO, EliminarCronogramaDTO, InsertarCronogramaPagoDTO, ListarCronogramaDTO, ListarPagosRealizadosDTO, ObservarCronogramaPagoDTO } from "@/proceso-compras/infraestructure/dto/cronograma.dto";
+import { ActualizarComprobanteCronograma, ActualizarPagoRealizado, AprobarCronogramaPago, ComprobantePorCargar, DataComprobantePorCargar, DataCronograma, DataDocTributarioPorAprobar, DataPagosRealizados, DocTributarioPorAprobar, EditarCronograma, EliminarCronograma, InsertarCronogramaPago, ListarCronograma, ListarPagosRealizados, ObservarCronogramaPago } from "../models/cronograma.model";
 
 export class CronogramaMapper {
     static toDomainData(param: DataCronogramaDTO): DataCronograma {
@@ -23,7 +23,10 @@ export class CronogramaMapper {
             documentoTributario : param.documentoTributario,
             informeProveedor : param.informeProveedor,
             informeResponsable : param.informeResponsable,
-            tipoDocumentoTributario : param.tipoDocumento
+            tipoDocumentoTributario : param.tipoDocumento,
+            fechaPagoRealizado : param.fechaPagoRealizado,
+            tipoPago : param.tipoPago,
+            tipoObservacion : param.tipoObservacion
 
         }
     }
@@ -67,7 +70,8 @@ export class CronogramaMapper {
     static toApiObservarCronogramaPago = (param : ObservarCronogramaPago) : ObservarCronogramaPagoDTO => {
         return {
             codigoCronogramaPagoProveedor : param.idCronogramaPagoProveedor,
-            observacion : param.observacion
+            observacion : param.observacion,
+            tipoObservacion : param.tipoObservacion
         }
     }
 
@@ -127,7 +131,37 @@ export class CronogramaMapper {
         }
     }
 
+    static toApiActualizarPago (param : ActualizarPagoRealizado) : ActualizarPagoRealizadoDTO{
+        return {
+            codigoCronogramaPagoProveedor : param.idCronogramaPagoProveedor,
+            fechaPagoRealizado : param.fechaRealizado,
+            tipoPago : param.tipoPago
+        }
+    }
 
 
+    /* PAGOS NO REALIZADOS   */
+    static toDomainDataPagosRealizados = (param : DataPagosRealizadosDTO) : DataPagosRealizados =>{
+        return{
+            data : param.data.map(this.toDomainPagosRealizados),
+            errors : param.errors,
+            isSuccess : param.isSuccess,
+            message : param.message
+        }
+    }
+
+    static toDomainPagosRealizados = (param : ListarPagosRealizadosDTO ) : ListarPagosRealizados => {
+        return {
+            idCronogramaPagoProveedor : param.codigoCronogramaPagoProveedor,
+            fechaPagoRealizado : param.fechaPagoRealizado,
+            monto : param.monto,
+            nombreProveedor : param.proveedor,
+            tipoPago : param.tipoPago,
+            conceptoCronograma : param.concepto,
+            fechaPagoCronograma : param.fechaPago,
+            tipoDocumento : param.tipoDocumento,
+            alcance : param.alcance
+        }
+    }
 
 }

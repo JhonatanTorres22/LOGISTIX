@@ -1,5 +1,5 @@
 import { Observable } from "rxjs";
-import { AprobarCronogramaPago, DataComprobantePorCargar, DataCronograma, DataDocTributarioPorAprobar, EditarCronograma, EliminarCronograma, InsertarCronogramaPago, ObservarCronogramaPago } from "../models/cronograma.model";
+import { ActualizarPagoRealizado, AprobarCronogramaPago, DataComprobantePorCargar, DataCronograma, DataDocTributarioPorAprobar, DataPagosRealizados, EditarCronograma, EliminarCronograma, InsertarCronogramaPago, ObservarCronogramaPago } from "../models/cronograma.model";
 import { ApiResponse } from "@/core/interceptors/error-message.model";
 
 export abstract class CronogramaRepository {
@@ -17,4 +17,9 @@ export abstract class CronogramaRepository {
 
    abstract obtenerDocTributarioPorAprobar() : Observable<DataDocTributarioPorAprobar>
    abstract obtenerComprobantePorCargar() : Observable<DataComprobantePorCargar>
+
+   abstract actualizarPagoRealizado(actualizar: ActualizarPagoRealizado) : Observable<ApiResponse>
+
+   /* PAGOS REALIZADOS */
+   abstract obtenerPagosRealizados () : Observable<DataPagosRealizados>
 }

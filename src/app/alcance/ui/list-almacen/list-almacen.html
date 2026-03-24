@@ -1,57 +1,99 @@
 @if (loading) {
 <ui-loading-progress-bar></ui-loading-progress-bar>
 }
-@else{
-<div class="flex justify-content-end mb-4">
-    <ui-button label="Agregar Almacén" icon="pi pi-plus" severity="primary" raised>
-    </ui-button>
-</div>
 
-@if (listAlmacen().length > 0) {
-<div class="flex flex-wrap gap-4">
+<div class="grid">
+
+    <!-- Cards de almacenes -->
     @for (almacen of listAlmacen(); track $index) {
-    <app-card [showHeader]="false"
-        cardClass="w-12 h-18rem surface-card shadow-2 border-round-xl p-4 hover:shadow-4 transition-all">
-        <div class="flex flex-column h-full justify-between">
+    <div class="col-12 md:col-6 lg:col-4 xl:col-3">
+        <div class="
+        surface-card border-round-xl border-1 surface-border
+        h-full flex flex-column p-4
+        transition-all transition-duration-200
+        hover:shadow-3 hover:border-primary-300
+      " style="min-height: 180px;">
 
-            <div class="flex flex-column gap-3">
-
-                <div class="flex align-items-center gap-2">
-                    <i class="pi pi-map-marker text-primary text-2xl"></i>
-                    <span class="text-lg font-semibold uppercase">
+            <!-- Header -->
+            <div class="flex align-items-center justify-content-between mb-3 gap-2">
+                <div class="flex align-items-center gap-2 flex-1 min-w-0">
+                    <div class="
+              w-2rem h-2rem flex-shrink-0 border-circle
+              bg-primary-100
+              flex align-items-center justify-content-center
+            ">
+                        <i class="pi pi-warehouse text-primary text-sm"></i>
+                    </div>
+                    <span
+                        class="font-bold text-900 text-base uppercase white-space-nowrap overflow-hidden text-overflow-ellipsis">
                         {{ almacen.nombre }}
                     </span>
                 </div>
-
-                <div class="flex align-items-center gap-2">
-                    <i class="pi pi-home text-color-secondary"></i>
-                    <span class="text-color-secondary text-sm">
-                        {{ almacen.descripcion }}
-                    </span>
-                </div>
-
+                <p-tag value="Activo" severity="success" styleClass="text-xs flex-shrink-0"></p-tag>
             </div>
 
-            <div class="border-top-1 surface-border my-4"></div>
+            <!-- Descripción -->
+            <div class="flex align-items-start gap-2 flex-1">
+                <i class="pi pi-info-circle text-color-secondary text-sm mt-1 flex-shrink-0"></i>
+                <span class="text-color-secondary text-sm line-height-3">
+                    {{ almacen.descripcion }}
+                </span>
+            </div>
 
-            <div class="flex align-items-center gap-4">
-                <ui-button icon="pi pi-pencil" tooltip="Editar" color="info">
-                </ui-button>
+            <p-divider styleClass="my-3"></p-divider>
 
-                <ui-button icon="pi pi-trash" tooltip="Eliminar" color="danger">
-                </ui-button>
+            <!-- Acciones -->
+            <div class="flex align-items-center justify-content-between">
 
-                <ui-button (onClick)="seleccionarAlmacenEmit(almacen)" icon="pi pi-eye" tooltip="Ver Productos">
-                </ui-button>
+                <div class="flex align-items-center gap-1">
+                    <ui-icon-button icon="pi pi-pencil" tooltip="Editar almacén" ></ui-icon-button>
+                    <ui-icon-button icon="pi pi-trash" tooltip="Eliminar almacén" color="danger"></ui-icon-button>
+                </div>
+                <p-button label="Ver Productos" icon="pi pi-arrow-right" iconPos="right" severity="primary" size="small"
+                    [text]="true" (onClick)="seleccionarAlmacenEmit(almacen)">
+                </p-button>
+
             </div>
 
         </div>
-    </app-card>
+    </div>
     }
-</div>
-}
-@else {
-<ui-card-not-items text="No se encuentran almacenes disponibles"></ui-card-not-items>
-}
 
-}
+    <!-- Card agregar almacén -->
+    <div class="col-12 md:col-6 lg:col-4 xl:col-3">
+        <div class="
+        border-2 border-dashed border-primary-300
+        border-round-xl
+        h-full
+        flex flex-column align-items-center justify-content-center
+        gap-3 p-5
+        cursor-pointer
+        transition-all transition-duration-200
+        hover:bg-primary-50 hover:border-primary
+        text-primary-400 hover:text-primary
+      " style="min-height: 180px;">
+
+            <div class="
+        w-4rem h-4rem border-circle
+        border-2 border-dashed border-primary-300
+        flex align-items-center justify-content-center
+        transition-all transition-duration-200
+      ">
+                <i class="pi pi-plus text-2xl"></i>
+            </div>
+
+            <div class="text-center">
+                <p class="font-semibold text-base m-0">Nuevo Almacén</p>
+                <p class="text-sm text-color-secondary m-0 mt-1">Registrar espacio de almacenamiento</p>
+            </div>
+
+        </div>
+    </div>
+
+    @if (listAlmacen().length === 0 && !loading) {
+    <div class="col-12">
+        <ui-card-not-items text="No se encuentran almacenes disponibles"></ui-card-not-items>
+    </div>
+    }
+
+</div>

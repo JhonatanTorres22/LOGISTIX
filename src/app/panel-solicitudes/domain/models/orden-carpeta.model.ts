@@ -55,6 +55,7 @@ export class SolicitudesComprasCompletas {
        public datosActividad: string,
        public presupuesto : number,
        public total : number,
-       public cantidadAnexo: number
+       public cantidadAnexo: number,
+       public estadoSolicitud : number
     ){}
 }

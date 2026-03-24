@@ -43,3 +43,26 @@ export interface ResponseProducto{
     isSuccess: boolean;
     message: string;
 }
+
+
+/* PRODUCTOS NO VÁLIDOS */
+export interface DataProductosNoValidosDTO {
+    data : ListarProductosNoValidosDTO[],
+    isSuccess: boolean,
+    message: string,
+    errors: null | string
+}
+
+export interface ListarProductosNoValidosDTO {
+    codigoProductoServicio : number,
+    nombre : string,
+    url : string,
+    proveedores: ListarProveedoresProductosNoValidosDTO[]
+}
+
+export interface ListarProveedoresProductosNoValidosDTO {
+    codigoProveedor: number,
+    nombreLegal : string,
+    precioReferencial : number,
+    estadoEvaluacion : string
+}

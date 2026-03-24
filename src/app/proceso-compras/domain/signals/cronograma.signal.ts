@@ -1,5 +1,5 @@
 import { Injectable, signal } from "@angular/core";
-import { ComprobantePorCargar, DocTributarioPorAprobar, ListarCronograma } from "../models/cronograma.model";
+import { ComprobantePorCargar, DocTributarioPorAprobar, ListarCronograma, ListarPagosRealizados } from "../models/cronograma.model";
 
 @Injectable({
     providedIn: 'root'
@@ -22,7 +22,10 @@ export class CronogramaSignal {
         informeProveedor: null,
         informeResponsable: null,
         documentoTributario: null,
-        conceptoTributario: ""
+        conceptoTributario: "",
+        fechaPagoRealizado: "",
+        tipoPago: "",
+        tipoObservacion: ""
     }
     selectCronograma = signal(this.selectCronogramaDefault)
 
@@ -30,4 +33,5 @@ export class CronogramaSignal {
     listDocTributarioPorAprobar = signal<DocTributarioPorAprobar[]>([])
     listComprobantePorCargar = signal<ComprobantePorCargar[]>([])
 
+    listPagosRealizados = signal<ListarPagosRealizados[]>([])
 }

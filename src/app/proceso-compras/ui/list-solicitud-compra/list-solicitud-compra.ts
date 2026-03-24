@@ -164,17 +164,14 @@ export class ListSolicitudCompra implements OnInit {
     ]
 
     this.listLocal = [
-      { text: 'SL01 - CHINCHA', value: 'SL01' },
-      { text: 'SL02 - CHINCHA', value: 'SL02' },
-      { text: 'SL03 - SUNAMPE', value: 'SL03' },
-      { text: 'F01L01 - FILIAL ICA', value: 'F01L01' },
-      { text: 'F01L02 - FILIAL PORUMA', value: 'F01L02' },
-      { text: 'F02L01 - FILIAL HUAURA', value: 'F02L01' },
-      { text: 'INSTITUCIONAL', value: 'INST' },
+      { text: 'SL01 - CHINCHA', value: 'SL01 - CHINCHA' },
+      { text: 'SL02 - CHINCHA', value: 'SL02 - CHINCHA' },
+      { text: 'SL03 - SUNAMPE', value: 'SL03 - SUNAMPE' },
+      { text: 'F01L01 - FILIAL ICA', value: 'F01L01 - FILIAL ICA' },
+      { text: 'F01L02 - FILIAL PORUMA', value: 'F01L02 - FILIAL PORUMA' },
+      { text: 'F02L01 - FILIAL HUAURA', value: 'F02L01 - FILIAL HUAURA' },
+      { text: 'INSTITUCIONAL', value: 'INSTITUCIONAL' },
     ]
-
-
-
   }
 
   obtenerSolicitud = () => {
@@ -230,14 +227,6 @@ export class ListSolicitudCompra implements OnInit {
           fases.flatMap(f => f.anexos)
             .find(a => a.nombre === 'Orden de Compra') ?? null;
         this.siglaArea.set(sigla);
-
-        // const ultimoAnexo = fases
-        //   .flatMap(f => f.anexos)
-        //   .at(-1); 
-
-        // if (ultimoAnexo) {
-        //   this.selectAnexo.set(ultimoAnexo);
-        // }
 
         const anexoActual = this.selectAnexo();
         const solicitudes = this.listAnexos();
@@ -410,14 +399,41 @@ export class ListSolicitudCompra implements OnInit {
   }
 
 
-  obtenerSiglaArea(area: string): string {
-    if (!area) return '';
+obtenerSiglaArea(area: string): string {
+  if (!area) return '';
 
-    const palabras = area.split(' ');
-    const letraJ = palabras[0]?.[0] ?? '';
-    const letraArea = palabras[2]?.[0] ?? '';
-    return `${letraJ}${letraArea}`;
+  const stopWords = ['DE', 'DEL', 'LA', 'EL', 'Y'];
+
+  const limpio = area.toUpperCase();
+
+  // 🔥 CASO ESCUELA PROFESIONAL
+  if (limpio.includes('ESCUELA PROFESIONAL')) {
+
+    // 👉 tomar todo lo que viene DESPUÉS de "PROFESIONAL"
+    const partes = limpio.split('PROFESIONAL');
+    const despues = partes[1] || '';
+
+    const palabrasCarrera = despues
+      .trim()
+      .split(' ')
+      .filter(p => p && !stopWords.includes(p));
+
+    const siglaCarrera = palabrasCarrera
+      .map(p => p.charAt(0))
+      .join('');
+
+    return 'DEP' + siglaCarrera;
   }
+
+  // 🔥 CASO GENERAL
+  const palabras = limpio
+    .split(' ')
+    .filter(p => !stopWords.includes(p));
+
+  return palabras
+    .map(p => p.charAt(0))
+    .join('');
+}
 
   itemsPorAnexo = new Map<number, MenuItem[]>();
 

@@ -1,0 +1,15 @@
+.product-name {
+  display: block;
+  max-width: 380px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: default;
+}
+ 
+.expansion-panel {
+  padding: 0.875rem 1rem 0.875rem 3.5rem;
+  background: var(--p-surface-50);
+  border-bottom: 1px solid var(--p-content-border-color);
+}
+ 

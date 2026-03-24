@@ -2,8 +2,8 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { map, Observable } from "rxjs";
 import { environment } from "src/environments/environment";
-import { CrearProducto, DataProducto, EditarProducto, EliminarProducto, Producto, ResponseProducto } from "../../domain/models/producto.model";
-import { DataProductoDTO, ProductoDTO } from "../dto/producto.dto";
+import { CrearProducto, DataProducto, DataProductosNoValidosDTO, EditarProducto, EliminarProducto, Producto, ResponseProducto } from "../../domain/models/producto.model";
+import { DataProductoDTO, DataProductosNoValidos } from "../dto/producto.dto";
 import { ProductoMapper } from "../../domain/mappers/producto.mapper";
 
 @Injectable({
@@ -17,6 +17,9 @@ export class ProductoService {
     private urlCrearMasivo : string = '/api/ProductoServicio/InsertarMasivo'
     private urlEditar : string = '/api/ProductoServicio/Actualizar'
     private urlEliminar : string = '/api/ProductoServicio/Eliminar'
+
+    /* PRODUCTOS NO VÁLIDOS */
+    private urlProductoNoValidos : string = '/api/ProductoServicio/ListarNoValidos'
     constructor(
         private http : HttpClient
     ){}
@@ -44,5 +47,11 @@ export class ProductoService {
     crearMasivo = (crear : CrearProducto[]) : Observable<ResponseProducto> => {
         const newProductos = ProductoMapper.toApiCrearMasivo(crear)
         return this.http.post<ResponseProducto>(this.urlApi + this.urlCrearMasivo, newProductos)
+    }
+
+    /* PRODUCTOS NO VÁLIDOS */
+    obtenerNoValidos = (): Observable<DataProductosNoValidos> => {
+        return this.http.get<DataProductosNoValidosDTO>(this.urlApi + this.urlProductoNoValidos)
+        .pipe(map(api => ProductoMapper.toDomainDataNoValidos(api)))
     }
 }

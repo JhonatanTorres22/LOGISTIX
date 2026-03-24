@@ -77,7 +77,8 @@ export class OrdenCarpetaMapper {
             datosActividad : param.datosDeActividad,
             codigoPlanTrabajo : param.codigoPlanDeTrabajo,
             areaResponsable : param.areaResponsable,
-            cantidadAnexo : param.cantidadAnexos
+            cantidadAnexo : param.cantidadAnexos,
+            estadoSolicitud : 4
         }
     }
 

@@ -4,10 +4,11 @@ import { Card } from "@/core/components/card/card";
 import { BreadcrumbModule } from "primeng/breadcrumb";
 import { ListAlmacen } from "./list-almacen/list-almacen";
 import { ListProductoAlmacen } from "./list-producto-almacen/list-producto-almacen";
+import { DividerModule } from "primeng/divider";
 
 @Component({
   selector: 'app-alcance',
-  imports: [ListAlcance, BreadcrumbModule, Card, ListAlmacen, ListProductoAlmacen],
+  imports: [ListAlcance, BreadcrumbModule, Card, ListAlmacen, ListProductoAlmacen, DividerModule],
   templateUrl: './alcance-component.html',
   styleUrl: './alcance-component.scss'
 })

@@ -7,6 +7,7 @@ import { AppSidebar } from './app.sidebar';
 import { AppFooter } from './app.footer';
 import { LayoutService } from '../service/layout.service';
 
+
 @Component({
     selector: 'app-layout',
     standalone: true,
@@ -16,7 +17,7 @@ import { LayoutService } from '../service/layout.service';
         <app-sidebar></app-sidebar>
         <div class="layout-main-container">
             <div class="layout-main">
-                <router-outlet></router-outlet>
+                    <router-outlet></router-outlet>
             </div>
             <app-footer></app-footer>
         </div>

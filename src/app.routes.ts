@@ -45,6 +45,10 @@ export const appRoutes: Routes = [
       {
         path: 'unidad-medida',
         loadChildren: () => import('./app/unidad-medida/unidad-medida-module').then(m => m.UnidadMedidaModule)
+      },
+      {
+        path: 'reporteria',
+        loadChildren: () => import('./app/reporteria/reporteria-module').then(m => m.ReporteriaModule)
       }
     ]
   },
