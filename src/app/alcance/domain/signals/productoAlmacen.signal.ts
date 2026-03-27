@@ -11,4 +11,6 @@ export class ProductoAlmacenSignal {
     totalRegistros = signal<number>(0)
     paginaActual = signal<number>(1)
     tamanioPagina = signal<number>(12)
+
+    actionProductoAlmacen = signal<boolean>(false)
 }

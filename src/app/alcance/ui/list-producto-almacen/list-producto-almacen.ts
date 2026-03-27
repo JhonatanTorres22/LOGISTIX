@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
 import { ProcesoComprasModule } from "@/proceso-compras/proceso-compras-module";
 import { AddProductoAlmacen } from "../add-producto-almacen/add-producto-almacen";
 import { ProductoAlmacenRepository } from '@/alcance/domain/repository/producto-almacen.repository';
@@ -9,13 +9,17 @@ import { TagModule } from "primeng/tag";
 import { ListarProductoPorAlmacen } from '@/alcance/domain/models/producto-almacen.model';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
-import { forkJoin } from 'rxjs';
+import { SelectButtonModule } from 'primeng/selectbutton';
 import { ImageModule } from 'primeng/image';
 import { ViewOrdenDespachar } from "../view-orden-despachar/view-orden-despachar";
-
+import { FloatLabel } from 'primeng/floatlabel';
+import { InputNumber } from 'primeng/inputnumber';
+import { IconFieldModule } from "primeng/iconfield";
+import { CategoriaModule } from "@/categoria/categoria-module";
+import { UiIconButton } from "@/core/components/ui-icon-button/ui-icon-button";
 @Component({
   selector: 'app-list-producto-almacen',
-  imports: [ProcesoComprasModule, AddProductoAlmacen,ImageModule, TagModule, InputNumberModule, InputTextModule, ViewOrdenDespachar],
+  imports: [ProcesoComprasModule, AddProductoAlmacen, ImageModule, FloatLabel, InputNumber, TagModule, InputNumberModule, InputTextModule, ViewOrdenDespachar, SelectButtonModule, IconFieldModule, CategoriaModule, UiIconButton],
   templateUrl: './list-producto-almacen.html',
   styleUrl: './list-producto-almacen.scss'
 })
@@ -31,30 +35,39 @@ export class ListProductoAlmacen {
   listProductoPorAlmacen = this.signal.listProductoPorAlmacen;
   totalRegistros = this.signal.totalRegistros;
   tamanioPagina = this.signal.tamanioPagina;
+  actionProductoAlmacen = this.signal.actionProductoAlmacen
 
   readonly opcionesListadoTabla = [6, 12, 24, 50, 100, 1000];
 
   buscarProducto = '';
 
+  constructor(){
+    effect(() => {
+      if(!this.actionProductoAlmacen()){return}
+      if(this.actionProductoAlmacen()){
+        this.obtenerProductoPorAlmacen()
+        this.actionProductoAlmacen.set(false)
+      }
+    })
+  }
+
   get listaFiltrada(): ListarProductoPorAlmacen[] {
-    const q = this.buscarProducto.toLowerCase().trim();
-    if (!q) return this.listProductoPorAlmacen();
-    return this.listProductoPorAlmacen().filter(p =>
-      String(p.idProductoServicio).includes(q)
-    );
-  }
+  const q = this.buscarProducto.toLowerCase().trim();
+  if (!q) return this.listProductoPorAlmacen();
 
-  activarCeldaId: string | null = null;
+  return this.listProductoPorAlmacen().filter(p =>
+    String(p.nombreProducto).toLowerCase().includes(q)
+  );
+}
 
-  pendingChanges: Record<number, { aumentar: number, comprometer: number }> = {};
+tipoMovimiento: 'ENTRADA' | 'SALIDA' | null = null;
 
-  get cantidadCambios(): number {
-    return Object.keys(this.pendingChanges).length;
-  }
+opcionesMovimiento = [
+  { label: 'ENTRADA', value: 'ENTRADA', icon: 'pi pi-arrow-circle-down' },
+  { label: 'SALIDA',  value: 'SALIDA',  icon: 'pi pi-arrow-circle-up'   }
+];
 
-  ngOnInit(): void {
-    this.obtenerProductoPorAlmacen();
-  }
+visibleOrdenCompra : boolean = false
 
   obtenerProductoPorAlmacen(pagina = 1, rows = this.tamanioPagina()): void {
     this.loading = true;
@@ -64,9 +77,8 @@ export class ListProductoAlmacen {
         
         this.loading = false;
         this.signal.totalRegistros.set(data.totalRegistros);
-        this.signal.listProductoPorAlmacen.set(data.data);
-        this.pendingChanges = {};
-        this.activarCeldaId = null;
+        this.listProductoPorAlmacen.set(data.data)
+
       },
       error: (err: ApiError) => {
         this.loading = false;
@@ -81,116 +93,15 @@ export class ListProductoAlmacen {
     this.obtenerProductoPorAlmacen(pagina, event.rows);
   }
 
-  actualizarCambio(id: number, tipo: 'aumentar' | 'comprometer', valor: number): void {
-    const item = this.listProductoPorAlmacen()
-      .find(p => p.idProductoPorAlmacen === id);
-
-    if (!item) return;
-
-    let val = Math.max(0, valor ?? 0);
-
-    if (tipo === 'comprometer') {
-      val = Math.min(val, item.comprometido);
-    }
-
-    if (!this.pendingChanges[id]) {
-      this.pendingChanges[id] = { aumentar: 0, comprometer: 0 };
-    }
-
-    this.pendingChanges[id][tipo] = val;
-
-    if (this.pendingChanges[id].aumentar === 0 && this.pendingChanges[id].comprometer === 0) {
-      delete this.pendingChanges[id];
-    }
-  }
-
-  obtenerCantidadFinal(item: ListarProductoPorAlmacen): number {
-    const cambio = this.pendingChanges[item.idProductoPorAlmacen];
-    if (!cambio) return item.cantidad;
-
-    return item.cantidad + cambio.aumentar - cambio.comprometer;
-  }
-
-  obtenerAumento(id: number): number {
-    return this.pendingChanges[id]?.aumentar ?? 0;
-  }
-
-  obtenerDisminucion(id: number): number {
-    return this.pendingChanges[id]?.comprometer ?? 0;
-  }
-
-  tieneCambio(id: number): boolean {
-    const c = this.pendingChanges[id];
-    return !!c && (c.aumentar > 0 || c.comprometer > 0);
-  }
-
-  cancelarCambios(): void {
-    this.pendingChanges = {};
-    this.activarCeldaId = null;
-  }
-
-  guardarCambios(): void {
-
-    const aumentar: { idProductoPorAlmacen: number, cantidad: number }[] = [];
-    const disminuir: { idProductoPorAlmacen: number, cantidad: number }[] = [];
-
-    Object.entries(this.pendingChanges).forEach(([id, val]) => {
-
-      if (val.aumentar > 0) {
-        aumentar.push({
-          idProductoPorAlmacen: +id,
-          cantidad: val.aumentar
-        });
-      }
-
-      if (val.comprometer > 0) {
-        disminuir.push({
-          idProductoPorAlmacen: +id,
-          cantidad: val.comprometer
-        });
-      }
-
-    });
-
-    if (!aumentar.length && !disminuir.length) return;
-
-    this.loading = true;
-    const requests = [];
-
-    console.log(aumentar, 'aumentar');
-    console.log(disminuir, 'disminuir');
-
-
-    if (aumentar.length) {
-      requests.push(
-        this.repository.aumentarCantidadProductoAlmacen(aumentar)
-      );
-    }
-
-    if (disminuir.length) {
-      requests.push(
-        this.repository.disminuirCantidadProductoAlmacen(disminuir)
-      );
-    }
-    forkJoin(requests).subscribe({
-      next: () => {
-        this.loading = false;
-        this.alert.showAlert('Cambios guardados correctamente', 'success');
-        this.obtenerProductoPorAlmacen();
-      },
-      error: (err: ApiError) => {
-        this.loading = false;
-        this.alert.showAlert(`Error: ${err.error.message}`, 'error');
-      }
-    });
-  }
-
   numeroOrden: number | null = null;
   ordenBuscada: number | null = null;
 
   buscarOrden() {
+    
     if (!this.numeroOrden) return;
-
     this.ordenBuscada = this.numeroOrden;
+    this.visibleOrdenCompra = true
+    console.log(this.visibleOrdenCompra);
+    
   }
 }

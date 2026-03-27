@@ -32,6 +32,8 @@ import { UiIconButton } from "@/core/components/ui-icon-button/ui-icon-button";
 import { TagModule } from "primeng/tag";
 import { AuthService } from '@/auth/infraestructure/services/auth.service';
 import { ActualizarEstadoProximo } from '@/proceso-compras/domain/models/solicitud-compra.model';
+import { InsertarCarpetasConAnexo } from '@/proceso-compras/domain/models/carpetas.models';
+import { CarpetasRepository } from '@/proceso-compras/domain/repository/carpeta.repository';
 
 @Component({
   selector: 'app-list-cronogramas',
@@ -61,6 +63,8 @@ export class ListCronogramas implements OnInit {
   selectCronograma = this.cronogramaSignal.selectCronograma
   selectCronogramaDefault = this.cronogramaSignal.selectCronogramaDefault
 
+  private repositoryCarpetas = inject(CarpetasRepository)
+
 
   private repositorySolicitudCompra = inject(SolicitudCompraRepository)
   private signal = inject(OrdenCompraDetalleSignal)
@@ -81,6 +85,7 @@ export class ListCronogramas implements OnInit {
   pagoRealizadoForm: FormGroup
   private carpetaSignal = inject(CarpetaSignal)
   actionCarpeta = this.carpetaSignal.actionCarpeta
+  selectCarpeta = this.carpetaSignal.carpetaSelect
 
   private signalOrdenCarpeta = inject(OrdenCarpetaSignal)
   actionOrdenCompraCarpeta = this.signalOrdenCarpeta.actionOrdenCompraCarpeta
@@ -123,15 +128,15 @@ export class ListCronogramas implements OnInit {
       tipoPago: new FormControl('', [Validators.required])
     })
 
-    effect(() => {
+    // effect(() => {
 
-      if (!this.actionCarpeta()) return;
-      if (this.actionCarpeta() === 'ACTUALIZAR ARCHIVO CRONOGRAMA') {
+    //   if (!this.actionCarpeta()) return;
+    //   if (this.actionCarpeta() === 'ACTUALIZAR ARCHIVO CRONOGRAMA') {
 
-        this.actualizarArchivoCronograma();
-        this.actionCarpeta.set('');
-      }
-    })
+    //     this.actualizarArchivoCronograma();
+    //     this.actionCarpeta.set('');
+    //   }
+    // })
 
   }
   ngOnInit(): void {
@@ -201,9 +206,37 @@ export class ListCronogramas implements OnInit {
     if (hayAlgunArchivo) {
       this.actualizarArchivoCronograma();
     } else {
-      this.visibleCarpeta = true;
+      // this.visibleCarpeta = true;
+      this.insertarCarpetaConAnexo()
     }
   };
+
+    insertarCarpetaConAnexo(): void {
+      this.loading = true
+      const payload: InsertarCarpetasConAnexo = {
+        idAnexosPorFase: this.idAnexoPorFaseCronograma,
+        idCarpeta: this.selectCarpeta().idCarpeta
+      }
+      console.log(payload, 'insertando carpetas con anexo en componente de carpetas');
+  
+      this.alert.sweetAlert('question', '¿Confirmar?', '¿Guardar archivo en la carpeta?')
+        .then(ok => {
+          if (!ok) return;
+  
+          this.repositoryCarpetas.insertarCarpetaConAnexo(payload)
+            .subscribe({
+              next: res => {
+                this.loading = false
+                this.alert.showAlert(`Guardado, ${res.message}`, 'success');
+                this.actualizarArchivoCronograma()
+              },
+              error: err => {
+                this.loading = false
+                this.alert.showAlert(`Error, ${err.error?.Message}`, 'error');
+              }
+            });
+        });
+    }
 
   activarAnexoCronograma = () => {
     this.loading = true

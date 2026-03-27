@@ -35,6 +35,7 @@ export interface OrdenCompraDetalle {
   ruc: string
   direccion: string,
   idAnexoPorFaseCronograma : number,
+  idProductoPorAlmacen : number
   despacho? : boolean
 }
 

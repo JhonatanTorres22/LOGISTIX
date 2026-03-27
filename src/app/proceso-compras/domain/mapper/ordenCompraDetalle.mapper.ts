@@ -38,7 +38,9 @@ export class OrdenCompraDetalleMapper {
                     nombreProveedor: orden.nombreLegal,
                     ruc: orden.ruc,
                     direccion: orden.direccionFiscal,
-                    idAnexoPorFaseCronograma : orden.codigoAnexoPorFaseCronograma
+                    idAnexoPorFaseCronograma : orden.codigoAnexoPorFaseCronograma,
+                    idProductoPorAlmacen: orden.codigoProductoPorAlmacen
+
 
                 })) || []
             })) || []

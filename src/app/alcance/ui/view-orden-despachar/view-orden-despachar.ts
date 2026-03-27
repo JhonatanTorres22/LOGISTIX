@@ -1,54 +1,60 @@
-import { ApiError } from '@/core/interceptors/error-message.model';
+import { ApiError, ApiResponse } from '@/core/interceptors/error-message.model';
 import { AnexosPorFaseOrdenCompra, OrdenCompraDetalle } from '@/proceso-compras/domain/models/ordenCompraDetalle.model';
 import { SolicitudCompraRepository } from '@/proceso-compras/domain/repository/solicitud-compra.repository';
 import { OrdenCompraDetalleSignal } from '@/proceso-compras/domain/signals/ordenCompraDetalle.signal';
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input, OnChanges, OnInit, signal } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnChanges, OnInit, Output, signal } from '@angular/core';
 import { AlertService } from 'src/assets/demo/services/alert.service';
 import { TagModule } from "primeng/tag";
 import { ButtonModule } from "primeng/button";
 import { TableModule } from "primeng/table";
+import { DialogModule } from "primeng/dialog";
+import { ProcesoComprasModule } from "@/proceso-compras/proceso-compras-module";
+import { AumentarCantidadProductoAlmacen, DisminuirCantidadProductoAlmacen } from '@/alcance/domain/models/producto-almacen.model';
+import { ProductoAlmacenRepository } from '@/alcance/domain/repository/producto-almacen.repository';
+import { ProductoAlmacenSignal } from '@/alcance/domain/signals/productoAlmacen.signal';
+import { StyleClass } from "primeng/styleclass";
 
 @Component({
   selector: 'app-view-orden-despachar',
-  imports: [CommonModule, TagModule, ButtonModule, TableModule],
+  imports: [CommonModule, TagModule, ButtonModule, TableModule, DialogModule, ProcesoComprasModule],
   templateUrl: './view-orden-despachar.html',
   styleUrl: './view-orden-despachar.scss'
 })
-export class ViewOrdenDespachar implements OnChanges{
-    loading = false
- 
-    @Input() ordenId!: number  | null;
-  private alert      = inject(AlertService)
-  private repository = inject(SolicitudCompraRepository)
-  private signal     = inject(OrdenCompraDetalleSignal)
- 
+export class ViewOrdenDespachar implements OnInit {
+  loading = false
+
+  @Input() ordenId!: number | null;
+  private alert = inject(AlertService)
+  private repositorySolicitudCompra = inject(SolicitudCompraRepository)
+  private repository = inject(ProductoAlmacenRepository)
+  private signal = inject(OrdenCompraDetalleSignal)
+
   listOrdenCompra = this.signal.listOrdenCompraDetalle
- 
-  /**
-   * Mapa de selecciones por anexo:
-   * { [idAnexosPorFase]: OrdenCompra[] }
-   * Necesario porque p-table usa [(selection)] y cada tabla es independiente.
-   */
+
+  @Input() visible: boolean = false
+  @Input() tipoMovimiento: string | null = ''
+  @Output() visibleChange = new EventEmitter<boolean>();
+
+  private signalProductoAlmacen = inject(ProductoAlmacenSignal);
+  actionProductoAlmacen = this.signalProductoAlmacen.actionProductoAlmacen
+
+
   seleccionadosPorAnexo: Record<number, OrdenCompraDetalle[]> = {}
- 
-  /** Lista plana de todos los ítems seleccionados (computed reactivo) */
+
   seleccionados = signal<OrdenCompraDetalle[]>([])
- 
+
   ngOnInit(): void {
-    // this.obtenerOrdenCompra()
+    if (this.ordenId) {
+      this.obtenerOrdenCompra(this.ordenId);
+    }
   }
 
-  ngOnChanges() {
-  if (this.ordenId) {
-    this.obtenerOrdenCompra(this.ordenId);
-  }
-}
- 
-  obtenerOrdenCompra(id:number): void {
-    if(this.ordenId == null || this.ordenId == 0){return}
+
+  obtenerOrdenCompra(id: number): void {
+    if (this.ordenId == null || this.ordenId == 0) { return }
     this.loading = true
-    this.repository.obtenerOrdenCompraDetalle(id).subscribe({
+    this.repositorySolicitudCompra.obtenerOrdenCompraDetalle(id).subscribe({
       next: (data) => {
         this.listOrdenCompra.set(data.data)
         this.inicializarSelecciones()
@@ -61,8 +67,7 @@ export class ViewOrdenDespachar implements OnChanges{
       }
     })
   }
- 
-  /** Inicializa el mapa con arrays vacíos por cada anexo */
+
   private inicializarSelecciones(): void {
     const data = this.listOrdenCompra()
     if (!data?.length) return
@@ -70,23 +75,77 @@ export class ViewOrdenDespachar implements OnChanges{
       this.seleccionadosPorAnexo[anexo.idAnexosPorFase] = []
     })
   }
- 
-  /** Llamado por (selectionChange) de cada tabla — actualiza el signal global */
+
   onSelectionChange(): void {
     const todos = Object.values(this.seleccionadosPorAnexo).flat()
     this.seleccionados.set(todos)
   }
- 
-  /** Retorna los ítems pendientes (despacho === false) de un anexo */
-  obtenerPendientes(anexo: AnexosPorFaseOrdenCompra): OrdenCompraDetalle[] {
-    return anexo.ordenCompra.filter(o => !o.despacho)
-  }
 
-  /** Acción de despacho — aquí conectas tu lógica/endpoint */
   despacharSeleccionados(): void {
     const items = this.seleccionados()
-    console.log('Despachando:', items)
-    this.alert.showAlert(`Despachando ${items.length} ítem(s)`, 'info')
+
+    if (!this.tipoMovimiento) {
+      this.alert.showAlert(`No se ha seleccionado el tipo de movimiento`, 'error')
+      return
+    }
+
+    const payload = items.map(item => ({
+      idProductoPorAlmacen: item.idProductoPorAlmacen,
+      cantidad: item.cantidad
+    }))
+
+    console.log('Payload limpio:', payload)
+    this.loading = true
+    this.alert.sweetAlert('question', `¿CONFIRMAR ${this.tipoMovimiento}?`,  `'¿Está seguro que desea realizar ${this.tipoMovimiento} a los productos?`)
+      .then(isConfirm => {
+        if (!isConfirm) { return }
+
+        switch (this.tipoMovimiento) {
+          case 'ENTRADA': {
+            this.aumentarProductoAlmacen(payload)
+          }; break;
+    
+          case 'SALIDA': {
+            this.disminuirProductoAlmacen(payload)
+          }; break;
+        }
+      })
+
+  }
+
+  aumentarProductoAlmacen(aumentarProductos: AumentarCantidadProductoAlmacen[]) {
+    this.repository.aumentarCantidadProductoAlmacen(aumentarProductos).subscribe({
+      next: (res: ApiResponse) => {
+        this.loading = false
+        this.alert.showAlert(`Cantidad aumentada, ${res.message}`, 'success')
+        this.actionProductoAlmacen.set(res.isSuccess)
+        this.closeDialog()
+      },
+      error: (err: ApiError) => {
+        this.loading = false
+        this.alert.showAlert(`Error al aumentar, ${err.error.message}`, 'error')
+      }
+    })
+  }
+
+  disminuirProductoAlmacen(disminuirProducto: DisminuirCantidadProductoAlmacen[]) {
+    this.repository.disminuirCantidadProductoAlmacen(disminuirProducto).subscribe({
+      next: (res: ApiResponse) => {
+        this.loading = false
+        this.alert.showAlert(`Cantidad disminuida, ${res.message}`, 'success')
+        this.actionProductoAlmacen.set(res.isSuccess)
+        this.closeDialog()
+      },
+      error: (err: ApiError) => {
+        this.loading = false
+        this.alert.showAlert(`Error al disminuir, ${err.error.message}`, 'error')
+      }
+    })
+  }
+
+  closeDialog() {
+    this.visible = false;
+    this.visibleChange.emit(false);
   }
 }
 

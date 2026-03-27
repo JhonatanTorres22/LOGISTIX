@@ -1,25 +1,33 @@
-<div class="p-3">
+@if (loading) {
+<ui-loading-progress-bar></ui-loading-progress-bar>
+}
+@else {
+<p-dialog [styleClass]="tipoMovimiento === 'SALIDA' ? 'bg-red-50' : tipoMovimiento === 'ENTRADA' ? 'bg-green-50' : 'bg-blue-50'"
+ [(visible)]="visible" [modal]="true" [style]="{ width: '50rem' }" (onHide)="closeDialog()" [maximizable]="true">
 
-    <div class="flex align-items-center justify-content-between mb-3">
-        <div>
-            <!-- <h2 class="text-xl font-bold text-900 m-0">Orden de Despacho</h2> -->
-            <span class="text-800 text-sm">
-                Solicitud #{{ listOrdenCompra()[0]?.idSolicitudCompra }} —
-                {{ listOrdenCompra()[0]?.codigoPlanDeTrabajo }}
-            </span>
-        </div>
-        <div class="flex gap-2 align-items-center">
+    <ng-template #header>
+        <div class="inline-flex items-center justify-center gap-2">
+            <span class="font-bold whitespace-nowrap"> Solicitud #{{ listOrdenCompra()[0]?.idSolicitudCompra }} —
+                {{ listOrdenCompra()[0]?.codigoPlanDeTrabajo }} </span>
             <p-tag [value]="listOrdenCompra()[0]?.tipoGasto" severity="info" />
-            <p-button label="Despachar seleccionados" icon="pi pi-send" size="small"
-                [disabled]="seleccionados().length === 0" (onClick)="despacharSeleccionados()" />
         </div>
+    </ng-template>
+
+    <div [ngClass]="{'bg-red-100 border-red-300' : tipoMovimiento === 'SALIDA', 'bg-green-100 border-green-300' : tipoMovimiento === 'ENTRADA' }"
+        class="flex align-items-center gap-2 p-2 mb-1 border-round-lg border-1">
+        <i class="pi pi-exclamation-triangle text-xl"
+            [ngClass]="{'text-red-600' : tipoMovimiento === 'SALIDA', 'text-green-600': tipoMovimiento === 'ENTRADA'} "></i>
+        <span class=" font-semibold text-sm"
+            [ngClass]="{'text-red-700': tipoMovimiento === 'SALIDA', 'text-green-700': tipoMovimiento === 'ENTRADA'}">
+            TIPO DE MOVIMIENTO {{ tipoMovimiento }}
+        </span>
     </div>
+    <!-- {{tipoMovimiento}} -->
 
     @for (anexo of listOrdenCompra()[0]?.anexosPorFases; track anexo.idAnexosPorFase) {
 
     @let proveedor = anexo.ordenCompra[0];
     @let indice = $index + 1;
-    <!-- @let pendientes = obtenerPendientes(anexo); -->
 
     <div class="border-1 border-200 border-round mb-3 overflow-hidden">
         <div class="flex align-items-center justify-content-between m-1">
@@ -39,16 +47,8 @@
                 </span>
             </div>
 
-            <!-- <div class="flex gap-1">
-                <p-tag [value]="pendientes.length + ' pend.'" [severity]="pendientes.length > 0 ? 'warn' : 'success'"
-                    icon="pi pi-clock" styleClass="text-xs" />
-                <p-tag [value]="(anexo.ordenCompra.length - pendientes.length) + ' ok'" severity="success"
-                    icon="pi pi-check" styleClass="text-xs" />
-            </div> -->
-
         </div>
 
-        <!-- Tabla de productos -->
         <p-table [value]="anexo.ordenCompra" styleClass="p-datatable-sm p-datatable-gridlines p-datatable-striped"
             [(selection)]="seleccionadosPorAnexo[anexo.idAnexosPorFase]" dataKey="idOrdenCompra"
             (selectionChange)="onSelectionChange()">
@@ -90,9 +90,9 @@
 
                     <td class="text-center text-xs">
                         @if (item.despacho) {
-                        <p-tag styleClass="text-xs" value="Entregado" severity="success" icon="pi pi-check-circle" styleClass="text-xs" />
+                        <p-tag styleClass="text-xs" value="Entregado" severity="success" icon="pi pi-check-circle" />
                         } @else {
-                        <p-tag  value="Pendiente" severity="warn" icon="pi pi-clock" styleClass="text-xs" />
+                        <p-tag value="Pendiente" severity="warn" icon="pi pi-clock" styleClass="text-xs" />
                         }
                     </td>
 
@@ -111,4 +111,13 @@
     </div>
     }
 
-</div>
+    <ng-template #footer>
+        <ui-button label="CANCELAR" icon="pi pi-times" color="secondary" (click)="closeDialog()"></ui-button>
+        <ui-button [label]="tipoMovimiento+''" icon="pi pi-save" color="primary"
+            [disabled]="seleccionados().length === 0" (onClick)="despacharSeleccionados()"></ui-button>
+
+    </ng-template>
+
+
+</p-dialog>
+}

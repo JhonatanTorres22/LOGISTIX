@@ -1,14 +1,8 @@
-// Filas con cambios pendientes
-:host ::ng-deep .row-edited > td {
-  background: var(--green-50) !important;
+.pi {
+  transform: scale(1);
+  transition: transform 0.2s ease;
 }
 
-// Icono lápiz siempre visible pero sutil
-.pi-pencil {
-  opacity: 0.4;
-  transition: opacity 0.15s;
-}
-
-tr:hover .pi-pencil {
-  opacity: 1;
+.pi:hover {
+  transform: scale(1.1);
 }
