@@ -1,0 +1,114 @@
+<div class="p-3">
+
+    <div class="flex align-items-center justify-content-between mb-3">
+        <div>
+            <!-- <h2 class="text-xl font-bold text-900 m-0">Orden de Despacho</h2> -->
+            <span class="text-800 text-sm">
+                Solicitud #{{ listOrdenCompra()[0]?.idSolicitudCompra }} —
+                {{ listOrdenCompra()[0]?.codigoPlanDeTrabajo }}
+            </span>
+        </div>
+        <div class="flex gap-2 align-items-center">
+            <p-tag [value]="listOrdenCompra()[0]?.tipoGasto" severity="info" />
+            <p-button label="Despachar seleccionados" icon="pi pi-send" size="small"
+                [disabled]="seleccionados().length === 0" (onClick)="despacharSeleccionados()" />
+        </div>
+    </div>
+
+    @for (anexo of listOrdenCompra()[0]?.anexosPorFases; track anexo.idAnexosPorFase) {
+
+    @let proveedor = anexo.ordenCompra[0];
+    @let indice = $index + 1;
+    <!-- @let pendientes = obtenerPendientes(anexo); -->
+
+    <div class="border-1 border-200 border-round mb-3 overflow-hidden">
+        <div class="flex align-items-center justify-content-between m-1">
+
+            <div class="flex align-items-center gap-2">
+                <span class="bg-primary text-white border-circle flex align-items-center justify-content-center"
+                    style="width: 1.5rem; height: 1.5rem; font-size: 0.7rem;">
+                    {{ indice }}
+                </span>
+
+                <span class="font-semibold text-sm">
+                    Orden de Compra {{ indice }}
+                </span>
+
+                <span class="text-500 text-xs">
+                    {{ proveedor.nombreProveedor }} · RUC: {{ proveedor.ruc }}
+                </span>
+            </div>
+
+            <!-- <div class="flex gap-1">
+                <p-tag [value]="pendientes.length + ' pend.'" [severity]="pendientes.length > 0 ? 'warn' : 'success'"
+                    icon="pi pi-clock" styleClass="text-xs" />
+                <p-tag [value]="(anexo.ordenCompra.length - pendientes.length) + ' ok'" severity="success"
+                    icon="pi pi-check" styleClass="text-xs" />
+            </div> -->
+
+        </div>
+
+        <!-- Tabla de productos -->
+        <p-table [value]="anexo.ordenCompra" styleClass="p-datatable-sm p-datatable-gridlines p-datatable-striped"
+            [(selection)]="seleccionadosPorAnexo[anexo.idAnexosPorFase]" dataKey="idOrdenCompra"
+            (selectionChange)="onSelectionChange()">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th style="width: 2.5rem"></th>
+                    <th class="text-xs">Descripción del Bien</th>
+                    <th style="width: 9rem" class="text-center text-xs">Unidad de Medida</th>
+                    <th style="width: 7rem" class="text-center">
+                        <span class="text-primary font-bold text-xs">Cantidad</span>
+                    </th>
+                    <th style="width: 7rem" class="text-center text-xs">Estado</th>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-item>
+                <tr [class.opacity-60]="item.despacho">
+
+                    <td class="text-center text-xs">
+                        @if (!item.despacho) {
+                        <p-tableCheckbox [value]="item" />
+                        }
+                    </td>
+
+                    <td>
+                        <span class="text-xs text-900">{{ item.descripcionDelBien }}</span>
+                    </td>
+
+                    <td class="text-center text-xs text-500">{{ item.unidadMedida }}</td>
+
+                    <td class="text-center text-xs">
+                        <span class="inline-flex align-items-center justify-content-center
+                       font-bold text-sm border-round px-2 py-1 text-xs" [ngClass]="item.despacho
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-primary-100 text-primary-700 border-1 border-primary-300'">
+                            {{ item.cantidad }}
+                        </span>
+                    </td>
+
+                    <td class="text-center text-xs">
+                        @if (item.despacho) {
+                        <p-tag styleClass="text-xs" value="Entregado" severity="success" icon="pi pi-check-circle" styleClass="text-xs" />
+                        } @else {
+                        <p-tag  value="Pendiente" severity="warn" icon="pi pi-clock" styleClass="text-xs" />
+                        }
+                    </td>
+
+                </tr>
+            </ng-template>
+        </p-table>
+
+    </div>
+    }
+
+    <!-- Estado vacío -->
+    @if (!listOrdenCompra() || listOrdenCompra().length === 0) {
+    <div class="flex flex-column align-items-center justify-content-center py-6 text-400">
+        <i class="pi pi-inbox text-5xl mb-2"></i>
+        <span class="text-lg">Sin órdenes disponibles</span>
+    </div>
+    }
+
+</div>

@@ -37,3 +37,9 @@ export interface DecodedToken {
     iss: string;
     aud: string;
 }
+
+export interface CambioContrasenia {
+    userName : string,
+    password : string,
+    newPassword : string
+}

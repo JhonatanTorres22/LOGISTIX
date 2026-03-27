@@ -1,5 +1,5 @@
-import { DataModuloDTO, DecodedTokenDTO, LoginRequestDTO, LoginResponseDTO } from "../../infraestructure/dto/auth.dto";
-import { AuthData, DataModulo, DecodedToken, LoginModel } from "../models/auth.model";
+import { CambioContraseniaDTO, DataModuloDTO, DecodedTokenDTO, LoginRequestDTO, LoginResponseDTO } from "../../infraestructure/dto/auth.dto";
+import { AuthData, CambioContrasenia, DataModulo, DecodedToken, LoginModel } from "../models/auth.model";
 
 export class AuthMapper {
     static toDomain(param: DataModuloDTO): DataModulo {
@@ -39,6 +39,14 @@ export class AuthMapper {
         } catch (err) {
             console.error('Error decodificando token:', err);
             return null as any; // o un objeto vacío
+        }
+    }
+
+    static toApiCambioContrasenia (param : CambioContrasenia) : CambioContraseniaDTO {
+        return {
+            contrasenia : param.password,
+            nuevaContrasenia : param.newPassword,
+            numeroDocumento : param.userName
         }
     }
 }

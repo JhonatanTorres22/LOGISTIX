@@ -26,6 +26,9 @@ import { CronogramaRepository } from '@/proceso-compras/domain/repository/cronog
 import { CronogramaSignal } from '@/proceso-compras/domain/signals/cronograma.signal';
 import { UiCardNotItemsComponent } from "@/core/components/ui-card-not-items/ui-card-not-items.component";
 import { OrdenCarpetaSignal } from '@/panel-solicitudes/domain/signals/orden-carpetas.signal';
+import { InsertarCarpetasConAnexo } from '@/proceso-compras/domain/models/carpetas.models';
+import { CarpetasRepository } from '@/proceso-compras/domain/repository/carpeta.repository';
+import { ActualizarEstadoProximo } from '@/proceso-compras/domain/models/solicitud-compra.model';
 
 const pdfMake: any = pdfMakeImport;
 const pdfFonts: any = pdfFontsImport;
@@ -38,6 +41,7 @@ pdfMake.vfs = pdfFonts.vfs;
   styleUrl: './pdf-orden-compra.scss'
 })
 export class PdfOrdenCompra {
+  private repositorySolicitudCompra = inject(SolicitudCompraRepository)
   signalProveedorProducto = inject(ProveedorProductoSignal)
   selectProveedorProducto = this.signalProveedorProducto.selectProveedorProducto
   // @Input() urlPdfExistente?: string;
@@ -60,7 +64,9 @@ export class PdfOrdenCompra {
 
   carpetaSignal = inject(CarpetaSignal)
   actionCarpeta = this.carpetaSignal.actionCarpeta
-  // selectCarpeta = this.carpetaSignal.carpetaSelect
+  selectCarpeta = this.carpetaSignal.carpetaSelect
+  private repositoryCarpeta = inject(CarpetasRepository)
+
 
   permissionService = inject(PermissionService)
   solicitudPermiso = PERMISOS.SOLICITUDCOMPRA;
@@ -77,9 +83,10 @@ export class PdfOrdenCompra {
   listCronograma = this.cronogramaSignal.listCronograma
 
 
-
   firmaGerenteBase64: string | null = null
   constructor(private sanitizer: DomSanitizer,
+
+
     private http: HttpClient,
     private alert: AlertService) {
     effect(() => {
@@ -644,25 +651,18 @@ export class PdfOrdenCompra {
       idSolicitudCompra: this.listAnexo()[0].idSolicitudCompra
     }
 
-    // this.actionAnexo.set('REFRESH');
-    if (this.selectAnexo().nombre == 'Orden Firmada') {
-      this.visibleCarpeta = true;
-    }
-
     console.log(insertar, 'insertar anexo por fase en orden de compra');
 
 
     this.anexoRepository.insertarAnexoPorFase(insertar).subscribe({
       next: (res: ResponseAnexoPorFase) => {
         this.idNuevoAnexoPorFase = res.data
-        console.log(this.idNuevoAnexoPorFase);
-
         this.loading = false;
         this.alert.showAlert('Orden y anexo generados correctamente', 'success');
-
-        // this.actionAnexo.set('REFRESH');
+        this.actionAnexo.set('REFRESH');
         if (this.selectAnexo().nombre == 'Orden Firmada') {
-          this.visibleCarpeta = true;
+          // this.visibleCarpeta = true;
+          this.insertarCarpetaConAnexo()
         }
       },
       error: (err) => {
@@ -674,10 +674,36 @@ export class PdfOrdenCompra {
     });
   };
 
+  insertarCarpetaConAnexo(): void {
+    this.loading = true
+    const payload: InsertarCarpetasConAnexo = {
+      idAnexosPorFase: this.idNuevoAnexoPorFase,
+      idCarpeta: this.selectCarpeta().idCarpeta
+    }
+    console.log(payload, 'insertando carpetas con anexo en componente de carpetas');
+    this.repositoryCarpeta.insertarCarpetaConAnexo(payload)
+      .subscribe({
+        next: res => {
+          this.loading = false
+          this.alert.showAlert(`Guardado, ${res.message}`, 'success');
+          // this.actionCarpeta.set(action);
+          // this.uploadArchivo()
+          // this.closeDialog();
+          this.actualizarArchivo()
+        },
+        error: err => {
+          this.loading = false
+          this.alert.showAlert(`Error, ${err.error?.Message}`, 'error');
+        }
+      });
+  }
+
 
   private signalOrdenCarpeta = inject(OrdenCarpetaSignal)
   actionOrdenCompraCarpeta = this.signalOrdenCarpeta.actionOrdenCompraCarpeta
   actionOrdenFirmada = this.anexoSignal.actionOrdenFirmada
+
+
   actualizarArchivo = () => {
     console.log('actualizar archivo');
 
@@ -716,11 +742,11 @@ export class PdfOrdenCompra {
         this.closeDrawer()
         if (this.selectAnexo().nombre == 'Orden Firmada') {
 
-          this.actionOrdenFirmada.set('ENVIAR CORREO')
+          // this.actionAnexo.set('REFRESH')
           console.log(this.actionOrdenFirmada());
           // this.actionOrdenCompraCarpeta.set('archivoAsignado')
           this.aprobarOrdenCompraFirmada()
-          this.actionAnexo.set('REFRESH')
+          this.actionOrdenFirmada.set('ENVIAR CORREO')
         }
         console.log(this.selectAnexo());
 
@@ -742,6 +768,7 @@ export class PdfOrdenCompra {
       next: (data: ApiResponse) => {
         this.loading = false
         this.alert.showAlert(`Archivo Aprobado, ${data.message}`, 'success')
+        this.actualizarEstadoProximo()
         // anexoPorFase.estado = 2;
         // this.actionAnexo.set('Aprobar');
       },
@@ -752,9 +779,28 @@ export class PdfOrdenCompra {
         this.loading = false
       }
     })
-
-
   }
+
+  actualizarEstadoProximo() {
+    const anexoActual = this.selectAnexo()?.nombre;
+
+
+    const actualizarEstado: ActualizarEstadoProximo = {
+      estadoProximo: 'Documento Tributario Por Aprobar',
+      idSolicitudCompra: this.listAnexo()[0].idSolicitudCompra
+    };
+
+    this.repositorySolicitudCompra.actualizarEstadoProximo(actualizarEstado).subscribe({
+      next: (res: ApiResponse) => {
+        this.actionOrdenCompraCarpeta.set('estadoActualizado')
+        this.alert.showAlert(`Estado actualizado. ${res.message}`, 'success');
+      },
+      error: (err: ApiError) => {
+        this.alert.showAlert(`Error al actualizar estado, ${err.error.message}`, 'error');
+      }
+    });
+  }
+
 
   // enviarConstanciaFirma = () => {
 

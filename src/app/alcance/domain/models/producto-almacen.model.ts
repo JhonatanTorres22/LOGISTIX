@@ -23,5 +23,12 @@ export interface ListarProductoPorAlmacen {
     cantidad: number,
     stock: number,
     comprometido: number,
-    pedido: number
+    pedido: number,
+    nombreProducto: string,
+    urlImagen: string,
+    modelo: string,
+    marca : string
 }
+
+export type AumentarCantidadProductoAlmacen = Pick<ListarProductoPorAlmacen, 'idProductoPorAlmacen' | 'cantidad'>
+export type DisminuirCantidadProductoAlmacen = Pick<ListarProductoPorAlmacen, 'idProductoPorAlmacen' | 'cantidad'>

@@ -51,3 +51,8 @@ export type AgregarSolicitud =
 
   export type EditarSolicitudCompraDetalle = Omit<DetalleSolicitudCompra, 'ordenCompra' |'nombreProveedor' | 'ruc' | 'direccion'>
   export type EliminarSolicitudCompraDetalle = Pick<DetalleSolicitudCompra, 'idSolicitudCompraDetalle'>
+
+  export interface ActualizarEstadoProximo {
+    idSolicitudCompra : number,
+    estadoProximo : string
+  }

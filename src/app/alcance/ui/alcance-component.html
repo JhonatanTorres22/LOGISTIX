@@ -1,71 +1,67 @@
-<!-- <app-card cardTitle="GESTIÓN" cardClass="card-estatico"> -->
+<app-card cardTitle="GESTIÓN" cardClass="card-estatico">
 
-<div class="alcance-wrapper">
+  <div class="alcance-wrapper">
 
-  <!-- Header con breadcrumb profesional -->
-  <div class="flex align-items-center justify-content-between mb-4">
-    <div class="flex flex-column gap-1">
+    <!-- Header con breadcrumb profesional -->
+    <div class="flex align-items-center justify-content-between mb-4">
+      <div class="flex flex-column gap-1">
 
-      <div class="flex align-items-center gap-2 text-color-secondary text-sm">
-        <i class="pi pi-map-marker text-primary"></i>
-        <span
-          class="cursor-pointer hover:text-primary transition-colors transition-duration-200 font-medium"
-          [class.text-primary]="vistaActual() === 'alcances'"
-          [class.font-bold]="vistaActual() === 'alcances'"
-          (click)="irAlcances()">
-          Alcances
-        </span>
+        <div class="flex align-items-center gap-2 text-color-secondary text-sm">
+          <i class="pi pi-map-marker text-primary"></i>
+          <span class="cursor-pointer hover:text-primary transition-colors transition-duration-200 font-medium"
+            [class.text-primary]="vistaActual() === 'alcances'" [class.font-bold]="vistaActual() === 'alcances'"
+            (click)="irAlcances()">
+            Alcances
+          </span>
 
-        @if (vistaActual() === 'almacenes' || vistaActual() === 'productos') {
+          @if (vistaActual() === 'almacenes' || vistaActual() === 'productos') {
           <i class="pi pi-chevron-right text-xs text-color-secondary"></i>
           <i class="pi pi-home text-primary"></i>
-          <span
-            class="cursor-pointer hover:text-primary transition-colors transition-duration-200 font-medium"
-            [class.text-primary]="vistaActual() === 'almacenes'"
-            [class.font-bold]="vistaActual() === 'almacenes'"
+          <span class="cursor-pointer hover:text-primary transition-colors transition-duration-200 font-medium"
+            [class.text-primary]="vistaActual() === 'almacenes'" [class.font-bold]="vistaActual() === 'almacenes'"
             (click)="irAlmacenes()">
             Almacenes
           </span>
-        }
+          }
 
-        @if (vistaActual() === 'productos') {
+          @if (vistaActual() === 'productos') {
           <i class="pi pi-chevron-right text-xs text-color-secondary"></i>
           <i class="pi pi-box text-primary"></i>
           <span class="text-primary font-bold">Productos</span>
-        }
+          }
+        </div>
+
+        <h5 class="text-2xl font-bold text-900 m-0">
+          @if (vistaActual() === 'alcances') { Gestión de Alcances }
+          @if (vistaActual() === 'almacenes') { Almacenes del Alcance }
+          @if (vistaActual() === 'productos') { Productos del Almacén }
+        </h5>
+
+        <!-- <span class="text-color-secondary text-sm">
+          @if (vistaActual() === 'alcances') { Administra los puntos de distribución }
+          @if (vistaActual() === 'almacenes') { Selecciona un almacén para ver sus productos }
+          @if (vistaActual() === 'productos') { Inventario de productos disponibles }
+        </span> -->
+
       </div>
-
-      <h2 class="text-2xl font-bold text-900 m-0">
-        @if (vistaActual() === 'alcances') { Gestión de Alcances }
-        @if (vistaActual() === 'almacenes') { Almacenes del Alcance }
-        @if (vistaActual() === 'productos') { Productos del Almacén }
-      </h2>
-
-      <span class="text-color-secondary text-sm">
-        @if (vistaActual() === 'alcances') { Administra los puntos de distribución }
-        @if (vistaActual() === 'almacenes') { Selecciona un almacén para ver sus productos }
-        @if (vistaActual() === 'productos') { Inventario de productos disponibles }
-      </span>
-
     </div>
-  </div>
 
-  <p-divider styleClass="my-3"></p-divider>
+    <!-- <p-divider styleClass="-mb-1"></p-divider> -->
 
-  @if (vistaActual() === 'alcances') {
+    @if (vistaActual() === 'alcances') {
     <app-list-alcance (onSelectAlcance)="vistaActual.set('almacenes')">
     </app-list-alcance>
-  }
+    }
 
-  @if (vistaActual() === 'almacenes') {
+    @if (vistaActual() === 'almacenes') {
     <app-list-almacen (onSelectAlmacen)="vistaActual.set('productos')">
     </app-list-almacen>
-  }
+    }
 
-  @if (vistaActual() === 'productos') {
+    @if (vistaActual() === 'productos') {
     <app-list-producto-almacen></app-list-producto-almacen>
-  }
+    }
 
-</div>
+  </div>
 
-<!-- </app-card> -->
+</app-card>

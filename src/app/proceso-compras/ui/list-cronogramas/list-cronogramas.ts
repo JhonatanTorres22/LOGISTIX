@@ -31,6 +31,7 @@ import { OrdenCarpetaSignal } from '@/panel-solicitudes/domain/signals/orden-car
 import { UiIconButton } from "@/core/components/ui-icon-button/ui-icon-button";
 import { TagModule } from "primeng/tag";
 import { AuthService } from '@/auth/infraestructure/services/auth.service';
+import { ActualizarEstadoProximo } from '@/proceso-compras/domain/models/solicitud-compra.model';
 
 @Component({
   selector: 'app-list-cronogramas',
@@ -531,6 +532,8 @@ export class ListCronogramas implements OnInit {
         CodigoCronogramaPagoProveedor: cronograma.idCronogramaPagoProveedor
       })
     );
+    console.log(tipo);
+    
 
     config.request(formData).subscribe({
       next: () => {
@@ -547,6 +550,9 @@ export class ListCronogramas implements OnInit {
         console.log(this.actionOrdenCompraCarpeta());
 
         this.selectCronograma.set(this.selectCronogramaDefault);
+        if (tipo === 'comprobante') {
+          this.actualizarEstadoProximo('Guia de Remision');
+        }
 
       },
       error: (err: ApiError) => {
@@ -613,14 +619,32 @@ export class ListCronogramas implements OnInit {
       next: (data: ApiResponse) => {
         this.alert.showAlert(`Cronograma aprobado, ${data.message}`, 'success')
         this.loading = false
-        this.obtenerCronograma()
+        cronograma.estado === 3
+        this.actualizarEstadoProximo('Cargar Cronograma')
+        // this.obtenerCronograma()
       },
       error: (err: ApiError) => {
         this.alert.showAlert(`Error al aprobar, ${err.userMessage}`)
         this.loading = false
       }
     })
+  }
 
+  actualizarEstadoProximo(estadoProximo : string) {
+    const actualizarEstado: ActualizarEstadoProximo = {
+      estadoProximo: estadoProximo,
+      idSolicitudCompra: this.listAnexo()[0].idSolicitudCompra
+    };
+
+    this.repositorySolicitudCompra.actualizarEstadoProximo(actualizarEstado).subscribe({
+      next: (res: ApiResponse) => {
+        this.actionOrdenCompraCarpeta.set('estadoActualizado')
+        this.alert.showAlert(`Estado actualizado. ${res.message}`, 'success');
+      },
+      error: (err: ApiError) => {
+        this.alert.showAlert(`Error al actualizar estado, ${err.error.message}`, 'error');
+      }
+    });
   }
 
   observarCronogramaPago = (cronograma: ListarCronograma) => {
@@ -638,7 +662,8 @@ export class ListCronogramas implements OnInit {
         cronograma.tipoObservacion = this.observarForm.value.tipoObservacion
         this.loading = false
         this.cancelarObservacion()
-        this.obtenerCronograma()
+        cronograma.estado === 2
+        // this.obtenerCronograma()
 
       },
       error: (err: ApiError) => {

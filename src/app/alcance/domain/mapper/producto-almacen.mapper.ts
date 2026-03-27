@@ -1,5 +1,5 @@
-import { AgregarProductoAlmacenDTO, DataProductoPorAlmacenDTO, ListarProductoPorAlmacenDTO } from "@/alcance/infraestructure/dto/producto-almacen.dto";
-import { AgregarProductoAlmacen, DataProductoPorAlmacen, ListarProductoPorAlmacen } from "../models/producto-almacen.model";
+import { AgregarProductoAlmacenDTO, AumentarCantidadProductoAlmacenDTO, DataProductoPorAlmacenDTO, DisminuirCantidadProductoAlmacenDTO, ListarProductoPorAlmacenDTO } from "@/alcance/infraestructure/dto/producto-almacen.dto";
+import { AgregarProductoAlmacen, AumentarCantidadProductoAlmacen, DataProductoPorAlmacen, DisminuirCantidadProductoAlmacen, ListarProductoPorAlmacen } from "../models/producto-almacen.model";
 
 export class ProductoAlmacenMapper {
 
@@ -33,6 +33,24 @@ export class ProductoAlmacenMapper {
             stock : param.enStock,
             cantidad : param.cantidad,
             comprometido : param.comprometido,
+            marca : param.marca,
+            modelo : param.modelo,
+            nombreProducto : param.nombre,
+            urlImagen : param.url
         }
+    }
+
+    static toApiAgregarCantidadProductoAlmacen (param : AumentarCantidadProductoAlmacen[]) : AumentarCantidadProductoAlmacenDTO[] {
+        return param.map(productoAlmacen => ({
+            cantidad : productoAlmacen.cantidad,
+            codigoProductoPorAlmacen : productoAlmacen.idProductoPorAlmacen
+        }))
+    }
+
+    static toApiDisminuirCantidadProductoAlmacen (param : DisminuirCantidadProductoAlmacen[]) : DisminuirCantidadProductoAlmacenDTO[] {
+        return param.map(productoAlmacen => ({
+            cantidad : productoAlmacen.cantidad,
+            codigoProductoPorAlmacen : productoAlmacen.idProductoPorAlmacen
+        }))
     }
 }

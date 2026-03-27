@@ -1,6 +1,5 @@
 import { ApiError } from '@/core/interceptors/error-message.model';
 import { LayoutService } from '@/layout/service/layout.service';
-import { DocTributarioPorAprobar } from '@/proceso-compras/domain/models/cronograma.model';
 import { OrdenCompraPorFirmar } from '@/proceso-compras/domain/models/ordenCompraDetalle.model';
 import { CronogramaRepository } from '@/proceso-compras/domain/repository/cronograma.repository';
 import { CronogramaSignal } from '@/proceso-compras/domain/signals/cronograma.signal';
@@ -12,6 +11,7 @@ import { UiIconButton } from "@/core/components/ui-icon-button/ui-icon-button";
 import { UiCardNotItemsComponent } from "@/core/components/ui-card-not-items/ui-card-not-items.component";
 import { UiLoadingProgressBarComponent } from "@/core/components/ui-loading-progress-bar/ui-loading-progress-bar.component";
 import { Router } from '@angular/router';
+import { DashboardSignal } from '../../signals/dashboard.signal';
 
 @Component({
   selector: 'app-list-comprobante-por-cargar',
@@ -27,7 +27,9 @@ export class ListComprobantePorCargar {
   private signal = inject(CronogramaSignal)
   listComprobantePorCargar = this.signal.listComprobantePorCargar
 
-  constructor(public layoutService: LayoutService, private router: Router,) { }
+  private dashboardSignal = inject(DashboardSignal)
+
+  constructor(private router: Router,) { }
 
   ngOnInit() {
     this.obtenerComprobantePorAprobar()
@@ -52,8 +54,15 @@ export class ListComprobantePorCargar {
   }
 
   seleccionarMensaje(mensaje: OrdenCompraPorFirmar) {
-    this.router.navigate(['/solicitud-compra'])
-    this.layoutService.codigoSolicitudCompraNavbar.set(mensaje.idSolicitudCompra)
+     this.dashboardSignal.selectCarpetaConAnexoPorTrabajar.set({
+      idSolicitudCompra : mensaje.idSolicitudCompra,
+    idSubtarea: mensaje.idSubTarea,
+    idCarpeta: mensaje.idCarpeta ?? 0,
+    numeracionCarpeta: mensaje.numeracionCarpeta ?? '',
+    prefijoCarpeta: mensaje.prefijoCarpeta ?? ''
+  });
+
+  this.router.navigate(['/solicitud-compra']);
   }
 
 }

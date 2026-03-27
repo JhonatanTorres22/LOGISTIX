@@ -2,10 +2,11 @@ import { Injectable } from "@angular/core";
 import { AuthRepository } from "../../domain/repositories/auth.repository";
 import { AuthService } from "../services/auth.service";
 import { Observable } from "rxjs";
-import { AuthData, DataModulo, LoginModel } from "../../domain/models/auth.model";
+import { AuthData, CambioContrasenia, DataModulo, LoginModel } from "../../domain/models/auth.model";
 // import { NavigationItem } from "src/app/@theme/types/navigation";
 import { MenuService } from "../services/menu.services";
 import { MenuItem } from "primeng/api";
+import { ApiResponse } from "@/core/interceptors/error-message.model";
 
 
 @Injectable({
@@ -25,5 +26,9 @@ export class AuthRepositoryImpl implements AuthRepository {
     }
     obtenerMenu(): Observable<MenuItem[]> {
         return this.menuService.obtenerMenu()
+    }
+    
+    cambioContrasenia(cambio: CambioContrasenia): Observable<ApiResponse> {
+        return this.service.cambiarContrasenia(cambio)
     }
 }

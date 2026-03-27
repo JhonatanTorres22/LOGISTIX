@@ -56,6 +56,6 @@ export class SolicitudesComprasCompletas {
        public presupuesto : number,
        public total : number,
        public cantidadAnexo: number,
-       public estadoSolicitud : number
+       public estadoProximo : string
     ){}
 }

@@ -3,6 +3,7 @@
     <ui-loading-progress-bar></ui-loading-progress-bar>
  }
  @else {
+    <!-- <pre> {{listComprobantePorCargar() | json}} </pre> -->
      <p-data-view [value]="listComprobantePorCargar()" [paginator]="true" [rows]="5">
      
          <ng-template #emptymessage>

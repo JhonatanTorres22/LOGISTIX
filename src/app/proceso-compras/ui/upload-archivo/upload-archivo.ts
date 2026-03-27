@@ -25,10 +25,13 @@ import { AuthService } from '@/auth/infraestructure/services/auth.service';
 import { SolicitudCompraRepository } from '@/proceso-compras/domain/repository/solicitud-compra.repository';
 import { OrdenCompraDetalleSignal } from '@/proceso-compras/domain/signals/ordenCompraDetalle.signal';
 import { OrdenCarpetaSignal } from '@/panel-solicitudes/domain/signals/orden-carpetas.signal';
+import { ActualizarEstadoProximo } from '@/proceso-compras/domain/models/solicitud-compra.model';
+import { InsertarCarpetasConAnexo } from '@/proceso-compras/domain/models/carpetas.models';
+import { CarpetasRepository } from '@/proceso-compras/domain/repository/carpeta.repository';
 
 @Component({
   selector: 'app-upload-archivo',
-  standalone : true,
+  standalone: true,
   imports: [ProcesoComprasModule, Dialog, ProcesoComprasModule, FieldsetModule, UploadFileComponent, CheckboxModule, DataViewModule, ListCarpetas, CardModule, PdfOrdenCompra],
   templateUrl: './upload-archivo.html',
   styleUrl: './upload-archivo.scss'
@@ -61,6 +64,8 @@ export class UploadArchivo implements OnInit {
 
   private carpetaSignal = inject(CarpetaSignal)
   actionCarpeta = this.carpetaSignal.actionCarpeta
+  selectCarpeta = this.carpetaSignal.carpetaSelect
+
 
   archivoObservandoId: number | null = null;
   mostrarSubirArchivo: boolean = false
@@ -83,8 +88,12 @@ export class UploadArchivo implements OnInit {
 
   idNuevoAnexoPorFase: number = 0
 
-    private signalOrdenCarpeta = inject(OrdenCarpetaSignal)
+  private signalOrdenCarpeta = inject(OrdenCarpetaSignal)
   actionOrdenCompraCarpeta = this.signalOrdenCarpeta.actionOrdenCompraCarpeta
+
+  private authService = inject(AuthService)
+  userData = this.authService.getUserData()
+
   constructor(
     private alert: AlertService
   ) {
@@ -118,11 +127,13 @@ export class UploadArchivo implements OnInit {
 
     effect(() => {
       console.log(this.actionOrdenFirmada());
-      
+
       if (this.actionOrdenFirmada() == '') return;
+      console.log(this.actionOrdenFirmada());
+      
       if (this.actionOrdenFirmada() === 'ENVIAR CORREO ORDEN FIRMADA') {
         console.log(this.actionOrdenFirmada(), 'desde upload');
-        
+
         const archivos = this.selectAnexo().archivos;
         const ultimoAnexo = archivos[archivos.length - 1];
         this.archivoAnexoPorFaseActual = ultimoAnexo.archivo;
@@ -197,28 +208,28 @@ export class UploadArchivo implements OnInit {
   // Variable para guardar el anexo seleccionado
   anexoSeleccionado: any = null;
 
-seleccionarProveedor(item: any) {
+  seleccionarProveedor(item: any) {
 
-  const nombreProveedor = item.proveedor;
-  const idAnexo = item.idAnexosPorFase;
+    const nombreProveedor = item.proveedor;
+    const idAnexo = item.idAnexosPorFase;
 
-  const list = this.listOrdenCompra();
-  if (!list?.length) return;
+    const list = this.listOrdenCompra();
+    if (!list?.length) return;
 
-  const anexos = list[0].anexosPorFases;
+    const anexos = list[0].anexosPorFases;
 
-  const anexo = anexos.find(a => a.idAnexosPorFase === idAnexo);
-  if (!anexo) return;
+    const anexo = anexos.find(a => a.idAnexosPorFase === idAnexo);
+    if (!anexo) return;
 
-  const productosProveedor = anexo.ordenCompra.filter(
-    o => o.nombreProveedor === nombreProveedor
-  );
+    const productosProveedor = anexo.ordenCompra.filter(
+      o => o.nombreProveedor === nombreProveedor
+    );
 
-  this.proveedoresAgrupados = productosProveedor;
-  this.visiblePdfOrden = true;
-  this.selectProveedorProducto.set(productosProveedor);
+    this.proveedoresAgrupados = productosProveedor;
+    this.visiblePdfOrden = true;
+    this.selectProveedorProducto.set(productosProveedor);
 
-}
+  }
 
   guardarArchivo() {
     if (!this.modoArchivo) return;
@@ -229,7 +240,7 @@ seleccionarProveedor(item: any) {
         ? this.insertarAnexoFase()
         : this.uploadArchivo();
     }
-    else if(this.selectAnexo().nombre == 'Orden de Compra') {
+    else if (this.selectAnexo().nombre == 'Orden de Compra') {
       if (!this.tieneArchivoActual) {
         this.visibleCarpeta = true
         return
@@ -239,7 +250,7 @@ seleccionarProveedor(item: any) {
       }
 
     }
-    else if(this.selectAnexo().nombre == 'Documentacion Preliminar'){
+    else if (this.selectAnexo().nombre == 'Documentacion Preliminar') {
       this.modoArchivo === 'CREAR'
         ? this.insertarAnexoFase()
         : this.uploadArchivo();
@@ -258,12 +269,13 @@ seleccionarProveedor(item: any) {
         this.loading = false
         this.idNuevoAnexoPorFase = res.data
         this.alert.showAlert('Anexo generado correctamente', 'success')
-        if(this.selectAnexo().nombre == 'Documentacion Preliminar'){
+        if (this.selectAnexo().nombre == 'Documentacion Preliminar') {
           this.uploadArchivo()
           return
         }
         if (this.selectAnexo().nombre == 'Cronograma') { return }
-        this.visibleCarpeta = true
+        // this.visibleCarpeta = true
+        this.insertarCarpetaConAnexo()
 
       },
       error: () => {
@@ -309,6 +321,43 @@ seleccionarProveedor(item: any) {
     this.visiblePdfOrden = true
   }
   carpetaAbierta: boolean = false;
+  private repositoryCarpeta = inject(CarpetasRepository)
+  insertarCarpetaConAnexo(): void {
+    this.loading = true
+    const payload: InsertarCarpetasConAnexo = {
+      idAnexosPorFase: this.idNuevoAnexoPorFase,
+      idCarpeta: this.selectCarpeta().idCarpeta
+    }
+    console.log(payload, 'insertando carpetas con anexo en componente de carpetas');
+
+    this.alert.sweetAlert('question', '¿Confirmar?', '¿Guardar archivo en la carpeta?')
+      .then(ok => {
+        if (!ok) return;
+
+        this.repositoryCarpeta.insertarCarpetaConAnexo(payload)
+          .subscribe({
+            next: res => {
+              this.loading = false
+              this.alert.showAlert(`Guardado, ${res.message}`, 'success');
+              const action =
+                this.selectAnexo().nombre === 'Orden Firmada'
+                  ? 'INSERTAR CARPETA CON ANEXO EN ORDEN'
+                  : this.selectAnexo().nombre === 'Cronograma'
+                    ? 'ACTUALIZAR ARCHIVO CRONOGRAMA'
+                    : 'INSERTAR CARPETA CON ANEXO';
+              // this.actionCarpeta.set(action);
+              this.uploadArchivo()
+              this.closeDialog();
+            },
+            error: err => {
+              this.loading = false
+              this.alert.showAlert(`Error, ${err.error?.Message}`, 'error');
+            }
+          });
+      });
+  }
+
+
   uploadArchivo = () => {
     if (this.selectAnexo().nombre === 'Orden de Compra' && !this.carpetaAbierta) {
       this.visibleCarpeta = true;
@@ -335,13 +384,14 @@ seleccionarProveedor(item: any) {
         this.loading = false
         this.alert.showAlert('Archivo actualizado correctamente', 'success');
         this.closeDialog();
-        if(this.selectAnexo().nombre == 'Documentacion Preliminar'){
+        if (this.selectAnexo().nombre == 'Documentacion Preliminar') {
           this.actionAnexo.set('1');
           return
         }
-        this.actionOrdenCompraCarpeta.set('archivoAsignado')
+        // this.actionOrdenCompraCarpeta.set('archivoAsignado')
+        this.actualizarEstadoProximo()
         console.log(this.actionOrdenCompraCarpeta(), 'desde upload archivo');
-        
+
         // this.obtenerOrdenCompraDetalle()
       },
       error: (err: ApiError) => {
@@ -435,10 +485,7 @@ seleccionarProveedor(item: any) {
         });
       })
   };
-  private authService = inject(AuthService)
-  userData = this.authService.getUserData()
 
-  selectCarpeta = this.carpetaSignal.carpetaSelect
   enviarConstanciaFirma = () => {
 
     const rawProductos = this.selectProveedorProducto()
@@ -475,8 +522,9 @@ seleccionarProveedor(item: any) {
     this.anexoRepository.enviarConstanciaFirma(enviarConstancia).subscribe({
       next: () => {
         this.alert.showAlert(`Enviando correo`, 'success')
-        if(this.selectAnexo().nombre == 'Orden Firmada'){
-          this.actionOrdenCompraCarpeta.set('archivoAsignado')
+        if (this.selectAnexo().nombre == 'Orden Firmada') {
+          this.actualizarEstadoProximo()
+          // this.actionOrdenCompraCarpeta.set('archivoAsignado')
         }
       },
       error: (err) => {
@@ -529,9 +577,10 @@ seleccionarProveedor(item: any) {
         this.alert.showAlert('Archivo actualizado correctamente', 'success');
         // this.actionAnexo.set('1');
         this.obtenerOrdenCompraDetalle()
-        this.actionOrdenCompraCarpeta.set('archivoAsignado')
+        this.actualizarEstadoProximo()
+
         console.log(this.actionOrdenCompraCarpeta(), 'orden compra desde upload');
-        
+
         this.closeDialog();
       },
       error: (err: ApiError) => {
@@ -561,4 +610,48 @@ seleccionarProveedor(item: any) {
       ?.find(a => a.idAnexosPorFase === idAnexo);
   }
 
+  private readonly ESTADO_SIGUIENTE: Record<string, string> = {
+    'Orden de Compra': 'Orden Firmada',
+    'Orden Firmada': 'Documento Tributario Por Aprobar',
+    'Documento Tributario Por Aprobar': 'Cargar Cronograma',
+    'Cargar Cronograma': 'Guia de Remision',
+    'Guia de Remision': 'Recepcion',
+    'Recepcion': 'Entrega',
+    'Entrega': 'Acta',
+    'Acta': 'Completado',
+  };
+
+  actualizarEstadoProximo() {
+    const anexoActual = this.selectAnexo()?.nombre;
+
+    if (!anexoActual) {
+      this.alert.showAlert('No hay anexo seleccionado', 'error');
+      return;
+    }
+
+    const siguiente = this.ESTADO_SIGUIENTE[anexoActual];
+
+    if (!siguiente) {
+      if(this.selectAnexo().nombre == 'Cotización'){
+         this.actionOrdenCompraCarpeta.set('archivoAsignado')
+      }
+      this.alert.showAlert('Este anexo no tiene transición de estado', 'info');
+      return;
+    }
+
+    const actualizarEstado: ActualizarEstadoProximo = {
+      estadoProximo: siguiente,
+      idSolicitudCompra: this.listAnexo()[0].idSolicitudCompra
+    };
+
+    this.repository.actualizarEstadoProximo(actualizarEstado).subscribe({
+      next: (res: ApiResponse) => {
+        this.actionOrdenCompraCarpeta.set('estadoActualizado')
+        this.alert.showAlert(`Estado actualizado a: "${siguiente}". ${res.message}`, 'success');
+      },
+      error: (err: ApiError) => {
+        this.alert.showAlert(`Error al actualizar estado, ${err.error.message}`, 'error');
+      }
+    });
+  }
 }

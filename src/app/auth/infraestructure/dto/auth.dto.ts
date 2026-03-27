@@ -46,3 +46,9 @@ export interface DecodedTokenDTO {
     iss: string;
     aud: string;
 }
+
+export interface CambioContraseniaDTO {
+    numeroDocumento : string,
+    contrasenia : string,
+    nuevaContrasenia : string
+}

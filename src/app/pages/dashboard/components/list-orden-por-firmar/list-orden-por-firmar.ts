@@ -13,21 +13,23 @@ import { UiCardNotItemsComponent } from "@/core/components/ui-card-not-items/ui-
 import { CdkDragPlaceholder } from "@angular/cdk/drag-drop";
 import { UiLoadingProgressBarComponent } from "@/core/components/ui-loading-progress-bar/ui-loading-progress-bar.component";
 import { Router } from '@angular/router';
+import { DashboardSignal } from '../../signals/dashboard.signal';
 
 @Component({
   selector: 'app-list-orden-por-firmar',
-  imports: [DataViewModule, TagModule, CommonModule, ButtonModule, UiCardNotItemsComponent, CdkDragPlaceholder, UiLoadingProgressBarComponent],
+  imports: [DataViewModule, TagModule, CommonModule, ButtonModule, UiCardNotItemsComponent, UiLoadingProgressBarComponent],
   templateUrl: './list-orden-por-firmar.html',
   styleUrl: './list-orden-por-firmar.scss'
 })
 export class ListOrdenPorFirmar {
 
-  loading : boolean = false
+  loading: boolean = false
   private repository = inject(SolicitudCompraRepository)
   private alert = inject(AlertService)
   private signal = inject(SolicitudCompraSignal)
   listOrdenPorFirmar = this.signal.listOrdenPorFirmar
-  constructor(public layoutService: LayoutService,
+  private dashboardSignal = inject(DashboardSignal)
+  constructor(
     private router: Router,
   ) { }
   ngOnInit() {
@@ -50,7 +52,14 @@ export class ListOrdenPorFirmar {
   }
 
   seleccionarMensaje(ordenPorFirmar: OrdenCompraPorFirmar) {
-    this.router.navigate(['/solicitud-compra'])
-    this.layoutService.codigoSolicitudCompraNavbar.set(ordenPorFirmar.idSolicitudCompra)
+    this.dashboardSignal.selectCarpetaConAnexoPorTrabajar.set({
+      idSolicitudCompra: ordenPorFirmar.idSolicitudCompra,
+      idSubtarea: ordenPorFirmar.idSubTarea,
+      idCarpeta: ordenPorFirmar.idCarpeta ?? 0,
+      numeracionCarpeta: ordenPorFirmar.numeracionCarpeta ?? '',
+      prefijoCarpeta: ordenPorFirmar.prefijoCarpeta ?? ''
+    });
+
+    this.router.navigate(['/solicitud-compra']);
   }
 }
