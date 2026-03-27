@@ -3,7 +3,7 @@ name: Build & Deploy
 on:
   push:
     branches:
-      - main
+      - production
 
 jobs:
   build-and-deploy:
@@ -26,24 +26,20 @@ jobs:
       - name: Build production
         run: npm run build -- --configuration production
 
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Add server to known_hosts
+        run: ssh-keyscan -p ${{ secrets.DEPLOY_PORT }} -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Copy .htaccess to dist
+        run: cp .htaccess dist/sakai-ng/browser/.htaccess
+
       - name: Deploy via rsync
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
         run: |
-          # Prepare SSH
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -p "$DEPLOY_PORT" -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
-
-          # Sync build output (Angular 17+ outputs to dist/<name>/browser/)
           rsync -avz --delete \
-            -e "ssh -p $DEPLOY_PORT -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" \
+            -e "ssh -p ${{ secrets.DEPLOY_PORT }} -o StrictHostKeyChecking=no" \
             dist/sakai-ng/browser/ \
-            "$DEPLOY_USER@$DEPLOY_HOST:/home/autonomadeica/public_html/software-uai/silogi/prod/"
-
-          # Clean up key
-          rm -f ~/.ssh/id_rsa
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/home/autonomadeica/public_html/software-uai/silogi/prod/"
