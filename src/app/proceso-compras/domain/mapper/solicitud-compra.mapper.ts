@@ -1,5 +1,5 @@
-import { SolicitudCompraDTO, DetalleSolicitudCompraDTO, AgregarSolicitudDTO, GenerarOrdenDeCompraDTO, DataSolicitudCompraDTO, EditarSolicitudCompraDetalleDTO, EliminarSolicitudCompraDetalleDTO } from "../../infraestructure/dto/solicitud-compra.dto";
-import { AgregarSolicitud, DataSolicitudCompra, DetalleSolicitudCompra, EditarSolicitudCompraDetalle, EliminarSolicitudCompraDetalle, GenerarOrdenDeCompra, SolicitudCompra } from "../models/solicitud-compra.model";
+import { SolicitudCompraDTO, DetalleSolicitudCompraDTO, AgregarSolicitudDTO, GenerarOrdenDeCompraDTO, DataSolicitudCompraDTO, EditarSolicitudCompraDetalleDTO, EliminarSolicitudCompraDetalleDTO, ActualizarEstadoProximoDTO } from "../../infraestructure/dto/solicitud-compra.dto";
+import { ActualizarEstadoProximo, AgregarSolicitud, DataSolicitudCompra, DetalleSolicitudCompra, EditarSolicitudCompraDetalle, EliminarSolicitudCompraDetalle, GenerarOrdenDeCompra, SolicitudCompra } from "../models/solicitud-compra.model";
 
 
 export class SolicitudCompraMapper {
@@ -84,6 +84,13 @@ export class SolicitudCompraMapper {
     static ToApiEliminarSolicitudCompraDetalle = (param : EliminarSolicitudCompraDetalle) : EliminarSolicitudCompraDetalleDTO => {
         return {
             codigoSolicitudCompraDetalle : param.idSolicitudCompraDetalle
+        }
+    }
+
+    static toDomainActualizarEstadoProximo (param : ActualizarEstadoProximo) : ActualizarEstadoProximoDTO {
+        return{
+            codigoSolicitudCompra : param.idSolicitudCompra,
+            estadoProximo : param.estadoProximo
         }
     }
 

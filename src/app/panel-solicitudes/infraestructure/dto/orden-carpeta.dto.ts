@@ -52,5 +52,5 @@ export interface SolicitudesComprasCompletasDTO {
     presupuestoProgramado: number,
     total: number,
     cantidadAnexos: number,
-    estadoSolicitud : number
+    estadoProximo : string
 }

@@ -15,6 +15,7 @@ import { CronogramaSignal } from '@/proceso-compras/domain/signals/cronograma.si
 import { UiCardNotItemsComponent } from "@/core/components/ui-card-not-items/ui-card-not-items.component";
 import { UiLoadingProgressBarComponent } from "@/core/components/ui-loading-progress-bar/ui-loading-progress-bar.component";
 import { Router } from '@angular/router';
+import { DashboardSignal } from '../../signals/dashboard.signal';
 
 @Component({
   selector: 'app-list-doc-tributario-por-aprobar',
@@ -23,12 +24,13 @@ import { Router } from '@angular/router';
   styleUrl: './list-doc-tributario-por-aprobar.scss'
 })
 export class ListDocTributarioPorAprobar {
-  loading : boolean = false
+  loading: boolean = false
   private repository = inject(CronogramaRepository)
   private alert = inject(AlertService)
   private signal = inject(CronogramaSignal)
   listDocTributarioPorAprobar = this.signal.listDocTributarioPorAprobar
-  constructor(public layoutService: LayoutService,
+  private dashboardSignal = inject(DashboardSignal)
+  constructor(
     private router: Router,
   ) { }
 
@@ -70,8 +72,16 @@ export class ListDocTributarioPorAprobar {
   }
 
   seleccionarMensaje(mensaje: OrdenCompraPorFirmar) {
+
+    this.dashboardSignal.selectCarpetaConAnexoPorTrabajar.set({
+      idSolicitudCompra: mensaje.idSolicitudCompra,
+      idSubtarea: mensaje.idSubTarea,
+      idCarpeta: mensaje.idCarpeta ?? 0,
+      numeracionCarpeta: mensaje.numeracionCarpeta ?? '',
+      prefijoCarpeta: mensaje.prefijoCarpeta ?? ''
+    });
+
     this.router.navigate(['/solicitud-compra'])
-    this.layoutService.codigoSolicitudCompraNavbar.set(mensaje.idSolicitudCompra)
   }
 
 

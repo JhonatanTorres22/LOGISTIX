@@ -20,7 +20,7 @@ import { UiLoadingProgressBarComponent } from "@/core/components/ui-loading-prog
   styleUrl: './login.scss'
 })
 export class Login {
-  loading : boolean = false
+  loading: boolean = false
   private authService = inject(AuthService)
   dataUser = this.authService.getUserData()
   signal = inject(AuthSignal)
@@ -49,41 +49,44 @@ export class Login {
   }
 
   iniciarSesion = () => {
-    this.loading = true
+    this.loading = true;
     let login: LoginModel = {
-      password: this.formLogin.value.password,
-      role: this.rol(),
-      username: this.dni()
+        password: this.formLogin.value.password,
+        role: this.rol(),
+        username: this.dni()
     }
+
     this.repository.login(login).subscribe({
-      next: () => {
-        this.alert.sweetAlert('success', '¡Bienvenido!', 'Gracias por iniciar sesion el logistix')
-        this.permisoService.load();
-        this.obtenerMenu()
+        next: () => {
+            localStorage.setItem('userName', this.dni());
 
-        // if(this.dataUser?.role == 'Jefe Logístico'){
-        //   this.router.navigate(['/proveedor'])
-        // }
-        // else{
-        // }
+            // 👇 Detecta si el password es igual al username
+            if (this.formLogin.value.password === this.dni()) {
+                localStorage.setItem('forzarCambio', 'true');
+            } else {
+                localStorage.removeItem('forzarCambio');
+            }
 
-      },
-      error: () => {
-        this.alert.showAlert('Hubo un error en las credenciales', 'error')
-        this.loading = false
-      }
+            this.alert.sweetAlert('success', '¡Bienvenido!', 'Gracias por iniciar sesion el logistix')
+            this.permisoService.load();
+            this.obtenerMenu();
+        },
+        error: () => {
+            this.alert.showAlert('Hubo un error en las credenciales', 'error')
+            this.loading = false
+        }
     })
-  }
+}
 
-    obtenerMenu = () => {
+  obtenerMenu = () => {
     this.repository.obtenerMenu().subscribe({
-      next : (data) => {
+      next: (data) => {
         this.alert.showAlert('Listando los menus correctamente', 'success')
         this.router.navigate(['/'])
         this.loading = false
       },
-      error : () => {
-        this.alert.showAlert('Hubo un error al listar los menús','error')
+      error: () => {
+        this.alert.showAlert('Hubo un error al listar los menús', 'error')
         this.loading = false
       }
     })

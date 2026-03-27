@@ -43,33 +43,6 @@
   }
 }
 
-/* Chips de filtro */
-.estado-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  padding: 2px 7px;
-  border-radius: 999px;
-  border: 1.5px solid #cbd5e1;
-  background: transparent;
-  color: #64748b;
-  cursor: pointer;
-  font-size: 10px;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-
-  &:hover {
-    border-color: #0f172a;
-    color: #0f172a;
-  }
-
-  &.active {
-    background: #0f172a;
-    border-color: #0f172a;
-    color: #fff;
-  }
-}
-
 /* Labels del tree */
 .node-label {
   display: block;
@@ -84,7 +57,88 @@
   font-weight: 600;
 }
 
-/* PrimeNG tree overrides */
+/* Fade al cerrar nodo */
+.node-closing .node-label {
+  opacity: 0.3;
+  transition: opacity 0.2s ease;
+}
+
+/* ── Carpetas amarillas + íconos de color ── */
+:host ::ng-deep .vscode-tree {
+
+  // Animación al expandir hijos
+  .p-treenode-children {
+    animation: treeSlideDown 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  // Línea vertical de indentación
+  .p-treenode-children {
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: #e2e8f0;
+      pointer-events: none;
+    }
+  }
+
+  // Hover suave
+  .p-treenode-content:hover {
+    background: #f1f5f9 !important;
+    border-radius: 4px;
+  }
+
+  // Nodo seleccionado
+  .p-treenode-content.p-highlight {
+    background: #dbeafe !important;
+    border-radius: 4px;
+
+    .node-label {
+      color: #1d4ed8 !important;
+      font-weight: 600;
+    }
+  }
+}
+
+/* Colores de íconos */
+:host ::ng-deep .icon-folder {
+  color: #dcb67a !important; // amarillo VSCode
+}
+
+:host ::ng-deep .icon-folder-open {
+  color: #dcb67a !important;
+  filter: brightness(1.1);
+}
+
+:host ::ng-deep .icon-pdf {
+  color: #e5534b !important;
+}
+
+:host ::ng-deep .icon-calendar {
+  color: #3b9a8b !important;
+}
+
+:host ::ng-deep .icon-warning {
+  color: #e5534b !important;
+}
+
+@keyframes treeSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* PrimeNG tree overrides — igual que antes */
 :host ::ng-deep .vscode-tree,
 :host ::ng-deep .p-tree-container,
 :host ::ng-deep .p-treenode-content,

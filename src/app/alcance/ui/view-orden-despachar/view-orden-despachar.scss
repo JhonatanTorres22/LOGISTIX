@@ -1,0 +1,12 @@
+:host ::ng-deep .p-datatable {
+  font-size: 0.85rem;
+}
+
+:host ::ng-deep .p-datatable td,
+:host ::ng-deep .p-datatable th {
+  padding: 0.4rem 0.5rem !important;
+}
+
+:host ::ng-deep .p-datatable-thead > tr > th {
+  background: #f8fafc; // más suave
+}

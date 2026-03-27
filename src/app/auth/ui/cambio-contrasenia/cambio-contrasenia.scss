@@ -1,0 +1,10 @@
+:host ::ng-deep {
+    // Evita que el dialog haga scroll al abrirse el panel del password
+    .p-dialog-content {
+        overflow: visible !important;
+    }
+
+    .p-password-panel {
+        z-index: 1200 !important;
+    }
+}

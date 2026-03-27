@@ -2,6 +2,7 @@
     <ui-loading-progress-bar></ui-loading-progress-bar>
 }
 @else {
+    <!-- <pre> {{listDocTributarioPorAprobar() | json}} </pre> -->
     <p-data-view [value]="listDocTributarioPorAprobar()" [paginator]="true" [rows]="5">
 
     <ng-template #emptymessage>

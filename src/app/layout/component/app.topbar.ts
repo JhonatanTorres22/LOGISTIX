@@ -15,11 +15,12 @@ import { SolicitudCompraRepository } from '@/proceso-compras/domain/repository/s
 import { ApiError } from '@/core/interceptors/error-message.model';
 import { AlertService } from 'src/assets/demo/services/alert.service';
 import { OrdenCompraPorFirmar } from '@/proceso-compras/domain/models/ordenCompraDetalle.model';
+import { CambioContrasenia } from "@/auth/ui/cambio-contrasenia/cambio-contrasenia";
 
 @Component({
     selector: 'app-topbar',
     standalone: true,
-    imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator, OverlayBadgeModule, PopoverModule, TagModule, DataViewModule, ButtonModule],
+    imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator, OverlayBadgeModule, PopoverModule, TagModule, DataViewModule, ButtonModule, CambioContrasenia],
     template: ` <div class="layout-topbar">
         <div class="layout-topbar-logo-container">
             <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
@@ -33,9 +34,9 @@ import { OrdenCompraPorFirmar } from '@/proceso-compras/domain/models/ordenCompr
 
         <div class="layout-topbar-actions">
             <div class="layout-config-menu">
-                <button type="button" class="layout-topbar-action" (click)="toggleDarkMode()">
+                <!-- <button type="button" class="layout-topbar-action" (click)="toggleDarkMode()">
                     <i [ngClass]="{ 'pi ': true, 'pi-moon': layoutService.isDarkTheme(), 'pi-sun': !layoutService.isDarkTheme() }"></i>
-                </button>
+                </button> -->
                 <div class="relative">
                     <button
                         class="layout-topbar-action layout-topbar-action-highlight"
@@ -58,6 +59,10 @@ import { OrdenCompraPorFirmar } from '@/proceso-compras/domain/models/ordenCompr
 
             <div class="layout-topbar-menu hidden lg:block">
                 <div class="layout-topbar-menu-content">
+                    <button type="button" class="layout-topbar-action" (click)="abrirCambioContrasenia()" >
+    <i class="pi pi-lock"></i>
+    <span>Cambiar Contraseña</span>
+</button>
                     <!-- <button type="button" class="layout-topbar-action">
                         <i class="pi pi-calendar"></i>
                         <span>Calendar</span>
@@ -124,7 +129,13 @@ import { OrdenCompraPorFirmar } from '@/proceso-compras/domain/models/ordenCompr
                 </div>
             </div>
         </div>
-    </div>`
+    </div>
+    @if (modalCambioVisible) {
+        <app-cambio-contrasenia [(visible)]="modalCambioVisible"
+    [forzado]="cambioForzado"
+    (onCambioExitoso)="onCambioExitoso()"></app-cambio-contrasenia>
+    }
+    `
 })
 export class AppTopbar implements OnInit {
 
@@ -138,8 +149,13 @@ export class AppTopbar implements OnInit {
         this.layoutService.layoutConfig.update((state) => ({ ...state, darkTheme: !state.darkTheme }));
     }
 
+    cambioForzado = false;
+
     ngOnInit() {
-        // this.obtenerOrdencompraPorFirmar()
+        if (localStorage.getItem('forzarCambio') === 'true') {
+            this.cambioForzado = true;
+            this.modalCambioVisible = true;
+        }
     }
 
     mensajes: OrdenCompraPorFirmar[] = []
@@ -159,5 +175,15 @@ export class AppTopbar implements OnInit {
 
     seleccionarMensaje(mensaje: OrdenCompraPorFirmar) {
         this.layoutService.codigoSolicitudCompraNavbar.set(mensaje.idSolicitudCompra)
+    }
+
+    modalCambioVisible = false;
+
+    abrirCambioContrasenia() {
+        this.modalCambioVisible = true;
+    }
+    onCambioExitoso(): void {
+        this.cambioForzado = false;
+        this.modalCambioVisible = false;
     }
 }

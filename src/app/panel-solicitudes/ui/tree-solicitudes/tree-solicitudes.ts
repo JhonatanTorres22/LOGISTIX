@@ -16,6 +16,8 @@ import { CardModule } from "primeng/card";
 import { LayoutService } from '@/layout/service/layout.service';
 import { SelectModule } from "primeng/select";
 import { FormsModule } from '@angular/forms';
+import { DashboardSignal } from '@/pages/dashboard/signals/dashboard.signal';
+import { CarpetaSignal } from '@/proceso-compras/domain/signals/carpeta.signal';
 
 @Component({
   selector: 'app-tree-solicitudes',
@@ -41,53 +43,78 @@ export class TreeSolicitudes implements OnInit {
 
   actionOrdenCompraCarpet = this.signal.actionOrdenCompraCarpeta
 
+
   private userService = inject(AuthService)
   userData = this.userService.getUserData()
-  constructor(
-  ) {
+  private currentSolicitudNode: TreeNode | null = null;
+  closingNodeKey = signal<string | null>(null);
+  solicitudSeleccionada = signal<boolean>(false);
+  private dashboardSignal = inject(DashboardSignal)
+  carpetaSeleccionadaPorTrabajar = this.dashboardSignal.selectCarpetaConAnexoPorTrabajar
+  private carpetaSignal = inject(CarpetaSignal)
+  selectCarpeta = this.carpetaSignal.carpetaSelect
+  selectDefaultCarpeta = this.carpetaSignal.carpetaSelectDefault
+  constructor() {
+
     effect(() => {
-      const id = this.codigoSolicitudCompraNavbar();
+      const carpetaData = this.carpetaSeleccionadaPorTrabajar();
       const nodes = this.nodes();
 
-      if (id && nodes.length > 0) {
-        const node = nodes.find(n =>
-          n.key === `solicitud-${id}`
-        );
+      if (carpetaData.idSolicitudCompra === 0 || nodes.length === 0) return;
 
-        if (node) {
-          const solicitud = node.data;
-          this.subtarea.set(solicitud);
-          this.obtenerOrdenCompra(node, id);
-        }
+      const node = nodes.find(n => n.key === `solicitud-${carpetaData.idSolicitudCompra}`);
+      if (!node) return;
+
+      if (this.currentSolicitudNode && this.currentSolicitudNode.key !== node.key) {
+        this.currentSolicitudNode.expanded = false;
+        this.currentSolicitudNode.children = [];
       }
+
+      this.currentSolicitudNode = node;
+      this.solicitudSeleccionada.set(true);
+      this.subtarea.set({ codigoSubTarea: 0 } as any);
+      // this.selectCarpeta.set(this.selectDefaultCarpeta)
+
+      this.obtenerOrdenCompra(node, carpetaData.idSolicitudCompra, carpetaData.idCarpeta);
     });
 
+    // Effect 2: archivo asignado → recargar carpetas del nodo activo
     effect(() => {
-
       const action = this.actionOrdenCompraCarpet();
       const nodes = this.nodes();
       const solicitud = this.subtarea();
 
-      if (!action) return;
-      if (nodes.length === 0) return;
-      if (!solicitud) return;
+      if (!action || nodes.length === 0 || !solicitud) return;
 
       if (action === 'archivoAsignado') {
-
-        const node = nodes.find(n =>
+        const node = this.currentSolicitudNode ?? nodes.find(n =>
           n.data.codigoSubTarea === solicitud.codigoSubTarea
         );
 
         if (!node) return;
 
+        // Mantener la subtarea actual al recargar
+        const subtareaActual = this.subtarea();
         this.obtenerOrdenCompra(node, node.data.idSolicitudCompra);
+
+        // Restaurar subtarea después de recargar si ya estaba seteada
+        if (subtareaActual.codigoSubTarea !== 0) {
+          this.subtarea.set(subtareaActual);
+        }
 
         this.actionOrdenCompraCarpet.set('');
       }
 
-    });
-  };
+      if (action === 'estadoActualizado') {
+        this.currentSolicitudNode = null;        // 👈 limpiar referencia
+        this.solicitudSeleccionada.set(false);   // 👈 limpiar vista
+        this.subtarea.set({ codigoSubTarea: 0 } as any);
+        this.actionOrdenCompraCarpet.set('');
 
+        this.obtenerTodasSolicitudesCompra();    // recargar lista limpia
+      }
+    });
+  }
 
 
   ngOnInit(): void {
@@ -139,32 +166,92 @@ export class TreeSolicitudes implements OnInit {
   }
 
   onNodeSelect(event: any): void {
-
     const node: TreeNode = event.node;
 
-    if (node?.key?.startsWith('solicitud') && node.children?.length === 0) {
+    if (node?.key?.startsWith('solicitud')) {
+      if (this.currentSolicitudNode?.key === node.key) return;
 
-      const solicitud = node.data;
+      if (this.currentSolicitudNode) {
+        this.closingNodeKey.set(this.currentSolicitudNode.key ?? null);
+        const nodeACerrar = this.currentSolicitudNode;
+        setTimeout(() => {
+          nodeACerrar.expanded = false;
+          nodeACerrar.children = [];
+          this.closingNodeKey.set(null);
+        }, 250);
+      }
 
-      this.subtarea.set(solicitud);
+      this.subtarea.set({ codigoSubTarea: 0 } as any);
+      // this.selectCarpeta.set(this.selectDefaultCarpeta)
+      this.solicitudSeleccionada.set(true);  // ← solicitud activa pero sin carpeta aún
+      this.currentSolicitudNode = node;
 
-      this.obtenerOrdenCompra(node, solicitud.idSolicitudCompra);
+      if (node.children?.length === 0) {
+        this.obtenerOrdenCompra(node, node.data.idSolicitudCompra);
+      } else {
+        node.expanded = true;
+      }
+
+      return;
+    }
+
+    if (node?.key?.startsWith('carpeta')) {
+      const solicitudNode = this.nodes().find(n =>
+        n.children?.some(c => c.key === node.key)
+      );
+
+      if (solicitudNode) {
+        this.subtarea.set(solicitudNode.data);
+        this.solicitudSeleccionada.set(false);
+      }
+
+      // ← setear carpeta seleccionada
+      this.selectCarpeta.set({
+        idCarpeta: node.data.idCarpeta,
+        prefijo: node.data.prefijo,
+        numeracion: node.data.numeracion
+      });
+
+      node.expanded = !node.expanded;
     }
   }
 
-  obtenerOrdenCompra = (node: TreeNode, idSolicitud: number) => {
-
+  obtenerOrdenCompra = (node: TreeNode, idSolicitud: number, idCarpeta: number = 0) => {
     this.loading = true;
 
     this.repository.obtener(idSolicitud).subscribe({
       next: (resp) => {
-
         this.listOrdenCarpeta.set(resp.data);
 
-        node.children = this.buildTree(resp.data);
+        if (!resp.data || resp.data.length === 0) {
+          this.subtarea.set(node.data);
+          this.solicitudSeleccionada.set(false);
+          node.expanded = false;
+          this.loading = false;
+          this.resetNavbarSignal();
+          return;
+        }
 
+        node.children = this.buildTree(resp.data);
         node.expanded = true;
 
+        if (idCarpeta !== 0) {
+          const carpetaNode = node.children.find(c => c.key === `carpeta-${idCarpeta}`);
+          if (carpetaNode) {
+            carpetaNode.expanded = true;
+            this.subtarea.set(node.data);
+            this.solicitudSeleccionada.set(false);
+
+            // ← setear carpeta también desde el effect
+            this.carpetaSignal.carpetaSelect.set({
+              idCarpeta: carpetaNode.data.idCarpeta,
+              prefijo: carpetaNode.data.prefijo,
+              numeracion: carpetaNode.data.numeracion
+            });
+          }
+        }
+
+        this.resetNavbarSignal();
         this.loading = false;
       },
       error: (err: ApiError) => {
@@ -174,50 +261,40 @@ export class TreeSolicitudes implements OnInit {
     });
   };
 
+  private resetNavbarSignal() {
+    this.dashboardSignal.selectCarpetaConAnexoPorTrabajar.set(
+      this.dashboardSignal.selectDefaultCarpetaConAnexoPorTrabajar
+    );
+  }
+
   private buildTree(data: any[]): TreeNode[] {
-
     return data.map(carpeta => ({
-
       key: `carpeta-${carpeta.idCarpeta}`,
-
       label: `${carpeta.prefijo}-${carpeta.numeracion}`,
-
-      expanded: true,
-
+      expanded: false,
       data: carpeta,
-
       children: carpeta.carpetaConAnexoPorFase.map((caf: any) =>
         this.buildAnexoNode(caf)
       )
-
     }));
   }
 
   private buildAnexoNode(caf: any): TreeNode {
-
     const anexo = caf.anexoPorFase[0];
-
     return {
 
       key: `anexo-${caf.idAnexoPorFase}`,
-
-      // 👇 ESTA ES LA CARPETA QUE SE MOSTRARÁ
       label: anexo.nombreAnexo,
 
       expanded: true,
-
-      // 👇 guardamos los IDs pero no se muestran
       data: {
         idCarpetaConAnexoPorFase: caf.idCarpetaConAnexoPorFase,
         idAnexoPorFase: caf.idAnexoPorFase
       },
-
       children: [
-
         ...(anexo.archivo
           ? [this.buildArchivoNode(anexo.archivo)]
           : []),
-
         ...this.buildCronogramas(anexo.cronograma)
 
       ]
@@ -285,27 +362,24 @@ export class TreeSolicitudes implements OnInit {
   }
 
   getIconClass(node: TreeNode): string {
-
     if (node.key?.startsWith('solicitud')) {
       return node.data?.cantidadAnexo === 0
-        ? 'pi pi-exclamation-triangle text-red'
-        : 'pi pi-folder';
+        ? 'pi pi-exclamation-triangle icon-warning'
+        : node.expanded
+          ? 'pi pi-folder-open icon-folder-open'
+          : 'pi pi-folder icon-folder';
     }
 
-    if (node.key?.startsWith('carpeta')) {
-      return 'pi pi-folder';
+    if (node.key?.startsWith('carpeta') || node.key?.startsWith('anexo')) {
+      return node.expanded
+        ? 'pi pi-folder-open icon-folder-open'
+        : 'pi pi-folder icon-folder';
     }
 
-    if (node.key?.startsWith('anexo')) {
-      return 'pi pi-folder';
-    }
-
-    // 🔥 CRONOGRAMA ES CARPETA
     if (node.key?.startsWith('cronograma')) {
-      return 'pi pi-folder';
+      return 'pi pi-calendar icon-calendar';
     }
 
-    // 🔥 SOLO ARCHIVOS SON PDF
     if (
       node.key?.startsWith('docTrib') ||
       node.key?.startsWith('infProv') ||
@@ -313,17 +387,21 @@ export class TreeSolicitudes implements OnInit {
       node.key?.startsWith('compPago') ||
       node.key?.startsWith('archivo')
     ) {
-      return 'pi pi-file-pdf';
+      return 'pi pi-file-pdf icon-pdf';
     }
 
     return '';
   }
-
   estadosFiltro = [
-    { value: 1, label: 'Orden de Compra', icon: 'pi pi-shopping-cart' },
-    { value: 2, label: 'Orden de Compra Firmada', icon: 'pi pi-check-circle' },
-    { value: 3, label: 'Cronograma por Aprobar', icon: 'pi pi-clock' },
-    { value: 4, label: 'Cronograma por Carga', icon: 'pi pi-upload' },
+    { value: 'Orden de Compra', label: 'Orden de Compra', icon: 'pi pi-shopping-cart' },
+    { value: 'Orden Firmada', label: 'Orden Firmada', icon: 'pi pi-file-edit' },
+    { value: 'Documento Tributario Por Aprobar', label: 'Documento Tributario Por Aprobar', icon: 'pi pi-file-check' },
+    { value: 'Cargar Cronograma', label: 'Cargar Cronograma', icon: 'pi pi-calendar-plus' },
+    { value: 'Guia de Remision', label: 'Guia de Remision', icon: 'pi pi-truck' },
+    { value: 'Recepcion', label: 'Recepcion', icon: 'pi pi-inbox' },
+    { value: 'Entrega', label: 'Entrega', icon: 'pi pi-box' },
+    { value: 'Acta', label: 'Acta', icon: 'pi pi-clipboard' },
+    { value: 'Completado', label: 'Completado', icon: 'pi pi-check-circle' },
   ];
 
   filtroActivo = signal<number | null>(null);
@@ -332,12 +410,14 @@ export class TreeSolicitudes implements OnInit {
     const filtro = this.filtroActivo();
     const todos = this.nodes();
     if (filtro === null) return todos;
-    return todos.filter(n => n.data?.estadoSolicitud === filtro);
+    return todos.filter(n => n.data?.estadoProximo === filtro);
   });
 
   filtroActivoModel: number | null = null;
 
   onFiltroChange(event: any) {
+    console.log(event.value);
+
     this.filtroActivo.set(event.value ?? null);
   }
 }

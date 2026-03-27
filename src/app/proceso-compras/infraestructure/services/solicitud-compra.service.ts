@@ -2,7 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
 import { map, Observable } from "rxjs";
 import { environment } from "src/environments/environment";
-import { AgregarSolicitud, DataSolicitudCompra, EditarSolicitudCompraDetalle, EliminarSolicitudCompraDetalle, GenerarOrdenDeCompra, SolicitudCompra } from "../../domain/models/solicitud-compra.model";
+import { ActualizarEstadoProximo, AgregarSolicitud, DataSolicitudCompra, EditarSolicitudCompraDetalle, EliminarSolicitudCompraDetalle, GenerarOrdenDeCompra, SolicitudCompra } from "../../domain/models/solicitud-compra.model";
 import { SolicitudCompraMapper } from "../../domain/mapper/solicitud-compra.mapper";
 import { DataSolicitudCompraDTO } from "../dto/solicitud-compra.dto";
 import { ApiResponse } from "@/core/interceptors/error-message.model";
@@ -31,6 +31,7 @@ export class SolicitudCompraService {
     private urlAgregarOrdenCompraDetalle : string = '/api/OrdenCompraDetalle/InsertarMasivo'
     private urlEditarOrdenCompraDetalle : string = '/api/OrdenCompraDetalle/ActualizarMasivo'
     private urlEliminarOrdenCompraDetalle : string  = '/api/OrdenCompraDetalle/EliminarMasivo'
+    private urlActualizarEstadoProximo : string = '/api/SolicitudCompra/ActualizarEstadoProximo'
 
 
     private urlListarOrdenCompraPorFirmar : string = '/api/OrdenCompraDetalle/PorFirmar'
@@ -60,6 +61,11 @@ export class SolicitudCompraService {
     eliminarSolicitudCompraDetalle = (eliminar : EliminarSolicitudCompraDetalle) => {
         const eliminarSolicitud = SolicitudCompraMapper.ToApiEliminarSolicitudCompraDetalle(eliminar)
         return this.http.delete<ApiResponse>(this.urlApi + this.urlEliminarSolicitudCompraDetalle, {body : eliminarSolicitud})
+    }
+
+    actualizarEstadoProximo (estadoProximo : ActualizarEstadoProximo) : Observable<ApiResponse>{
+        const updateEstadoProximo = SolicitudCompraMapper.toDomainActualizarEstadoProximo(estadoProximo)
+        return this.http.put<ApiResponse>(this.urlApi + this.urlActualizarEstadoProximo, updateEstadoProximo)
     }
 
     /* ORDEN DE COMPRA DETALLE */

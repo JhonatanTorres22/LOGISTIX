@@ -2,7 +2,7 @@ import { inject, Injectable } from "@angular/core";
 import { SolicitudCompraRepository } from "../../domain/repository/solicitud-compra.repository";
 import { SolicitudCompraService } from "../services/solicitud-compra.service";
 import { Observable } from "rxjs";
-import { AgregarSolicitud, DataSolicitudCompra, EditarSolicitudCompraDetalle, EliminarSolicitudCompraDetalle, GenerarOrdenDeCompra, SolicitudCompra } from "../../domain/models/solicitud-compra.model";
+import { ActualizarEstadoProximo, AgregarSolicitud, DataSolicitudCompra, EditarSolicitudCompraDetalle, EliminarSolicitudCompraDetalle, GenerarOrdenDeCompra, SolicitudCompra } from "../../domain/models/solicitud-compra.model";
 import { ApiResponse } from "@/core/interceptors/error-message.model";
 import { AgregarOrdenCompraDetalle, DataOrdenCompra, DataOrdenCompraPorFirmar, EditarOrdenCompraDetalle, EliminarOrdenCompraDetalle, ValidarProductoAlmacen } from "@/proceso-compras/domain/models/ordenCompraDetalle.model";
 
@@ -25,6 +25,9 @@ export class SolicitudCompraRepositoryImpl implements SolicitudCompraRepository 
     }
     editarSolicitudCompraDetalle(editar: EditarSolicitudCompraDetalle): Observable<ApiResponse> {
         return this.service.editarSolicitudCompraDetalle(editar)
+    }
+    actualizarEstadoProximo(estadoProximo: ActualizarEstadoProximo): Observable<ApiResponse> {
+        return this.service.actualizarEstadoProximo(estadoProximo)
     }
 
     eliminarSolicitudCompraDetalle(eliminar: EliminarSolicitudCompraDetalle): Observable<ApiResponse> {

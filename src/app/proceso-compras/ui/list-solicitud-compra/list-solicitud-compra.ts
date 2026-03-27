@@ -242,8 +242,9 @@ export class ListSolicitudCompra implements OnInit {
             if (this.actionOrdenFirmada() == 'ENVIAR CORREO') {
               this.actionOrdenFirmada.set('ENVIAR CORREO ORDEN FIRMADA')
               console.log(this.actionOrdenFirmada());
-              
             }
+            console.log(this.actionOrdenFirmada());
+            
             this.actionAnexo.set(''); return;
           }
         }

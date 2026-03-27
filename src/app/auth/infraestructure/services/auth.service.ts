@@ -2,10 +2,11 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { catchError, map, Observable, throwError } from "rxjs";
 import { environment } from "src/environments/environment";
-import { AuthData, DataModulo, DecodedToken, LoginModel } from "../../domain/models/auth.model";
+import { AuthData, CambioContrasenia, DataModulo, DecodedToken, LoginModel } from "../../domain/models/auth.model";
 import { DataModuloRolDTO, LoginRequestDTO, LoginResponseDTO } from "../dto/auth.dto";
 import { AuthMapper } from "../../domain/mappers/auth.mappers";
 import { Router } from "@angular/router";
+import { ApiResponse } from "@/core/interceptors/error-message.model";
 
 @Injectable({
     providedIn: 'root'
@@ -16,6 +17,7 @@ export class AuthService {
     private urlListarRol: string
     private urlLogin: string
     private urlRefreshToken: string
+    private urlCambioContrasenia: string
     constructor(
         private router: Router,
         private http: HttpClient
@@ -24,11 +26,17 @@ export class AuthService {
             this.urlListarRol = '/api/usuario/ListarRoles?nombreUsuario='
         this.urlLogin = '/api/usuario/Autenticar'
         this.urlRefreshToken = '/api/Usuario/RefreshToken'
+        this.urlCambioContrasenia = '/api/Usuario/CambiarContrasenia'
+
     }
 
     obtenerRol = (usuario: string): Observable<DataModulo[]> => {
         return this.http.get<DataModuloRolDTO>(this.urlApi + this.urlListarRol + usuario)
             .pipe(map(api => api.data.map(AuthMapper.toDomain)))
+    }
+    cambiarContrasenia = (cambio: CambioContrasenia): Observable<ApiResponse> => {
+        const updateContrasenia = AuthMapper.toApiCambioContrasenia(cambio)
+        return this.http.put<ApiResponse>(this.urlApi + this.urlCambioContrasenia, updateContrasenia)
     }
     login(model: LoginModel): Observable<AuthData> {
         const dto: LoginRequestDTO = AuthMapper.toDTO(model);
@@ -104,12 +112,17 @@ export class AuthService {
         return decoded ? JSON.parse(decoded) : null;
     }
 
+    getUserName(): string {
+        return localStorage.getItem('userName') ?? '';
+    }
     logout() {
         localStorage.removeItem('app_permisos')
         localStorage.removeItem('decodedToken');
+        localStorage.removeItem('userName');
         localStorage.removeItem('token');
         localStorage.removeItem('app_menu');
         this.router.navigate(['/login'])
     }
+
 
 }
