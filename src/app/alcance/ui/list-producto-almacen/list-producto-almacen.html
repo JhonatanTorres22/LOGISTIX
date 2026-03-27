@@ -1,262 +1,191 @@
 @if (loading) {
 <ui-loading-progress-bar></ui-loading-progress-bar>
 }
-<div class="grid">
-  <div [ngClass]="ordenBuscada ? 'col-12 md:col-7' : 'col-12'">
 
-    <!-- BARRA CAMBIOS PENDIENTES -->
-    @if (cantidadCambios > 0) {
-    <div class="flex align-items-center gap-2 p-3 mb-3 border-round"
-      style="background: var(--blue-50); border: 1px solid var(--blue-200)">
-      <i class="pi pi-info-circle text-blue-500"></i>
-      <span class="text-blue-800 text-sm">
-        <strong>{{ cantidadCambios }}</strong>
-        cambio{{ cantidadCambios !== 1 ? 's' : '' }} pendiente{{ cantidadCambios !== 1 ? 's' : '' }}
-      </span>
-      <div class="flex-1"></div>
-      <ui-button label="Cancelar" icon="pi pi-times" color="danger" (onClick)="cancelarCambios()"></ui-button>
-      <ui-button label="Guardar cambios" icon="pi pi-check" color="primary" (onClick)="guardarCambios()"></ui-button>
-    </div>
-    }
-    
-    
-    <!-- TABLA -->
-     <!-- <pre> {{listaFiltrada | json}} </pre> -->
-    <p-table [value]="listaFiltrada" [paginator]="true" [rows]="tamanioPagina()" [totalRecords]="totalRegistros()"
-      [lazy]="true" (onLazyLoad)="cambioDePagina($event)" [rowsPerPageOptions]="opcionesListadoTabla"
-      styleClass="p-datatable-sm" size="small">
-    
-      <ng-template pTemplate="caption">
-        <div class="flex align-items-center justify-content-between gap-2 flex-wrap">
-          <div class="flex align-items-center gap-2">
-            <p-tag [value]="totalRegistros() + ' registros'" severity="secondary"></p-tag>
-          </div>
-          <div class="flex align-items-center gap-2">
-    
-            <span class="p-input-icon-left">
-              <!-- <i class="pi pi-search"></i> -->
-              <input pInputText type="text" placeholder="Buscar..." [(ngModel)]="buscarProducto" class="p-inputtext-sm" />
-            </span>
-            <ui-button label="Agregar producto" icon="pi pi-plus" color="secondary"
-              (onClick)="visibleAddProductoAlmacen = true">
-            </ui-button>
-          </div>
-    
-          <div class="flex align-items-center gap-2 mb-3">
-    
-      <input
-        pInputText
-        type="number"
-        placeholder="Buscar orden..."
-        [(ngModel)]="numeroOrden"
-        class="p-inputtext-sm w-10rem"
-      />
-    
-      <button
-        pButton
-        icon="pi pi-search"
-        class="p-button-sm"
-        (click)="buscarOrden()"
-      ></button>
-    
-    </div>
-    
-    
-        </div>
-      </ng-template>
-    
-      <ng-template pTemplate="header">
-        <tr>
-          <th></th>
-          <th>Producto</th>
-          <th>Modelo</th>
-          <th>Marca</th>
-          <th class="text-right">Stock</th>
-          <th>Estado</th>
-          <th class="text-right">Comprometido </th>
-    
-          <th class="text-right"> Cantidad</th>
-        </tr>
-      </ng-template>
-    
-      <ng-template pTemplate="body" let-item>
-        <tr>
-          <td class="text-color-secondary text-sm">
-            <p-image [src]="item.urlImagen" width="20" [preview]="true"></p-image>
-            <!-- {{ item.idProductoPorAlmacen }}</td> -->
-    
-          <td>
-            <span class="text-xs">{{ item.nombreProducto }}</span>
-          </td>
-          <td>
-            <span class="text-xs">{{ item.modelo }}</span>
-          </td>
-          <td>
-            <span class="text-xs">{{ item.marca }}</span>
-          </td>
-    
-          <td class="text-right text-xs">
-            <span class="font-semibold" [style.color]="item.stock > 0 ? 'var(--green-600)' :
-                item.stock < 0 ? 'var(--red-500)'   : 'var(--orange-500)'">
-              {{ item.stock | number }}
-            </span>
-          </td>
-    
-          <td>
-            <p-tag styleClass="text-xs" [value]="item.stock > 0 ? 'En stock' : 'Sin stock'" [severity]="item.stock > 0 ? 'success' : 'danger'">
-            </p-tag>
-          </td>
-    
-          <td class="text-right text-xs" (click)="item.comprometido > 0 && (activarCeldaId = 'comp-' + item.idProductoPorAlmacen)">
-    
-            @if (activarCeldaId === 'comp-' + item.idProductoPorAlmacen) {
-    
-            <div class="flex align-items-center justify-content-end gap-2">
-    
-              <span class="text-color-secondary text-sm">
-                {{ item.comprometido }}
-              </span>
-    
-              <span class="font-bold text-red-500">-</span>
-              <p-inputNumber [ngModel]="obtenerDisminucion(item.idProductoPorAlmacen)"
-                (ngModelChange)="actualizarCambio(item.idProductoPorAlmacen, 'comprometer', $event)"
-                [max]="item.comprometido" [min]="0" inputStyleClass="text-right w-4rem p-1" (onBlur)="activarCeldaId = null"
-                (click)="$event.stopPropagation()">
-              </p-inputNumber>
-              <span class="font-bold">=</span>
-              <span class="font-semibold text-red-600">
-                {{ item.comprometido - obtenerDisminucion(item.idProductoPorAlmacen) }}
-              </span>
-    
-            </div>
-    
-            } @else {
-            <span class="flex align-items-center justify-content-end gap-2" [class.opacity-50]="item.comprometido <= 0"
-              [class.cursor-not-allowed]="item.comprometido <= 0" [class.cursor-pointer]="item.comprometido > 0">
-    
-              <span class="text-color-secondary text-sm">
-                {{ item.comprometido }}
-              </span>
-    
-              @if (item.comprometido <= 0) {
-                <i class="pi pi-lock text-xs text-gray-400" pTooltip="No hay cantidad comprometida para disminuir">
-                </i>
-    
-                } @else {
-    
-                @if (obtenerDisminucion(item.idProductoPorAlmacen) > 0) {
-    
-                <span class="font-bold text-red-500">-</span>
-    
-                <span class="text-sm bg-red-100 text-red-800 border-round">
-                  <div class="m-1 font-bold">
-                    {{ obtenerDisminucion(item.idProductoPorAlmacen) }}
-                  </div>
-                </span>
-                <span class="font-bold">=</span>
-                <span class="font-semibold text-red-600">
-                  {{ item.comprometido - obtenerDisminucion(item.idProductoPorAlmacen) }}
-                </span>
-                }
-                <i class="pi pi-pencil text-xs text-color-secondary"></i>
-    
-                }
-    
-            </span>
-            }
-    
-          </td>
-    
-          <!-- 🟢 CANTIDAD (AUMENTAR) -->
-          <td class="text-right" (click)="activarCeldaId = 'cant-' + item.idProductoPorAlmacen">
-    
-            @if (activarCeldaId === 'cant-' + item.idProductoPorAlmacen) {
-    
-            <div class="flex align-items-center justify-content-end gap-2">
-    
-              <span class="text-color-secondary text-sm">
-                {{ item.cantidad }}
-              </span>
-    
-              <span class="font-bold text-green-500">+</span>
-    
-              <p-inputNumber [ngModel]="obtenerAumento(item.idProductoPorAlmacen)"
-                (ngModelChange)="actualizarCambio(item.idProductoPorAlmacen, 'aumentar', $event)"
-                inputStyleClass="text-right w-4rem p-1" (onBlur)="activarCeldaId = null" (click)="$event.stopPropagation()">
-              </p-inputNumber>
-    
-              <span class="font-bold">=</span>
-    
-              <span class="font-semibold text-green-600">
-                {{ obtenerCantidadFinal(item) }}
-              </span>
-    
-            </div>
-    
-            } @else {
-    
-            <span class="flex align-items-center justify-content-end gap-2 cursor-pointer">
-    
-              <!-- valor base -->
-              <span class="text-color-secondary text-sm">
-                {{ item.cantidad }}
-              </span>
-    
-              @if (obtenerAumento(item.idProductoPorAlmacen) > 0) {
-    
-              <span class="font-bold text-green-500">+</span>
-    
-              <span class="text-sm bg-green-100 text-green-800 border-round">
-                <div class="m-1 font-bold">
-                  {{ obtenerAumento(item.idProductoPorAlmacen) }}
-                </div>
-              </span>
-    
-              <span class="font-bold">=</span>
-    
-              <span class="font-semibold text-green-600">
-                {{ obtenerCantidadFinal(item) }}
-              </span>
-    
-              }
-    
-              <i class="pi pi-pencil text-xs text-color-secondary"></i>
-    
-            </span>
-    
-            }
-    
-          </td>
-    
-        </tr>
-      </ng-template>
-    
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td colspan="6" class="text-center py-6 text-color-secondary">
-            <i class="pi pi-inbox text-4xl block mb-2"></i>
-            No se encontraron productos
-          </td>
-        </tr>
-      </ng-template>
-    
-    </p-table>
-  </div>
+<!-- BARRA CAMBIOS PENDIENTES -->
 
-   @if (ordenBuscada) {
-  <div class="col-12 md:col-5">
+<div class="flex align-items-center gap-2 p-2 mb-2 border-round transition-all transition-duration-200 hover:shadow-2"
+  [ngClass]="{
+    'bg-blue-50 border-blue-200':   !tipoMovimiento,
+    'bg-green-50 border-green-200': tipoMovimiento === 'ENTRADA',
+    'bg-red-50 border-red-200':     tipoMovimiento === 'SALIDA'
+  }" style="border: 1px solid">
 
-    <app-view-orden-despachar
-      [ordenId]="ordenBuscada">
-    </app-view-orden-despachar>
+  <!-- ICONO -->
+  <i class="pi transition-all transition-duration-200" [ngClass]="{
+      'pi-info-circle text-blue-500': !tipoMovimiento,
+      'pi-arrow-down-circle text-green-600': tipoMovimiento === 'ENTRADA',
+      'pi-arrow-up-circle text-red-500': tipoMovimiento === 'SALIDA'
+    }">
+  </i>
 
-  </div>
-  }
+  <!-- TEXTO -->
+  <span class="text-sm font-bold" [ngClass]="{
+      'text-blue-700': !tipoMovimiento,
+      'text-green-800': tipoMovimiento === 'ENTRADA',
+      'text-red-800': tipoMovimiento === 'SALIDA'
+    }">
+    {{
+    !tipoMovimiento
+    ? 'Selecciona el tipo de movimiento para continuar'
+    : tipoMovimiento === 'ENTRADA'
+    ? 'Registrando entrada de productos'
+    : 'Registrando salida de productos'
+    }}
+  </span>
+
+  <!-- BADGE -->
+  <span *ngIf="tipoMovimiento" class="px-2 py-1 text-xs border-round font-medium ml-2" [ngClass]="{
+      'bg-green-100 text-green-700': tipoMovimiento === 'ENTRADA',
+      'bg-red-100 text-red-700': tipoMovimiento === 'SALIDA'
+    }">
+    {{ tipoMovimiento }}
+  </span>
+
+  <!-- ESPACIADOR -->
+  <div class="flex-1"></div>
+
+  <!-- SELECT BUTTON -->
+  <p-selectButton [options]="opcionesMovimiento" [(ngModel)]="tipoMovimiento" optionLabel="label" optionValue="value"
+    styleClass="p-button-sm">
+    <ng-template pTemplate="item" let-item>
+      <i [class]="item.icon"></i>
+      <span class="ml-1 text-sm">{{ item.label }}</span>
+    </ng-template>
+  </p-selectButton>
+
 </div>
 
+
+<p-table [value]="listaFiltrada" [paginator]="true" [rows]="tamanioPagina()" [totalRecords]="totalRegistros()"
+  [lazy]="true" (onLazyLoad)="cambioDePagina($event)" [rowsPerPageOptions]="opcionesListadoTabla"
+  styleClass="p-datatable-sm" size="small">
+
+  <ng-template pTemplate="caption">
+    <div class="grid align-items-center p-2">
+
+      <!-- 🔹 COLUMNA 1: TOTAL + AGREGAR -->
+      <div class="col-12 md:col-4 flex align-items-center  gap-2">
+
+        <ui-button label="Agregar Productos" icon="pi pi-plus" color="secondary"
+          (onClick)="visibleAddProductoAlmacen = true">
+        </ui-button>
+        <p-tag [value]="totalRegistros() + ' registros'" severity="secondary" styleClass="text-sm px-2 py-1">
+        </p-tag>
+
+
+      </div>
+
+      <div class="col-12 md:col-4">
+        <span class="flex">
+          <p-icon-field iconPosition="left" class="w-full">
+            <p-inputIcon> <i class="pi pi-search"></i> </p-inputIcon>
+            <input pInputText id="buscarProducto" [(ngModel)]="buscarProducto" class="w-full p-inputtext-sm"
+              placeholder="Buscar Producto" />
+          </p-icon-field>
+        </span>
+      </div>
+
+      <div class="col-12 md:col-4">
+        @if (tipoMovimiento) {
+        <div class="flex align-items-center gap-2 p-2 border-round transition-all transition-duration-200" [ngClass]="{
+            'bg-green-50 border-green-200': tipoMovimiento === 'ENTRADA',
+            'bg-red-50 border-red-200': tipoMovimiento === 'SALIDA'
+          }" style="border: 1px solid">
+
+          <i class="pi" [ngClass]="{'pi-arrow-down-circle text-green-600': tipoMovimiento === 'ENTRADA','pi-arrow-up-circle text-red-500': tipoMovimiento === 'SALIDA'}"></i>
+          <span class="p-float-label w-full">
+            <p-floatlabel variant="on">
+              <p-inputNumber inputId="numeroOrden" [(ngModel)]="numeroOrden" [useGrouping]="false" class="w-full">
+              </p-inputNumber>
+              <label for="numeroOrden">N° Orden</label>
+            </p-floatlabel>
+          </span>
+
+          <ui-icon-button icon="pi pi-search" (click)="buscarOrden()"></ui-icon-button>
+
+        </div>
+        }
+
+      </div>
+
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="header">
+    <tr>
+      <th></th>
+      <th>Producto</th>
+      <th>Modelo</th>
+      <th>Marca</th>
+      <th class="text-right">Stock</th>
+      <th>Estado</th>
+      <th class="text-">Pedido </th>
+      <th class="text">Comprometido </th>
+      <th class="text"> Cantidad</th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-item>
+    <tr>
+      <td class="text-color-secondary text-sm">
+        <p-image [src]="item.urlImagen" width="20" [preview]="true"></p-image>
+      <td>
+        <span class="text-xs">{{ item.nombreProducto }}</span>
+      </td>
+      <td>
+        <span class="text-xs">{{ item.modelo }}</span>
+      </td>
+      <td>
+        <span class="text-xs">{{ item.marca }}</span>
+      </td>
+
+      <td class="text-right text-xs">
+        <span class="font-semibold" [style.color]="item.stock > 0 ? 'var(--green-600)' :
+                item.stock < 0 ? 'var(--red-500)'   : 'var(--orange-500)'">
+          {{ item.stock | number }}
+        </span>
+      </td>
+
+      <td>
+        <p-tag styleClass="text-xs" [value]="item.stock > 0 ? 'En stock' : 'Sin stock'"
+          [severity]="item.stock > 0 ? 'success' : 'danger'">
+        </p-tag>
+      </td>
+
+      <td class="text-center text-xs">
+        <span> {{item.pedido}} </span>
+      </td>
+
+      <td class="text-center text-xs">
+        <span> {{item.comprometido}} </span>
+      </td>
+
+      <td class="text-center text-xs">
+        <span> {{item.cantidad}} </span>
+      </td>
+
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="8" class="text-center py-6 text-color-secondary">
+        <i class="pi pi-inbox text-4xl block mb-2"></i>
+        No se encontraron productos en el almacén
+      </td>
+    </tr>
+  </ng-template>
+
+</p-table>
 <!-- <app-view-orden-despachar [ordenId]="61"></app-view-orden-despachar> -->
 
 @if (visibleAddProductoAlmacen) {
 <app-add-producto-almacen [(visible)]="visibleAddProductoAlmacen">
 </app-add-producto-almacen>
+}
+
+@if (visibleOrdenCompra) {
+<app-view-orden-despachar [tipoMovimiento]="tipoMovimiento" [ordenId]="numeroOrden"
+  [(visible)]="visibleOrdenCompra"></app-view-orden-despachar>
 }

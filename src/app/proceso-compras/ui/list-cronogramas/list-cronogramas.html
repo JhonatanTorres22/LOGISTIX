@@ -16,6 +16,7 @@
     <ui-loading-progress-bar></ui-loading-progress-bar>
     }
     @else{
+
     <!-- ACTIVAMOS EL CRONOGRAMA -->
     @if (pendientes > 0) {
     @for (item of cronogramasEsperados.slice(activados); track item.idAnexosPorFase) {
@@ -32,6 +33,13 @@
     @if(activados > 0){
     <!-- <pre>{{anexoCronograma | json}}</pre> -->
     @let orden = listOrdenCompra()?.[0];
+    <div class="flex align-items-center gap-2 px-3 py-2 mb-3 border-round bg-blue-50 border-1 border-blue-200 ">
+        <i class="pi pi-folder text-yellow-500"></i>
+        <span class="text-sm">Los archivos se guardarán en la carpeta</span>
+        <span class="flex align-items-center gap-1 px-2 py-1 border-round font-bold bg-blue-100 text-blue-800 text-xs">
+            <i class="pi pi-folder-open"></i>{{ selectCarpeta().prefijo }}-{{ selectCarpeta().numeracion }}
+        </span>
+    </div>
 
     @for (item of anexoCronograma.archivos ;let i = $index; track i) {
     <!-- {{item | json}} -->

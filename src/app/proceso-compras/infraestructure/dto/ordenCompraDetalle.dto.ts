@@ -36,7 +36,8 @@ export interface OrdenCompraDetalleDTO {
   ruc: string,
   codigoProveedor : number,
   codigoAnexoPorFaseCronograma : number
-  direccionFiscal: string
+  direccionFiscal: string,
+  codigoProductoPorAlmacen : number
 }
 
 
