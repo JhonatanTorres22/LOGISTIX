@@ -1,7 +1,7 @@
 import { Observable } from "rxjs";
 import { ActualizarEstadoProximo, AgregarSolicitud, DataSolicitudCompra, EditarSolicitudCompraDetalle, EliminarSolicitudCompraDetalle, GenerarOrdenDeCompra, SolicitudCompra } from "../models/solicitud-compra.model";
 import { ApiResponse } from "@/core/interceptors/error-message.model";
-import { AgregarOrdenCompraDetalle, DataOrdenCompra, DataOrdenCompraPorFirmar, EditarOrdenCompraDetalle, EliminarOrdenCompraDetalle, ValidarProductoAlmacen } from "../models/ordenCompraDetalle.model";
+import { ActualizarEstadoAtencionOrden, AgregarOrdenCompraDetalle, DataOrdenCompra, DataOrdenCompraPorFirmar, EditarOrdenCompraDetalle, EliminarOrdenCompraDetalle, ValidarProductoAlmacen } from "../models/ordenCompraDetalle.model";
 
 
 export abstract class SolicitudCompraRepository {
@@ -20,5 +20,6 @@ export abstract class SolicitudCompraRepository {
 
    /* ORDEN COMPRA POR FIRMAR */
    abstract obtenerOrdenCompraPorFirmar() : Observable<DataOrdenCompraPorFirmar>  
+   abstract actualizarEstadoAtencionOrden (actualizar : ActualizarEstadoAtencionOrden[]) : Observable<ApiResponse>
    abstract validarProductoPorAlmacen(validar: ValidarProductoAlmacen[]) : Observable<ApiResponse>
 }

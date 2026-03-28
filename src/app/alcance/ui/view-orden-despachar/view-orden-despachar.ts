@@ -1,5 +1,5 @@
 import { ApiError, ApiResponse } from '@/core/interceptors/error-message.model';
-import { AnexosPorFaseOrdenCompra, OrdenCompraDetalle } from '@/proceso-compras/domain/models/ordenCompraDetalle.model';
+import { ActualizarEstadoAtencionOrden, AnexosPorFaseOrdenCompra, OrdenCompraDetalle } from '@/proceso-compras/domain/models/ordenCompraDetalle.model';
 import { SolicitudCompraRepository } from '@/proceso-compras/domain/repository/solicitud-compra.repository';
 import { OrdenCompraDetalleSignal } from '@/proceso-compras/domain/signals/ordenCompraDetalle.signal';
 import { CommonModule } from '@angular/common';
@@ -13,7 +13,6 @@ import { ProcesoComprasModule } from "@/proceso-compras/proceso-compras-module";
 import { AumentarCantidadProductoAlmacen, DisminuirCantidadProductoAlmacen } from '@/alcance/domain/models/producto-almacen.model';
 import { ProductoAlmacenRepository } from '@/alcance/domain/repository/producto-almacen.repository';
 import { ProductoAlmacenSignal } from '@/alcance/domain/signals/productoAlmacen.signal';
-import { StyleClass } from "primeng/styleclass";
 
 @Component({
   selector: 'app-view-orden-despachar',
@@ -39,10 +38,9 @@ export class ViewOrdenDespachar implements OnInit {
   private signalProductoAlmacen = inject(ProductoAlmacenSignal);
   actionProductoAlmacen = this.signalProductoAlmacen.actionProductoAlmacen
 
-
   seleccionadosPorAnexo: Record<number, OrdenCompraDetalle[]> = {}
-
   seleccionados = signal<OrdenCompraDetalle[]>([])
+
 
   ngOnInit(): void {
     if (this.ordenId) {
@@ -131,14 +129,33 @@ export class ViewOrdenDespachar implements OnInit {
   disminuirProductoAlmacen(disminuirProducto: DisminuirCantidadProductoAlmacen[]) {
     this.repository.disminuirCantidadProductoAlmacen(disminuirProducto).subscribe({
       next: (res: ApiResponse) => {
-        this.loading = false
         this.alert.showAlert(`Cantidad disminuida, ${res.message}`, 'success')
+        if(res.isSuccess){
+          this.actualizarEstadoAtencionOrden()
+        }
+      },
+      error: (err: ApiError) => {
+        this.loading = false
+        this.alert.showAlert(`Error al disminuir, ${err.error.message}`, 'error')
+      }
+    })
+  }
+
+  actualizarEstadoAtencionOrden (){
+    const idsOrdenCompra = this.seleccionados().map(ordenCompra => ({
+      idOrdenCompra : ordenCompra.idOrdenCompra
+    }))
+
+    this.repositorySolicitudCompra.actualizarEstadoAtencionOrden(idsOrdenCompra).subscribe({
+      next: (res: ApiResponse) => {
+        this.loading = false
+        this.alert.showAlert(`Estados Actualizados, ${res.message}`, 'success')
         this.actionProductoAlmacen.set(res.isSuccess)
         this.closeDialog()
       },
       error: (err: ApiError) => {
         this.loading = false
-        this.alert.showAlert(`Error al disminuir, ${err.error.message}`, 'error')
+        this.alert.showAlert(`Error al actualizar estado, ${err.error.message}`, 'error')
       }
     })
   }

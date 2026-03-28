@@ -68,7 +68,7 @@
                 <tr [class.opacity-60]="item.despacho">
 
                     <td class="text-center text-xs">
-                        @if (!item.despacho) {
+                        @if (!item.estadoAtencion) {
                         <p-tableCheckbox [value]="item" />
                         }
                     </td>
@@ -89,8 +89,8 @@
                     </td>
 
                     <td class="text-center text-xs">
-                        @if (item.despacho) {
-                        <p-tag styleClass="text-xs" value="Entregado" severity="success" icon="pi pi-check-circle" />
+                        @if (item.estadoAtencion) {
+                        <p-tag styleClass="text-xs" value="Atendido" severity="success" icon="pi pi-check-circle" />
                         } @else {
                         <p-tag value="Pendiente" severity="warn" icon="pi pi-clock" styleClass="text-xs" />
                         }

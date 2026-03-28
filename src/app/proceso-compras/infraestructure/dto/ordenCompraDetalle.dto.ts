@@ -37,7 +37,8 @@ export interface OrdenCompraDetalleDTO {
   codigoProveedor : number,
   codigoAnexoPorFaseCronograma : number
   direccionFiscal: string,
-  codigoProductoPorAlmacen : number
+  codigoProductoPorAlmacen : number,
+  estadoAtencion : boolean
 }
 
 
@@ -81,3 +82,5 @@ export interface ValidarProductoAlmacenDTO {
   codigoProductoServicio : number,
   codigoAlmacen : number
 }
+
+export type ActualizarEstadoAtencionOrdenDTO = Pick<OrdenCompraDetalleDTO,'codigoOrdenCompra'>

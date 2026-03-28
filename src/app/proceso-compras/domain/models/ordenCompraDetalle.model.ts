@@ -36,7 +36,7 @@ export interface OrdenCompraDetalle {
   direccion: string,
   idAnexoPorFaseCronograma : number,
   idProductoPorAlmacen : number
-  despacho? : boolean
+  estadoAtencion : boolean
 }
 
 
@@ -79,3 +79,5 @@ export interface ValidarProductoAlmacen {
   idProductoServicio : number,
   idAlmacen : number
 }
+
+export type ActualizarEstadoAtencionOrden = Pick<OrdenCompraDetalle,'idOrdenCompra'>

@@ -88,11 +88,12 @@
         </div>
 
         @if(selectProveedorProducto().length === 0 && listSolicitud().length === 0) {
-        <div
-            class="flex gap-2 border-round border-1 border-dashed bg-gray-100 w-full h-15rem justify-content-center align-items-center border-gray-400 hover:bg-blue-50 hover:border-blue-500 hover:text-blue-500">
-            <h5 class="text-center absolute mt-8 pt-4 f-14 font-italic">No hay productos asignados a la solicitud de
-                pedido, para seleccionar los productos, primero debe ingresar datos en el formulario de arriba</h5>
-            <ui-button color="primary" icon="ti ti-plus" label="Seleccionar productos"
+
+        <div class="flex flex-column align-items-center gap-3 py-6 text-color-secondary">
+            <i class="pi pi-inbox" style="font-size:2.5rem"></i>
+            <span class="text-sm">No hay productos asignados a la solicitud de
+                pedido, para seleccionar los productos, primero debe ingresar datos en el formulario de arriba</span>
+            <ui-button color="primary" icon="pi pi-plus" label="Seleccionar productos"
                 (onClick)="visibleSelectProductos = true" [disabled]="formSolicitudCompra.invalid"></ui-button>
         </div>
         }
