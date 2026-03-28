@@ -7,7 +7,7 @@ import { Component, effect, inject, Input, OnInit, untracked } from '@angular/co
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { AlertService } from 'src/assets/demo/services/alert.service';
 import { SelectProveedorProducto } from "../select-proveedor-producto/select-proveedor-producto";
-import { AgregarSolicitud, EditarSolicitudCompraDetalle, EliminarSolicitudCompraDetalle } from '@/proceso-compras/domain/models/solicitud-compra.model';
+import { ActualizarEstadoProximo, AgregarSolicitud, EditarSolicitudCompraDetalle, EliminarSolicitudCompraDetalle } from '@/proceso-compras/domain/models/solicitud-compra.model';
 import { DetailsSubtarea } from "../details-subtarea/details-subtarea";
 import { PdfOrdenCompra } from "../pdf-orden-compra/pdf-orden-compra";
 import { AnexoPorFaseSignal } from '@/proceso-compras/domain/signals/anexoPorFase.signal';
@@ -115,6 +115,7 @@ export class ListSolicitudCompra implements OnInit {
 
   // private cargadoDesdeSeleccion = false;
   value: number = 0;
+  private despuesDeGuardar = false;
   constructor(
     private alert: AlertService,
   ) {
@@ -164,13 +165,13 @@ export class ListSolicitudCompra implements OnInit {
     ]
 
     this.listLocal = [
-      { text: 'SL01 - CHINCHA', value: 'SL01 - CHINCHA' },
-      { text: 'SL02 - CHINCHA', value: 'SL02 - CHINCHA' },
-      { text: 'SL03 - SUNAMPE', value: 'SL03 - SUNAMPE' },
-      { text: 'F01L01 - FILIAL ICA', value: 'F01L01 - FILIAL ICA' },
-      { text: 'F01L02 - FILIAL PORUMA', value: 'F01L02 - FILIAL PORUMA' },
-      { text: 'F02L01 - FILIAL HUAURA', value: 'F02L01 - FILIAL HUAURA' },
-      { text: 'INSTITUCIONAL', value: 'INSTITUCIONAL' },
+      { text: 'SL01 - CHINCHA', value: 'SL01 ' },
+      { text: 'SL02 - CHINCHA', value: 'SL02' },
+      { text: 'SL03 - SUNAMPE', value: 'SL03' },
+      { text: 'F01L01 - FILIAL ICA', value: 'F01L01' },
+      { text: 'F01L02 - FILIAL PORUMA', value: 'F01L02' },
+      { text: 'F02L01 - FILIAL HUAURA', value: 'F02L01' },
+      { text: 'INSTITUCIONAL', value: 'INST' },
     ]
   }
 
@@ -187,6 +188,11 @@ export class ListSolicitudCompra implements OnInit {
           this.presupuestoProgramado = this.listSolicitud()[0].presupuestoProgramado
         }
 
+        if (this.despuesDeGuardar && this.listSolicitud().length > 0) {
+          this.actualizarEstadoProximo()
+          this.despuesDeGuardar = false
+        }
+
         this.totalPresupuestoProgramado.set(this.presupuestoProgramado)
 
         if (this.listSolicitud().length === 0) {
@@ -197,7 +203,7 @@ export class ListSolicitudCompra implements OnInit {
         this.alert.showAlert(`Listando solicitud de compra, ${data.message}`, 'success')
         this.loading = false
         console.log(this.actionAnexo());
-        
+
         if (this.actionAnexo() !== 'REFRESH') {
           this.listarAnexos()
         }
@@ -238,13 +244,13 @@ export class ListSolicitudCompra implements OnInit {
           if (anexoNuevo && anexoNuevo !== anexoActual) {
             this.selectAnexo.set(anexoNuevo); console.log(this.selectAnexo(), 'desde el solicitud compra')
             console.log(this.actionOrdenFirmada());
-            
+
             if (this.actionOrdenFirmada() == 'ENVIAR CORREO') {
               this.actionOrdenFirmada.set('ENVIAR CORREO ORDEN FIRMADA')
               console.log(this.actionOrdenFirmada());
             }
             console.log(this.actionOrdenFirmada());
-            
+
             this.actionAnexo.set(''); return;
           }
         }
@@ -342,7 +348,7 @@ export class ListSolicitudCompra implements OnInit {
       return
     }
     this.loading = true
-    console.log(this.selectProveedorProducto());
+    // console.log(this.selectProveedorProducto());
 
     const totalGeneral = Math.round(
       this.tablaProductos.reduce(
@@ -354,8 +360,8 @@ export class ListSolicitudCompra implements OnInit {
     const solicitudes: AgregarSolicitud[] = this.tablaProductos.map(row => {
       const precioTotal = Math.round((row.precio * row.cantidad) * 100) / 100;
 
-      console.log(row);
-      
+      // console.log(row);
+
       return {
         areaResponsable: this.formSolicitudCompra.value.area,
         codigoPlanDeTrabajo: this.formSolicitudCompra.value.codigoPlan,
@@ -376,18 +382,19 @@ export class ListSolicitudCompra implements OnInit {
       };
     });
 
-    console.log(solicitudes);
-    
+    // console.log(solicitudes);
+
     this.alert.sweetAlert('question', '¿Confirmar?', '¿Está seguro que desea guardar los productos seleccionados?')
       .then(result => {
         if (!result) { this.loading = false; return }
 
         this.repository.agregar(solicitudes).subscribe({
           next: (data) => {
+            this.despuesDeGuardar = true;
             this.alert.showAlert(`La solicitud fue registrada correctamente`, 'success')
             this.loading = false
             this.obtenerSolicitud()
-            this.listarAnexos()
+            // this.listarAnexos()
           },
           error: (err: ApiError) => {
             console.log(err);
@@ -399,42 +406,59 @@ export class ListSolicitudCompra implements OnInit {
       })
   }
 
+  actualizarEstadoProximo() {
+    const actualizarEstado: ActualizarEstadoProximo = {
+      estadoProximo: 'Orden de Compra',
+      idSolicitudCompra: this.listSolicitud()[0].idSolicitudCompra
+    };
 
-obtenerSiglaArea(area: string): string {
-  if (!area) return '';
-
-  const stopWords = ['DE', 'DEL', 'LA', 'EL', 'Y'];
-
-  const limpio = area.toUpperCase();
-
-  // 🔥 CASO ESCUELA PROFESIONAL
-  if (limpio.includes('ESCUELA PROFESIONAL')) {
-
-    // 👉 tomar todo lo que viene DESPUÉS de "PROFESIONAL"
-    const partes = limpio.split('PROFESIONAL');
-    const despues = partes[1] || '';
-
-    const palabrasCarrera = despues
-      .trim()
-      .split(' ')
-      .filter(p => p && !stopWords.includes(p));
-
-    const siglaCarrera = palabrasCarrera
-      .map(p => p.charAt(0))
-      .join('');
-
-    return 'DEP' + siglaCarrera;
+    this.repository.actualizarEstadoProximo(actualizarEstado).subscribe({
+      next: (res: ApiResponse) => {
+        this.alert.showAlert(`Estado actualizado, ${res.message}`, 'success');
+      },
+      error: (err: ApiError) => {
+        this.alert.showAlert(`Error al actualizar estado, ${err.error.message}`, 'error');
+      }
+    });
   }
 
-  // 🔥 CASO GENERAL
-  const palabras = limpio
-    .split(' ')
-    .filter(p => !stopWords.includes(p));
 
-  return palabras
-    .map(p => p.charAt(0))
-    .join('');
-}
+
+  obtenerSiglaArea(area: string): string {
+    if (!area) return '';
+
+    const stopWords = ['DE', 'DEL', 'LA', 'EL', 'Y'];
+
+    const limpio = area.toUpperCase();
+
+    // 🔥 CASO ESCUELA PROFESIONAL
+    if (limpio.includes('ESCUELA PROFESIONAL')) {
+
+      // 👉 tomar todo lo que viene DESPUÉS de "PROFESIONAL"
+      const partes = limpio.split('PROFESIONAL');
+      const despues = partes[1] || '';
+
+      const palabrasCarrera = despues
+        .trim()
+        .split(' ')
+        .filter(p => p && !stopWords.includes(p));
+
+      const siglaCarrera = palabrasCarrera
+        .map(p => p.charAt(0))
+        .join('');
+
+      return 'DEP' + siglaCarrera;
+    }
+
+    // 🔥 CASO GENERAL
+    const palabras = limpio
+      .split(' ')
+      .filter(p => !stopWords.includes(p));
+
+    return palabras
+      .map(p => p.charAt(0))
+      .join('');
+  }
 
   itemsPorAnexo = new Map<number, MenuItem[]>();
 

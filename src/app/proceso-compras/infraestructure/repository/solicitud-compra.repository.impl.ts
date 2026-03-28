@@ -4,7 +4,7 @@ import { SolicitudCompraService } from "../services/solicitud-compra.service";
 import { Observable } from "rxjs";
 import { ActualizarEstadoProximo, AgregarSolicitud, DataSolicitudCompra, EditarSolicitudCompraDetalle, EliminarSolicitudCompraDetalle, GenerarOrdenDeCompra, SolicitudCompra } from "../../domain/models/solicitud-compra.model";
 import { ApiResponse } from "@/core/interceptors/error-message.model";
-import { AgregarOrdenCompraDetalle, DataOrdenCompra, DataOrdenCompraPorFirmar, EditarOrdenCompraDetalle, EliminarOrdenCompraDetalle, ValidarProductoAlmacen } from "@/proceso-compras/domain/models/ordenCompraDetalle.model";
+import { ActualizarEstadoAtencionOrden, AgregarOrdenCompraDetalle, DataOrdenCompra, DataOrdenCompraPorFirmar, EditarOrdenCompraDetalle, EliminarOrdenCompraDetalle, ValidarProductoAlmacen } from "@/proceso-compras/domain/models/ordenCompraDetalle.model";
 
 
 @Injectable({
@@ -54,6 +54,9 @@ export class SolicitudCompraRepositoryImpl implements SolicitudCompraRepository 
     /* ORDEN COMPRA POR FIRMAR */
     obtenerOrdenCompraPorFirmar(): Observable<DataOrdenCompraPorFirmar> {
         return this.service.obtenerOrdenCompraPorFirmar()
+    }
+    actualizarEstadoAtencionOrden(actualizar: ActualizarEstadoAtencionOrden[]): Observable<ApiResponse> {
+        return this.service.actualizarEstadoAtencionOrden(actualizar)
     }
 
     validarProductoPorAlmacen(validar: ValidarProductoAlmacen[]): Observable<ApiResponse> {

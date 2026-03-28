@@ -18,7 +18,7 @@ import { UiIconButton } from "@/core/components/ui-icon-button/ui-icon-button";
 
 @Component({
   selector: 'app-list-alcance',
-  imports: [CommonModule, Card, UiButtonComponent, TooltipModule, UiLoadingProgressBarComponent, AddEditAlcance, UiCardNotItemsComponent, ButtonModule, DividerModule, TagModule, UiIconButton],
+  imports: [CommonModule, TooltipModule, UiLoadingProgressBarComponent, AddEditAlcance, UiCardNotItemsComponent, ButtonModule, DividerModule, TagModule, UiIconButton],
   templateUrl: './list-alcance.html',
   styleUrl: './list-alcance.scss'
 })

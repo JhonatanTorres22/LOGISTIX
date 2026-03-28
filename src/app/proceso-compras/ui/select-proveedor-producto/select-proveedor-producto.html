@@ -2,7 +2,7 @@
 <ui-loading-progress-bar></ui-loading-progress-bar>
 }
 
-<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '90rem' }" (onHide)="closeDialog()">
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '90rem' }" (onHide)="closeDialog()" [maximizable]="true">
     <ng-template #header>
         <div class="inline-flex items-center justify-center gap-2">
             <span class="font-bold whitespace-nowrap"> SELECCIONAR PROVEEDOR PRODUCTO </span>

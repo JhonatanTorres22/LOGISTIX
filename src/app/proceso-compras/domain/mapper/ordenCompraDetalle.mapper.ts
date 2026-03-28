@@ -1,5 +1,5 @@
-import { AgregarOrdenCompraDetalleDTO, DataOrdenCompraDTO, DataOrdenCompraPorFirmarDTO, EditarOrdenCompraDetalleDTO, EliminarOrdenCompraDetalleDTO, ListarOrdenCompraDTO, OrdenCompraPorFirmarDTO, ValidarProductoAlmacenDTO } from "@/proceso-compras/infraestructure/dto/ordenCompraDetalle.dto";
-import { AgregarOrdenCompraDetalle, DataOrdenCompra, DataOrdenCompraPorFirmar, EditarOrdenCompraDetalle, EliminarOrdenCompraDetalle, ListarOrdenCompra, OrdenCompraPorFirmar, ValidarProductoAlmacen } from "../models/ordenCompraDetalle.model";
+import { ActualizarEstadoAtencionOrdenDTO, AgregarOrdenCompraDetalleDTO, DataOrdenCompraDTO, DataOrdenCompraPorFirmarDTO, EditarOrdenCompraDetalleDTO, EliminarOrdenCompraDetalleDTO, ListarOrdenCompraDTO, OrdenCompraPorFirmarDTO, ValidarProductoAlmacenDTO } from "@/proceso-compras/infraestructure/dto/ordenCompraDetalle.dto";
+import { ActualizarEstadoAtencionOrden, AgregarOrdenCompraDetalle, DataOrdenCompra, DataOrdenCompraPorFirmar, EditarOrdenCompraDetalle, EliminarOrdenCompraDetalle, ListarOrdenCompra, OrdenCompraPorFirmar, ValidarProductoAlmacen } from "../models/ordenCompraDetalle.model";
 
 export class OrdenCompraDetalleMapper {
 
@@ -39,7 +39,8 @@ export class OrdenCompraDetalleMapper {
                     ruc: orden.ruc,
                     direccion: orden.direccionFiscal,
                     idAnexoPorFaseCronograma : orden.codigoAnexoPorFaseCronograma,
-                    idProductoPorAlmacen: orden.codigoProductoPorAlmacen
+                    idProductoPorAlmacen: orden.codigoProductoPorAlmacen,
+                    estadoAtencion : orden.estadoAtencion
 
 
                 })) || []
@@ -101,6 +102,11 @@ export class OrdenCompraDetalleMapper {
         }
     }
 
-    
+
+    static toApiActualizarEstadoAtencioOrden (param : ActualizarEstadoAtencionOrden[]): ActualizarEstadoAtencionOrdenDTO[] {
+        return param.map(ordenCompra => ({
+            codigoOrdenCompra : ordenCompra.idOrdenCompra
+        }))
+    }
  
 }
