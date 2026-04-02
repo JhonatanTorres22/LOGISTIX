@@ -11,7 +11,7 @@ const routes: Routes = [
     loadComponent: () => import('./ui/list-pago-realizado/list-pago-realizado').then((c) => c.ListPagoRealizado)
   },
     {
-    path: 'productos-fecha-vecimiento',
+    path: 'productos-fecha-vencimiento',
     loadComponent: () => import('./ui/list-productos-fecha-vencimiento/list-productos-fecha-vencimiento').then((c) => c.ListProductosFechaVencimiento)
   }
 ];

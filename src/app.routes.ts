@@ -35,7 +35,7 @@ export const appRoutes: Routes = [
         loadChildren: () => import('./app/proceso-compras/proceso-compras-module').then(m => m.ProcesoComprasModule)
       },
       {
-        path: 'alcance',
+        path: 'alcances',
         loadChildren: () => import('./app/alcance/alcance-module').then(m => m.AlcanceModule)
       },
       {

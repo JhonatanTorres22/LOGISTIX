@@ -11,9 +11,14 @@ import { ProductoAlmacenSignal } from '@/alcance/domain/signals/productoAlmacen.
 import { CommonModule } from '@angular/common';
 import { TableModule } from "primeng/table";
 import { ImageModule } from "primeng/image";
+import { FechaVencimientoProductoAlmacen } from '@/alcance/domain/models/producto-almacen.model';
+import { PopoverModule } from "primeng/popover";
+import { ProcesoComprasModule } from "@/proceso-compras/proceso-compras-module";
+import { IconFieldModule } from "primeng/iconfield";
+import { InputIconModule } from "primeng/inputicon";
 @Component({
   selector: 'app-list-productos-fecha-vencimiento',
-  imports: [CardModule, TagModule, DatePickerModule, CommonModule, SelectModule, TableModule, ImageModule],
+  imports: [CardModule, TagModule, DatePickerModule, CommonModule, SelectModule, TableModule, ImageModule, PopoverModule, ProcesoComprasModule, IconFieldModule, InputIconModule],
   templateUrl: './list-productos-fecha-vencimiento.html',
   styleUrl: './list-productos-fecha-vencimiento.scss'
 })
@@ -23,7 +28,7 @@ export class ListProductosFechaVencimiento implements OnInit {
   private alert = inject(AlertService)
   private signal = inject(ProductoAlmacenSignal)
   listProductoAlmacenVencimiento = this.signal.listProductoAlmacenVencimiento
-
+fechasSeleccionadas: FechaVencimientoProductoAlmacen[] = [];
   ngOnInit(): void {
     this.obtenerProductosConFechaVencimiento(3)
   }
@@ -41,5 +46,10 @@ export class ListProductosFechaVencimiento implements OnInit {
         this.loading = false
       }
     })
+  }
+
+    abrirOverlay(event: Event, overlayPanel: any, fechas: FechaVencimientoProductoAlmacen[]): void {
+    this.fechasSeleccionadas = fechas;
+    overlayPanel.toggle(event);
   }
 }
