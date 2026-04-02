@@ -1,37 +1,40 @@
 <app-card cardClass="" [cardTitle]="listIndicador()[0]?.descripcion">
-    <p-tree [value]="treeData()">
-  <ng-template let-node pTemplate="default">
-    <div class="flex align-items-center w-full py-1">
+  <p-tree [value]="treeData()">
+    <ng-template let-node pTemplate="default">
+      <div class="flex align-items-center w-full py-1">
 
-      <div class="flex align-items-center gap-2 flex-1">
-        <span class="truncate font-medium">
-          {{ node.label }}
-        </span>
-      </div>
+        <div class="flex align-items-center gap-2 flex-1">
+          <span class="truncate font-medium text-xs">
+            {{ node.label }}
+          </span>
+        </div>
 
-      @if (!node.children) {
+        <!-- <pre> {{node.data | json}} </pre> -->
+        @if (!node.children) {
 
-        <div class="flex align-items-center gap-6 pl-4 border-left-1 surface-border">
+        <div class="flex align-items-center gap-4 pl-1">
 
-          <div class="w-6rem text-right">
-            <span class="font-bold text-green-600">
+          <div class="flex align-items-center justify-content-between">
+
+            <p-tag styleClass="text-xs" [value]="((node.data.fechaInicioST | date:'dd/MM/yyyy') ?? '')" severity="info">
+            </p-tag>
+
+            <span class="font-bold text-green-600 text-xs">
               S/ {{ node.data.totalPresupuesto | number:'1.2-2' }}
             </span>
+
           </div>
 
           <div class="w-4rem text-center">
-            <ui-button
-            (onClick)="seleccionarSubTarea(node.data)"
-              [label]="'#' + node.data.codigoSubTarea"
-              icon="pi pi-eye"
-              size="small"
-              severity="secondary"
+            <ui-button (onClick)="seleccionarSubTarea(node.data)" [label]="'#' + node.data.codigoSubTarea"
+              icon="pi pi-eye" size="small" severity="secondary"
               [disabled]="(node.data.rh + node.data.impr + node.data.inv + node.data.rmf == 0)">
             </ui-button>
           </div>
+
         </div>
-      }
-    </div>
-  </ng-template>
-</p-tree>
+        }
+      </div>
+    </ng-template>
+  </p-tree>
 </app-card>

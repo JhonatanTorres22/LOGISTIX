@@ -9,6 +9,10 @@ const routes: Routes = [
   {
     path: 'pagos-realizados',
     loadComponent: () => import('./ui/list-pago-realizado/list-pago-realizado').then((c) => c.ListPagoRealizado)
+  },
+    {
+    path: 'productos-fecha-vecimiento',
+    loadComponent: () => import('./ui/list-productos-fecha-vencimiento/list-productos-fecha-vencimiento').then((c) => c.ListProductosFechaVencimiento)
   }
 ];
 

@@ -39,7 +39,9 @@ export class SolicitudCompraMapper {
             direccion : param.direccionFiscal,
             nombreProveedor : param.nombreRs,
             ordenCompra : param.enOrdenDeCompra,
-            ruc : param.ruc
+            ruc : param.ruc,
+            stock :param.enStock,
+            stockMinimo : param.stockMinimo
         };
     }
 

@@ -32,7 +32,9 @@ export interface DetalleSolicitudCompra {
   ordenCompra : boolean,
   nombreProveedor: string,
   ruc: string,
-  direccion : string
+  direccion : string,
+  stock : number,
+  stockMinimo : number
 }
 
 export type AgregarSolicitud =
@@ -40,7 +42,7 @@ export type AgregarSolicitud =
     'idSolicitudCompra' | 'detalle' |'nombreSubTarea'> &
 
   Omit<DetalleSolicitudCompra,
-    'idSolicitudCompraDetalle' | 'direccion' | 'ruc' | 'nombreProveedor' | 'ordenCompra'>
+    'idSolicitudCompraDetalle' | 'direccion' | 'ruc' | 'nombreProveedor' | 'ordenCompra' | 'stock' | 'stockMinimo'>
   & {
     datosDeActividad: string
   }
@@ -49,7 +51,7 @@ export type AgregarSolicitud =
     idSolicitudCompraDetalle : number
   }
 
-  export type EditarSolicitudCompraDetalle = Omit<DetalleSolicitudCompra, 'ordenCompra' |'nombreProveedor' | 'ruc' | 'direccion'>
+  export type EditarSolicitudCompraDetalle = Omit<DetalleSolicitudCompra, 'ordenCompra' |'nombreProveedor' | 'ruc' | 'direccion' | 'stock'| 'stockMinimo'>
   export type EliminarSolicitudCompraDetalle = Pick<DetalleSolicitudCompra, 'idSolicitudCompraDetalle'>
 
   export interface ActualizarEstadoProximo {

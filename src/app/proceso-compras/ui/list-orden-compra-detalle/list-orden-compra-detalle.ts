@@ -74,6 +74,8 @@ export class ListOrdenCompraDetalle implements OnInit {
     const productosProveedor = (this.nuevaLista ?? [])
       .filter(p => p._grupoUnico === grupo)
       .map(p => ({
+        idSolicitudCompra: this.listAnexo()[0].idSolicitudCompra,
+        codigoPlanTrabajo: this.listSolicitudCompra()[0].codigoPlanDeTrabajo,
         idOrdenCompra: p.idOrdenCompra,
         proveedor: p.proveedor,
         cantidad: p.cantidad,
@@ -90,6 +92,8 @@ export class ListOrdenCompraDetalle implements OnInit {
 
     this.selectProveedorProducto.set(productosProveedor);
     this.visiblePdfOrdenCompra = true
+    console.log(this.selectProveedorProducto(), '**');
+    
     // (opcional) si también necesitas metadatos del header para el PDF:
     // this.selectProveedor.set({ proveedor: rowData.proveedor, ruc: rowData.ruc, idAnexoPorFase: rowData.idAnexoPorFase });
   }

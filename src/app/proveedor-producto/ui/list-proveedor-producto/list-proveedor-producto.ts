@@ -12,7 +12,7 @@ import { UiButtonComponent } from "@/core/components/ui-button/ui-button.compone
 import { catchError, forkJoin, of } from 'rxjs';
 import { Tag } from "primeng/tag";
 import { UiCardNotItemsComponent } from "@/core/components/ui-card-not-items/ui-card-not-items.component";
-
+import { Image } from 'primeng/image';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -33,7 +33,8 @@ import { ApiError, ApiResponse } from '@/core/interceptors/error-message.model';
 
 @Component({
   selector: 'app-list-proveedor-producto',
-  imports: [UiLoadingProgressBarComponent, DatePickerModule, InputTextModule, UiButtonComponent, Tag, UiCardNotItemsComponent, TableModule, CommonModule, ButtonModule, CheckboxModule, FormsModule, InputNumberModule, IconFieldModule, InputIconModule, GraficoPrecioProductos, UiIconButton],
+  imports: [UiLoadingProgressBarComponent, DatePickerModule, InputTextModule, UiButtonComponent, Tag, UiCardNotItemsComponent, TableModule,
+    Image, CommonModule, ButtonModule, CheckboxModule, FormsModule, InputNumberModule, IconFieldModule, InputIconModule, GraficoPrecioProductos, UiIconButton],
   templateUrl: './list-proveedor-producto.html',
   styleUrl: './list-proveedor-producto.scss'
 })

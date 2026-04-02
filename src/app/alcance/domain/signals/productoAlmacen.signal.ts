@@ -1,5 +1,5 @@
 import { Injectable, signal } from "@angular/core";
-import { DataProductoPorAlmacen, ListarProductoPorAlmacen } from "../models/producto-almacen.model";
+import { DataProductoPorAlmacen, ListarProductoPorAlmacen, ListarProductosConFechaVencimiento } from "../models/producto-almacen.model";
 
 @Injectable({
     providedIn: 'root'
@@ -13,4 +13,6 @@ export class ProductoAlmacenSignal {
     tamanioPagina = signal<number>(12)
 
     actionProductoAlmacen = signal<boolean>(false)
+
+    listProductoAlmacenVencimiento = signal<ListarProductosConFechaVencimiento[]>([])
 }

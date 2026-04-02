@@ -1,17 +1,14 @@
-import { Component, effect, EventEmitter, inject, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { InputNumberModule } from "primeng/inputnumber";
 import { TableModule } from "primeng/table";
 import { ProcesoComprasModule } from '@/proceso-compras/proceso-compras-module';
 import { AlertService } from 'src/assets/demo/services/alert.service';
-import { AnexoPorFase, InsertarAnexoPorFase, ResponseAnexoPorFase } from '@/proceso-compras/domain/models/anexoPorFase.model';
+import { InsertarAnexoPorFase, ResponseAnexoPorFase } from '@/proceso-compras/domain/models/anexoPorFase.model';
 import { AnexoPorFaseRepository } from '@/proceso-compras/domain/repository/anexoSolicitud.repository';
 import { AnexoPorFaseSignal } from '@/proceso-compras/domain/signals/anexoPorFase.signal';
 import { AgregarOrdenCompraDetalle, ValidarProductoAlmacen } from '@/proceso-compras/domain/models/ordenCompraDetalle.model';
-import { switchMap } from 'rxjs';
-import { SolicitudCompraSignal } from '@/proceso-compras/domain/signals/solicitud-compra.signal';
 import { PdfOrdenCompra } from "../pdf-orden-compra/pdf-orden-compra";
-import { ProveedorProductoSignal } from '@/proveedor-producto/domain/signals/proveedor-producto.signal';
 import { SolicitudCompraRepository } from '@/proceso-compras/domain/repository/solicitud-compra.repository';
 import { ApiError, ApiResponse } from '@/core/interceptors/error-message.model';
 import { DialogModule } from "primeng/dialog";
@@ -213,6 +210,59 @@ export class ListClonadorProductos {
     this.visible = false
     this.visibleChange.emit(false);
   }
+  clonadosBajoStock(): number {
+    return this.clonados.filter(p => p.stock < p.stockMinimo).length;
+}
+getEstadoStock(row: any) {
+  const stock = row.stock || 0;
+  const min = row.stockMinimo || 0;
+  const cantidad = row.cantidad || 0;
+
+  // 🔴 crítico
+  if (stock <= 0 || stock < min) {
+    return {
+      label: 'Crítico',
+      color: 'red',
+      icon: 'pi pi-times-circle',
+      recomendacion: 'Comprar urgente'
+    };
+  }
+
+  // 🟡 bajo
+  if (stock <= min * 1.3) {
+    return {
+      label: 'Bajo',
+      color: 'orange',
+      icon: 'pi pi-exclamation-triangle',
+      recomendacion: 'Revisar compra'
+    };
+  }
+
+  // 🟢 suficiente pero ojo con sobrecompra
+  if (stock >= cantidad && cantidad > 0) {
+    return {
+      label: 'Suficiente',
+      color: 'green',
+      icon: 'pi pi-check-circle',
+      recomendacion: 'No necesario comprar'
+    };
+  }
+
+  // 🟢 default
+  return {
+    label: 'OK',
+    color: 'green',
+    icon: 'pi pi-check-circle',
+    recomendacion: ''
+  };
+}
+
+getStockPercentage(row: any): number {
+  const stock = row.stock || 0;
+  const min = row.stockMinimo || 1;
+
+  return Math.min((stock / (min * 2)) * 100, 100);
+}
 
 }
 

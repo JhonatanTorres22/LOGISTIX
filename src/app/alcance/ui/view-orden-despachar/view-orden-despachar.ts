@@ -10,13 +10,14 @@ import { ButtonModule } from "primeng/button";
 import { TableModule } from "primeng/table";
 import { DialogModule } from "primeng/dialog";
 import { ProcesoComprasModule } from "@/proceso-compras/proceso-compras-module";
-import { AumentarCantidadProductoAlmacen, DisminuirCantidadProductoAlmacen } from '@/alcance/domain/models/producto-almacen.model';
+import { AumentarCantidadProductoAlmacen, DisminuirCantidadProductoAlmacen, InsertarFechaVencimientoProductoAlmacen } from '@/alcance/domain/models/producto-almacen.model';
 import { ProductoAlmacenRepository } from '@/alcance/domain/repository/producto-almacen.repository';
 import { ProductoAlmacenSignal } from '@/alcance/domain/signals/productoAlmacen.signal';
-
+import { DatePickerModule } from 'primeng/datepicker';
+import { UiDatePicker } from "@/core/components/ui-date-picker/ui-date-picker";
 @Component({
   selector: 'app-view-orden-despachar',
-  imports: [CommonModule, TagModule, ButtonModule, TableModule, DialogModule, ProcesoComprasModule],
+  imports: [CommonModule, TagModule, ButtonModule, TableModule, DialogModule, ProcesoComprasModule, DatePickerModule, UiDatePicker],
   templateUrl: './view-orden-despachar.html',
   styleUrl: './view-orden-despachar.scss'
 })
@@ -41,6 +42,7 @@ export class ViewOrdenDespachar implements OnInit {
   seleccionadosPorAnexo: Record<number, OrdenCompraDetalle[]> = {}
   seleccionados = signal<OrdenCompraDetalle[]>([])
 
+  fechasVencimiento: Record<string, string | null> = {};
 
   ngOnInit(): void {
     if (this.ordenId) {
@@ -70,14 +72,28 @@ export class ViewOrdenDespachar implements OnInit {
     const data = this.listOrdenCompra()
     if (!data?.length) return
     data[0].anexosPorFases.forEach((anexo: AnexosPorFaseOrdenCompra) => {
-      this.seleccionadosPorAnexo[anexo.idAnexosPorFase] = []
-    })
+      this.seleccionadosPorAnexo[anexo.idAnexosPorFase] = [];
+
+      anexo.ordenCompra.forEach(item => {
+        this.fechasVencimiento[item.idProductoPorAlmacen] = null;
+      });
+    });
   }
 
   onSelectionChange(): void {
     const todos = Object.values(this.seleccionadosPorAnexo).flat()
     this.seleccionados.set(todos)
   }
+
+  tieneSeleccionConFecha(): boolean {
+  const items = this.seleccionados();
+
+  if (items.length === 0) return false;
+
+  return items.every(item =>
+    this.fechasVencimiento[item.idProductoPorAlmacen]
+  );
+}
 
   despacharSeleccionados(): void {
     const items = this.seleccionados()
@@ -92,17 +108,17 @@ export class ViewOrdenDespachar implements OnInit {
       cantidad: item.cantidad
     }))
 
-    console.log('Payload limpio:', payload)
     this.loading = true
-    this.alert.sweetAlert('question', `¿CONFIRMAR ${this.tipoMovimiento}?`,  `'¿Está seguro que desea realizar ${this.tipoMovimiento} a los productos?`)
+    this.alert.sweetAlert('question', `¿CONFIRMAR ${this.tipoMovimiento}?`, `¿Está seguro que desea realizar ${this.tipoMovimiento} a los productos?`)
       .then(isConfirm => {
         if (!isConfirm) { return }
 
         switch (this.tipoMovimiento) {
           case 'ENTRADA': {
             this.aumentarProductoAlmacen(payload)
+            
           }; break;
-    
+
           case 'SALIDA': {
             this.disminuirProductoAlmacen(payload)
           }; break;
@@ -114,14 +130,45 @@ export class ViewOrdenDespachar implements OnInit {
   aumentarProductoAlmacen(aumentarProductos: AumentarCantidadProductoAlmacen[]) {
     this.repository.aumentarCantidadProductoAlmacen(aumentarProductos).subscribe({
       next: (res: ApiResponse) => {
-        this.loading = false
         this.alert.showAlert(`Cantidad aumentada, ${res.message}`, 'success')
-        this.actionProductoAlmacen.set(res.isSuccess)
-        this.closeDialog()
+        if (res.isSuccess) {
+          this.insertarFechaVencimientoProductoAlmacen()
+        }
       },
       error: (err: ApiError) => {
         this.loading = false
         this.alert.showAlert(`Error al aumentar, ${err.error.message}`, 'error')
+      }
+    })
+  }
+  insertarFechaVencimientoProductoAlmacen() {
+    const sinFecha = this.seleccionados().some(item =>
+      !this.fechasVencimiento[item.idProductoPorAlmacen]
+    );
+
+    if (sinFecha) {
+      this.alert.showAlert('Todos los productos deben tener fecha de vencimiento', 'error');
+      return;
+    }
+
+    const productoConFecha = this.seleccionados().map(ordenCompra => ({
+      idProductoPorAlmacen: ordenCompra.idProductoPorAlmacen,
+      fechaVencimiento: this.fechasVencimiento[ordenCompra.idProductoPorAlmacen]!
+    }));
+
+    console.log(productoConFecha);
+    
+    this.repository.insertarFechaVencimientoProductoAlmacen(productoConFecha).subscribe({
+      next: (res: ApiResponse) => {
+        this.loading = false
+        this.alert.showAlert(`Fecha de vencimiento registrada, ${res.message}`, 'success')
+        this.actionProductoAlmacen.set(res.isSuccess)
+        this.loading = false
+        this.closeDialog()
+      },
+      error: (err: ApiError) => {
+        this.loading = false
+        this.alert.showAlert(`Error al registrar fecha de vencimiento, ${err.error.message}`, 'error')
       }
     })
   }
@@ -130,7 +177,7 @@ export class ViewOrdenDespachar implements OnInit {
     this.repository.disminuirCantidadProductoAlmacen(disminuirProducto).subscribe({
       next: (res: ApiResponse) => {
         this.alert.showAlert(`Cantidad disminuida, ${res.message}`, 'success')
-        if(res.isSuccess){
+        if (res.isSuccess) {
           this.actualizarEstadoAtencionOrden()
         }
       },
@@ -141,9 +188,9 @@ export class ViewOrdenDespachar implements OnInit {
     })
   }
 
-  actualizarEstadoAtencionOrden (){
+  actualizarEstadoAtencionOrden() {
     const idsOrdenCompra = this.seleccionados().map(ordenCompra => ({
-      idOrdenCompra : ordenCompra.idOrdenCompra
+      idOrdenCompra: ordenCompra.idOrdenCompra
     }))
 
     this.repositorySolicitudCompra.actualizarEstadoAtencionOrden(idsOrdenCompra).subscribe({
@@ -159,6 +206,8 @@ export class ViewOrdenDespachar implements OnInit {
       }
     })
   }
+
+
 
   closeDialog() {
     this.visible = false;

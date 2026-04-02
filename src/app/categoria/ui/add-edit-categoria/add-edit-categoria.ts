@@ -53,20 +53,11 @@ export class AddEditCategoria implements OnInit {
         Validators.pattern(this.validation.expRegDescripcion)
       ])
     });
-
-    effect(() => {
-      const categoria = this.categoriaSelect();
-      if (!categoria || !this.visible) return;
-
-      if (categoria.idCategoria) {
-        this.patchValue();
-      } else {
-        this.resetForm();
-      }
-    });
   }
 
-  ngOnInit(): void { }
+  ngOnInit(): void { 
+    this.categoriaSelect().idCategoria === 0 ? '' : this.patchValue()
+  }
 
   ngOnDestroy(): void {
     this.resetForm();

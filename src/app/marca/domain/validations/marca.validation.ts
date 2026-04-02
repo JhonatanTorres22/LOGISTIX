@@ -9,7 +9,7 @@ export class MarcaValidation {
     minLengthNombre : number = 2
 
     maxLengthDescripcion :number = 200
-    minLengthDescripcion : number = 8
+    minLengthDescripcion : number = 2
 
     expReg = /^[a-zA-Z0-9áÁéÉíÍóÓúÚ\u00C0-\u017F][a-zA-Z0-9áÁéÉíÍóÓúÚ\u00C0-\u017F\s.-]*[a-zA-Z0-9áÁéÉíÍóÓúÚ\u00C0-\u017F.-]$/;
 

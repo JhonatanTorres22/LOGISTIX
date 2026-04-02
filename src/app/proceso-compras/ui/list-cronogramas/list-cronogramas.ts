@@ -693,6 +693,7 @@ export class ListCronogramas implements OnInit {
         this.alert.showAlert(`Cronograma observado, ${data.message}`, 'success')
         cronograma.observacion = this.observarForm.value.observacion
         cronograma.tipoObservacion = this.observarForm.value.tipoObservacion
+        cronograma.estado = 2
         this.loading = false
         this.cancelarObservacion()
         cronograma.estado === 2

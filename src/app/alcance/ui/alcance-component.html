@@ -1,8 +1,6 @@
-<app-card cardTitle="GESTIÓN" cardClass="card-estatico">
+<app-card cardTitle="GESTIÓN DE ALMACÉN" cardClass="card-estatico">
 
   <div class="alcance-wrapper">
-
-    <!-- Header con breadcrumb profesional -->
     <div class="flex align-items-center justify-content-between mb-4">
       <div class="flex flex-column gap-1">
 
@@ -36,17 +34,8 @@
           @if (vistaActual() === 'almacenes') { Almacenes del Alcance }
           @if (vistaActual() === 'productos') { Productos del Almacén }
         </h5>
-
-        <!-- <span class="text-color-secondary text-sm">
-          @if (vistaActual() === 'alcances') { Administra los puntos de distribución }
-          @if (vistaActual() === 'almacenes') { Selecciona un almacén para ver sus productos }
-          @if (vistaActual() === 'productos') { Inventario de productos disponibles }
-        </span> -->
-
       </div>
     </div>
-
-    <!-- <p-divider styleClass="-mb-1"></p-divider> -->
 
     @if (vistaActual() === 'alcances') {
     <app-list-alcance (onSelectAlcance)="vistaActual.set('almacenes')">
@@ -61,7 +50,5 @@
     @if (vistaActual() === 'productos') {
     <app-list-producto-almacen></app-list-producto-almacen>
     }
-
   </div>
-
 </app-card>

@@ -56,6 +56,22 @@
   color: #ef4444;
   font-weight: 600;
 }
+.node-completado {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+:host ::ng-deep .p-treenode-content.node-completado-bg {
+  background: #dcfce7 !important; // verde suave
+  border-radius: 4px;
+}
+:host ::ng-deep .icon-folder-completed {
+  color: #22c55e !important; // verde bonito (Tailwind green-500)
+}
+
+:host ::ng-deep .icon-folder-completed.pi-folder-open {
+  color: #16a34a !important; // un poco más oscuro al abrir
+}
 
 /* Fade al cerrar nodo */
 .node-closing .node-label {

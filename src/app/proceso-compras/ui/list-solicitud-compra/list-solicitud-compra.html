@@ -107,42 +107,30 @@
                 <p-speedDial showIcon="pi pi-bars" hideIcon="pi pi-times" direction="up" buttonClass="p-button-primary"
                     (onClick)="popover.toggle($event)">
                 </p-speedDial>
+                <p-button icon="pi pi-sitemap" [rounded]="true" styleClass="mt-2"
+                    (onClick)="visibleGraficoCarpetas = true" />
 
                 <p-popover #popover [dismissable]="false">
                     <div class="flex flex-wrap gap-2 justify-end">
                         @for (fase of listAnexos()[0]?.fases; track $index) {
                         @for (anexo of fase.anexos; track $index) {
 
-                        @if (
-                        (anexo.nombre === 'Documentacion Preliminar' && permisosSolicitud.DOCUMENTACION_PRELIMINAR) ||
-                        (anexo.nombre === 'Cotización' && (permisosSolicitud.COTIZACION ||
-                        permisosSolicitud.VALIDAR_COTIZACION)) ||
-                        (anexo.nombre === 'Orden de Compra' && (permisosSolicitud.ORDEN_COMPRA ||
-                        permisosSolicitud.VALIDAR_ORDEN_COMPRA)) ||
-                        (anexo.nombre === 'Orden Firmada' && (permisosSolicitud.ORDEN_COMPRA_FIRMADA ||
-                        permisosSolicitud.VALIDAR_ORDEN_COMPRA_FIRMADA)) ||
-                        (anexo.nombre === 'Contrato' && (permisosSolicitud.CONTRATO ||
-                        permisosSolicitud.VALIDAR_CONTRATO)) ||
-                        (anexo.nombre === 'Cronograma' && (permisosSolicitud.CRONOGRAMA ||
-                        permisosSolicitud.VALIDAR_CRONOGRAMA)) ||
-                        (anexo.nombre === 'Guia de Remision' && (permisosSolicitud.GUIA_REMISION ||
-                        permisosSolicitud.VALIDAR_GUIA_REMISION)) ||
-                        (anexo.nombre === 'Acta' && (permisosSolicitud.ACTA || permisosSolicitud.VALIDAR_ACTA)) ||
-                        (anexo.nombre === 'Evidencia' && (permisosSolicitud.EVIDENCIA ||
-                        permisosSolicitud.VALIDAR_EVIDENCIA)) ||
-                        (anexo.nombre === 'Cerrar Proceso' && permisosSolicitud.CERRAR_PROCESO) ||
+                        <!-- @if (
+                        
                         permisosSolicitud.ESCRITURA
-                        ) {
+                        ) { -->
                         <p-splitbutton [label]="anexo.nombre" icon="pi pi-file-pdf" dropdownIcon="pi pi-chevron-down"
                             (onClick)="mostrarModalArchivo(anexo)" [model]="itemsPorAnexo.get(anexo.idAnexo)">
                         </p-splitbutton>
-                        }
+                        <!-- } -->
                         }
                         }
                     </div>
                 </p-popover>
 
+
                 }
+
                 <!-- @else {
 
                 <div class="border-blue-700 border-dashed border-1 p-2 text-blue-700 font-bold border-round">
@@ -186,7 +174,7 @@
                         <div class="grid" style="width:100%;">
                             <div class="col-12 md:6">
 
-                                <p-table [scrollable]="true" scrollHeight="400px" #dt1 [value]="tablaProductos"
+                                <p-table [scrollable]="true" scrollHeight="500px" #dt1 [value]="tablaProductos"
                                     dataKey="idSolicitudCompraDetalle" [paginator]="true" [rows]="10"
                                     [rowsPerPageOptions]="[5,10,20,50]" [loading]="loading"
                                     [globalFilterFields]="['descripcionDelBien','nombreProveedor','ruc','cantidad']"
@@ -196,7 +184,7 @@
                                     <ng-template #groupheader let-rowData>
                                         <tr pRowGroupHeader class="bg-blue-50">
                                             <td colspan="7">
-                                                <div class="flex gap-4">
+                                                <div class="flex gap-4 text-xs">
                                                     <span>{{ rowData.proveedor }}</span>
                                                     <div class="bg-blue-100 text-blue-800 border-round">
                                                         <span class="m-2">RUC: {{ rowData.ruc }}</span>
@@ -208,28 +196,32 @@
 
                                     <ng-template pTemplate="header">
                                         <tr>
-                                            <th>Cantidad</th>
-                                            <th>Unidad Medida</th>
-                                            <th>Producto o Servicio</th>
-                                            <th>Precio Unitario</th>
-                                            <th>Precio Total</th>
+                                            <th class="text-xs">Cantidad</th>
+                                            @if (listSolicitud().length > 0) {
+                                            <th class="text-xs">Stock Actual</th>
+                                            <th class="text-xs">Stock Mínimo</th>
+                                            }
+                                            <th class="text-xs">Unidad Medida</th>
+                                            <th class="text-xs">Producto o Servicio</th>
+                                            <th class="text-xs">Precio Unitario</th>
+                                            <th class="text-xs">Precio Total</th>
                                             @if (listSolicitud().length == 0) {
-                                            <th>Accion</th>
+                                            <th class="text-xs">Accion</th>
                                             }
                                         </tr>
                                     </ng-template>
 
                                     <ng-template pTemplate="body" let-row>
-                                        <tr
-                                            [ngClass]="{ 'bg-green-50': row.ordenCompra, 'bg-red-50': !row.ordenCompra}">
+                                        <tr [ngClass]="{ 'bg-green-50': row.ordenCompra, 'bg-gray-50': !row.ordenCompra}"
+                                            class="mb-2">
                                             @if (listSolicitud().length === 0) {
-                                            <td pEditableColumn>
+                                            <td pEditableColumn class="text-xs">
                                                 <p-cellEditor>
-                                                    <ng-template pTemplate="input">
+                                                    <ng-template pTemplate="input" class="text-xs">
                                                         <p-inputNumber [(ngModel)]="row.cantidad" [min]="1"
                                                             (ngModelChange)="recalcularFila(row)"></p-inputNumber>
                                                     </ng-template>
-                                                    <ng-template pTemplate="output">
+                                                    <ng-template pTemplate="output" class="text-xs">
                                                         {{ row.cantidad }}
                                                     </ng-template>
                                                 </p-cellEditor>
@@ -238,13 +230,31 @@
                                             }
                                             @else {
                                             <td>
-                                                <span class="ml-3"> {{row.cantidad}} </span>
+                                                <span class="ml-3" class="text-xs"> {{row.cantidad}} </span>
                                             </td>
                                             }
-                                            <td> {{row.unidad}} </td>
-                                            <td>{{ row.productoNombre }}</td>
-                                            <td>S/. {{row.precio | number:'1.2-2'}}</td>
-                                            <td> S/. {{ (row.precio * row.cantidad) | number:'1.2-2' }}</td>
+                                            @if (listSolicitud().length > 0) {
+                                            <td class="text-center">
+                                                <span
+                                                    class="flex align-items-center justify-content-center border-round font-semibold text-xs"
+                                                    [ngClass]="{'bg-green-100 text-green-700': row.stock > row.stockMinimo,
+                                                    'bg-yellow-100 text-yellow-700' : row.stock == row.stockMinimo,
+                                                    'bg-red-100 text-red-700': row.stock < row.stockMinimo}">
+                                                    {{ row.stock <= 0 ? 'Sin Stock' : row.stock }}
+                                                </span>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <span class="text-xs text-800">
+                                                    {{ row.stockMinimo }}
+                                                </span>
+                                            </td>
+                                            }
+                                            <td class="text-xs"> {{row.unidad}} </td>
+                                            <td class="text-xs">{{ row.productoNombre }}</td>
+                                            <td class="text-xs">S/. {{row.precio | number:'1.2-2'}}</td>
+                                            <td class="text-xs"> S/. {{ (row.precio * row.cantidad) | number:'1.2-2' }}
+                                            </td>
                                             @if (listSolicitud().length == 0) {
                                             <ui-icon-button icon="pi pi-times" (onClick)="quitarProducto(row)"
                                                 color="danger" tooltip="Eliminar"></ui-icon-button>
@@ -283,6 +293,7 @@
                 <p-tabpanel [value]="1">
                     @if (value === 1) {
                     <ng-container>
+                        <!-- <pre> {{tablaProductos | json}} </pre> -->
                         <app-list-orden-compra-detalle
                             [tablaSolicitudCompra]="tablaProductos"></app-list-orden-compra-detalle>
                     </ng-container>
@@ -294,6 +305,9 @@
         }
     </div>
 </div>
+}
+@if (visibleGraficoCarpetas) {
+<app-grafico-tree-carpeta-anexo [(visible)]="visibleGraficoCarpetas"></app-grafico-tree-carpeta-anexo>
 }
 
 @if (visibleSelectProductos) {

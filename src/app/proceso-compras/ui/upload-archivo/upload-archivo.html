@@ -10,11 +10,24 @@
 
     @else {
 
-    <div class="flex align-items-center gap-2 px-3 py-2 mb-3 border-round bg-blue-50 border-1 border-blue-200 ">
+    <div [ngClass]="{'bg-red-50 border-red-200' :selectCarpeta().idCarpeta == 0, 'bg-blue-50 border-blue-200' : selectCarpeta().idCarpeta !== 0 }"
+     class="flex align-items-center gap-2 px-3 py-2 mb-3 border-round border-1">
         <i class="pi pi-folder text-yellow-500"></i>
         <span class="text-sm">Los archivos se guardarán en la carpeta</span>
-        <span class="flex align-items-center gap-1 px-2 py-1 border-round font-bold bg-blue-100 text-blue-800 text-xs">
-            <i class="pi pi-folder-open"></i>{{ selectCarpeta().prefijo }}-{{ selectCarpeta().numeracion }}
+        <span [ngClass]="{'bg-red-100 text-red-800' :selectCarpeta().idCarpeta == 0, 'bg-blue-100 text-blue-800' : selectCarpeta().idCarpeta !== 0 }"
+            class="flex align-items-center gap-1 px-2 py-1 border-round font-bold text-xs">
+            <i class="pi pi-folder-open"></i>
+            @if(selectCarpeta().idCarpeta !== 0){
+                {{ selectCarpeta().prefijo }}-{{ selectCarpeta().numeracion }}
+            }
+            @else {
+                @if(selectAnexo().nombre === 'Orden de Compra'){
+                    Suba Archivo Para registrar carpeta
+                }
+                @else {
+                    No se ha registrado carpeta
+                }
+            }
         </span>
     </div>
     @if (mostrarSubirArchivo) {
@@ -31,14 +44,13 @@
     @if (!mostrarSubirArchivo && (
     (selectAnexo().nombre == 'Documentacion Preliminar' && permisosSolicitud.DOCUMENTACION_PRELIMINAR) ||
     (selectAnexo().nombre == 'Cotización' && permisosSolicitud.COTIZACION) ||
-    (selectAnexo().nombre == 'Orden de Compra' && permisosSolicitud.ORDEN_COMPRA && mostrarSubirArchivo) ||
     (selectAnexo().nombre == 'Contrato' && permisosSolicitud.CONTRATO) ||
     (selectAnexo().nombre == 'Cronograma' && permisosSolicitud.CRONOGRAMA) ||
     (selectAnexo().nombre == 'Acta' && permisosSolicitud.ACTA) ||
     (selectAnexo().nombre == 'Evidencia' && permisosSolicitud.EVIDENCIA) ||
     (selectAnexo().nombre == 'Guia de Remision' && permisosSolicitud.GUIA_REMISION) ||
-    (selectAnexo().nombre == 'Cerrar Proceso' && permisosSolicitud.CERRAR_PROCESO)
-    )
+    (selectAnexo().nombre == 'Cerrar Proceso' && permisosSolicitud.CERRAR_PROCESO) 
+    )&& (selectCarpeta().idCarpeta !== 0)
 
     ) {
     <ui-button label="Agregar un Archivo" (onClick)="mostrarFormularioNuevo()"></ui-button>
@@ -190,14 +202,11 @@
     </div>
     }
     @else {
-    <!-- <pre> {{ listAnexo()[0].fases[1].anexos[2] | json }} </pre> -->
     <ui-card-not-items text="No se encuentran archivos guardado"></ui-card-not-items>
     }
     @if (selectAnexo().nombre == 'Orden Firmada') {
     <div class="flex flex-col gap-2">
-
         @for (item of proveedores; track $index) {
-        <!-- {{ item | json }} -->
         <ui-button (click)="seleccionarProveedor(item)" [disabled]="!item.tieneArchivo"
             [label]="item.proveedor + (item.tieneArchivo ? '' : ' (Sin archivo)')">
         </ui-button>
@@ -208,7 +217,7 @@
     }
 
     <ng-template #footer>
-        <p-button severity="secondary" label="Cancelar" icon="pi pi-times" (onClick)="closeDialog()"></p-button>
+    <ui-button label="Cancelar" icon="pi pi-times" (onClick)="closeDialog()" color="secondary"></ui-button>
         @if (selectAnexo().nombre !== 'Orden Firmada') {
         <ui-button label="GUARDAR ARCHIVO" icon="pi pi-save" color="primary" [disabled]="archivoForm.invalid"
             (onClick)="guardarArchivo()" />

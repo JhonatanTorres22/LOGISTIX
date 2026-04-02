@@ -10,14 +10,15 @@ import { finalize } from 'rxjs';
 import { ProductoModule } from '@/producto/producto-module';
 import { ProcesoComprasModule } from "@/proceso-compras/proceso-compras-module";
 import { ApiError } from '@/core/interceptors/error-message.model';
-import { Route, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { UiIconButton } from "@/core/components/ui-icon-button/ui-icon-button";
 import { IconFieldModule } from "primeng/iconfield";
 import { InputIconModule } from "primeng/inputicon";
-
+import { Image } from 'primeng/image';
 @Component({
   selector: 'app-list-productos',
-  imports: [ProductoModule, ImportProductos, AddEditProducto, UiLoadingProgressBarComponent, ProcesoComprasModule, UiIconButton, IconFieldModule, InputIconModule],
+  imports: [ProductoModule, ImportProductos, AddEditProducto, UiLoadingProgressBarComponent, ProcesoComprasModule, UiIconButton,
+    Image, IconFieldModule, InputIconModule],
   templateUrl: './list-productos.html',
   styleUrl: './list-productos.scss'
 })

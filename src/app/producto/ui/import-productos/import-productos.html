@@ -53,19 +53,20 @@
             <th>Modelo</th>
             <th>Descripción</th>
             <th>Unidad</th>
+            <th>Tipo</th>
         </tr>
     </ng-template>
 
-    <ng-template #body pTemplate="body" let-rowData>
-        <tr [pSelectableRow]="rowData">
+    <ng-template #body pTemplate="body" let-producto>
+        <tr [pSelectableRow]="producto">
             <td>
-                <img [src]="rowData.urlImagen" [alt]="rowData.nombreProducto"
-                    class="w-20 h-20 rounded object-contain bg-gray-50" />
+                <p-image [src]="producto.urlImagen" alt="Imagen Producto" width="25" [preview]="true" />
             </td>
-            <td>{{ rowData.nombreProducto }}</td>
-            <td>{{ rowData.modeloProducto }}</td>
-            <td>{{ rowData.descripcionProducto }}</td>
-            <td>{{ rowData.unidad }}</td>
+            <td>{{ producto.nombreProducto }}</td>
+            <td>{{ producto.modeloProducto }}</td>
+            <td>{{ producto.descripcionProducto }}</td>
+            <td>{{ producto.unidad }}</td>
+            <td> {{producto.tipo}} </td>
         </tr>
     </ng-template>
 

@@ -1,0 +1,80 @@
+<p-card>
+    <ng-template pTemplate="header">
+        <div class="flex align-items-center justify-content-between px-4 pt-3 pb-2">
+            <div class="flex align-items-center gap-2">
+                <!-- <i class="pi pi-wallet text-2xl text-primary"></i> -->
+                <span class="text-xl font-bold">Productos con Fecha de Vencimiento</span>
+            </div>
+            <p-tag [value]="' registros'" severity="info" icon="pi pi-list" />
+        </div>
+    </ng-template>
+    <div class="p-4">
+        <p-table [value]="listProductoAlmacenVencimiento()" [paginator]="true" [rows]="5"
+            [rowsPerPageOptions]="[5, 10, 20]" styleClass="p-datatable-striped p-datatable-gridlines"
+            responsiveLayout="scroll">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th style="width: 80px">Imagen</th>
+                    <th pSortableColumn="nombreProducto">
+                        Producto <p-sortIcon field="nombreProducto" />
+                    </th>
+                    <th>Descripción</th>
+                    <th>Marca / Modelo</th>
+                    <th>Unidad</th>
+                    <th>Fechas de Vencimiento</th>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-producto>
+                <tr>
+                    <!-- Imagen -->
+                    <td>
+                        <p-image [src]="producto.urlImagen" [alt]="producto.nombreProducto" width="60" height="60"
+                            [preview]="true" />
+                    </td>
+
+                    <!-- Nombre -->
+                    <td>
+                        <span class="font-semibold text-sm">{{ producto.nombreProducto }}</span>
+                        <div class="text-xs text-color-secondary mt-1">
+                            ID: {{ producto.idProductoPorAlmacen }}
+                        </div>
+                    </td>
+
+                    <!-- Descripción -->
+                    <td>{{ producto.descripcionProducto }}</td>
+
+                    <!-- Marca / Modelo -->
+                    <td>
+                        <div>{{ producto.marca }}</div>
+                        <div class="text-xs text-color-secondary">{{ producto.modelo }}</div>
+                    </td>
+
+                    <!-- Unidad -->
+                    <td>
+                        <p-tag [value]="producto.unidadMedida" severity="info" />
+                    </td>
+
+                    <!-- Fechas de Vencimiento -->
+                    <td>
+                        <div *ngIf="producto.fechaVencimiento.length > 0; else sinFecha">
+                            <p-tag *ngFor="let fv of producto.fechaVencimiento"
+                                [value]="(fv.fechaVencimiento | date: 'dd/MM/yyyy') ?? ''" severity="warning"
+                                styleClass="mr-1 mb-1" />
+                        </div>
+                        <ng-template #sinFecha>
+                            <p-tag value="Sin vencimiento" severity="success" />
+                        </ng-template>
+                    </td>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="6" class="text-center p-4">No se encontraron productos.</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+
+</p-card>

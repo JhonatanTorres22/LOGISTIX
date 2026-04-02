@@ -14,8 +14,8 @@ import { ActualizarEstadoAtencionOrden, AgregarOrdenCompraDetalle, DataOrdenComp
 export class SolicitudCompraRepositoryImpl implements SolicitudCompraRepository {
    private service = inject(SolicitudCompraService)
 
-     obtener = (codigo: number): Observable<DataSolicitudCompra> =>{
-        return this.service.obtener(codigo)
+     obtener = (codigo: number, idAlmacen : number): Observable<DataSolicitudCompra> =>{
+        return this.service.obtener(codigo, idAlmacen)
     }
     agregar = (agregar: AgregarSolicitud[]): Observable<void> => {
         return this.service.agregar(agregar)
