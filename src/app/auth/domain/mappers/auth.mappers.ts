@@ -13,7 +13,7 @@ export class AuthMapper {
         };
     }
 
-        static toDTO(model: LoginModel): LoginRequestDTO {
+    static toDTO(model: LoginModel): LoginRequestDTO {
         return {
             nombreUsuario: model.username,
             contrasenia: model.password,
@@ -22,7 +22,7 @@ export class AuthMapper {
     }
 
     // DTO → Model (lo que recibes del backend)
-     static fromResponse(dto: LoginResponseDTO): AuthData {
+    static fromResponse(dto: LoginResponseDTO): AuthData {
         const token = dto.data.token;
         return {
             token,
@@ -32,21 +32,30 @@ export class AuthMapper {
 
     static decodeToken(token: string): DecodedToken {
         try {
-            const payload = token.split('.')[1]; // JWT: header.payload.signature
-            const decodedJson = atob(payload); // base64 decode
+            const payload = token.split('.')[1];
+
+            // 🔥 Decodificación correcta UTF-8
+            const decodedJson = decodeURIComponent(
+                atob(payload)
+                    .split('')
+                    .map(c => '%' + c.charCodeAt(0).toString(16).padStart(2, '0'))
+                    .join('')
+            );
+
             const decoded: DecodedTokenDTO = JSON.parse(decodedJson);
-            return { ...decoded }; // mapea campos directamente al model
+            return { ...decoded };
+
         } catch (err) {
             console.error('Error decodificando token:', err);
-            return null as any; // o un objeto vacío
+            return null as any;
         }
     }
 
-    static toApiCambioContrasenia (param : CambioContrasenia) : CambioContraseniaDTO {
+    static toApiCambioContrasenia(param: CambioContrasenia): CambioContraseniaDTO {
         return {
-            contrasenia : param.password,
-            nuevaContrasenia : param.newPassword,
-            numeroDocumento : param.userName
+            contrasenia: param.password,
+            nuevaContrasenia: param.newPassword,
+            numeroDocumento: param.userName
         }
     }
 }

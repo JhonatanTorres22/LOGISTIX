@@ -1,7 +1,7 @@
 import { ProductoAlmacenRepository } from "@/alcance/domain/repository/producto-almacen.repository";
 import { ProductoAlmacenService } from "../services/producto-almacen.service";
 import { inject } from "@angular/core";
-import { AgregarProductoAlmacen, AumentarCantidadProductoAlmacen, DataProductoPorAlmacen, DisminuirCantidadProductoAlmacen } from "@/alcance/domain/models/producto-almacen.model";
+import { ActualizarStockMinimoProductoAlmacen, AgregarProductoAlmacen, AumentarCantidadProductoAlmacen, DataListarProductosConFechaVencimiento, DataProductoPorAlmacen, DisminuirCantidadProductoAlmacen, InsertarFechaVencimientoProductoAlmacen } from "@/alcance/domain/models/producto-almacen.model";
 import { Observable } from "rxjs";
 import { ApiResponse } from "@/core/interceptors/error-message.model";
 
@@ -21,5 +21,16 @@ export class ProductoAlmacenRepositoryImpl implements ProductoAlmacenRepository 
 
     disminuirCantidadProductoAlmacen(disminuirCantidad: DisminuirCantidadProductoAlmacen[]): Observable<ApiResponse> {
         return this.service.disminuirCantidadProductoAlmacen(disminuirCantidad)
+    }
+
+    actualizarStockMinimoProductoAlmacen(actualizarStockMinimo: ActualizarStockMinimoProductoAlmacen[]): Observable<ApiResponse> {
+        return this.service.actualizarStockMinimoProductoAlmacen(actualizarStockMinimo)
+    }
+    
+    insertarFechaVencimientoProductoAlmacen(insertarFechaVencimiento: InsertarFechaVencimientoProductoAlmacen[]): Observable<ApiResponse> {
+        return this.service.insertarFechaVencimientoProductoAlmacen(insertarFechaVencimiento)
+    }
+    obtenerProductosConFechaVencimiento(idAlmacen: number): Observable<DataListarProductosConFechaVencimiento> {
+        return this.service.obtenerProductosConFechaVencimiento(idAlmacen)
     }
 }

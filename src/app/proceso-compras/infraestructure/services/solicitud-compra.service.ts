@@ -39,8 +39,8 @@ export class SolicitudCompraService {
     private urlActualizarEstadoAtencionOrden : string = '/api/OrdenCompraDetalle/Atendido'
     private http = inject(HttpClient)
 
-    obtener = (codigo : number) : Observable<DataSolicitudCompra> => {
-        return this.http.get<DataSolicitudCompraDTO>(this.urlApi + this.urlListarSolicitud + codigo)
+    obtener = (codigo : number, idAlmacen : number) : Observable<DataSolicitudCompra> => {
+        return this.http.get<DataSolicitudCompraDTO>(this.urlApi + this.urlListarSolicitud + codigo + `/${idAlmacen}`)
         .pipe(map(apiResponse => SolicitudCompraMapper.toDomainData(apiResponse)))
     }
 

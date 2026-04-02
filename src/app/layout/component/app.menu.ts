@@ -13,29 +13,43 @@ import { SharedModule } from '@/core/components/shared.module';
   imports: [CommonModule, AppMenuitem, RouterModule, SharedModule],
   template: `
 @if (dataAuth) {
-  <p-card class="mb-3 shadow-none border-0 bg-transparent">
-    <div class="flex items-center gap-2">
+<!-- <p-card class="mb-3 shadow-none border-0 bg-transparent"> -->
 
-      <!-- Avatar PrimeNG -->
+  <!-- Bloque centrado verticalmente -->
+  <div class="flex flex-column align-items-center text-center gap-2 py-2">
+
+    <div class="relative">
       <p-avatar
-        image="https://images.vexels.com/media/users/3/129616/isolated/preview/fb517f8913bd99cd48ef00facb4a67c0-silueta-de-avatar-de-empresario.png"
+        image="https://png.pngtree.com/png-vector/20190710/ourmid/pngtree-user-vector-avatar-png-image_1541962.jpg"
         shape="circle"
-        size="large"
-        styleClass="border border-primary"
+        size="xlarge"
+        styleClass="border-2 border-primary-300"
       ></p-avatar>
 
-      <!-- Info -->
-      <div class="flex flex-col leading-tight">
-        <span class="text-[10px] font-bold text-gray-800 dark:text-gray-100">
-          {{ dataAuth.apellidosyNombres }}
-        </span>
-        <span class="text-[9px] text-gray-500 dark:text-gray-400">
-          {{ dataAuth.correo }}
-        </span>
-      </div>
-
+      <span
+        class="absolute border-circle bg-green-500 border-2 border-white dark:border-gray-900"
+        style="width: 12px; height: 12px; bottom: 2px; right: 2px;"
+      ></span>
     </div>
-  </p-card>
+
+    <!-- Nombre -->
+    <span class="text-sm font-semibold text-900 dark:text-0 line-height-2">
+      {{ dataAuth.apellidosyNombres }}
+    </span>
+
+    <!-- Correo -->
+    <span class="text-xs text-500 dark:text-400">
+      {{ dataAuth.correo }}
+    </span>
+
+    <!-- Badge rol -->
+    <span class="flex align-items-center gap-1 text-xs font-medium px-3 py-1 border-round-3xl bg-blue-50 text-blue-800 border-1 border-blue-200">
+      <span class="border-circle bg-blue-500" style="width: 6px; height: 6px; display: inline-block; flex-shrink: 0;"></span>
+      {{ dataAuth.role }}
+    </span>
+
+  </div>
+<!-- </p-card> -->
 }
 
   <div class="my-3 border-t border-gray-200 dark:border-gray-700"></div>

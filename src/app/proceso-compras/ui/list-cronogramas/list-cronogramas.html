@@ -33,11 +33,21 @@
     @if(activados > 0){
     <!-- <pre>{{anexoCronograma | json}}</pre> -->
     @let orden = listOrdenCompra()?.[0];
-    <div class="flex align-items-center gap-2 px-3 py-2 mb-3 border-round bg-blue-50 border-1 border-blue-200 ">
+    <div [ngClass]="{'bg-red-50 border-red-200' :selectCarpeta().idCarpeta == 0, 'bg-blue-50 border-blue-200' : selectCarpeta().idCarpeta !== 0 }"
+        class="flex align-items-center gap-2 px-3 py-2 mb-3 border-round  border-1">
         <i class="pi pi-folder text-yellow-500"></i>
         <span class="text-sm">Los archivos se guardarán en la carpeta</span>
-        <span class="flex align-items-center gap-1 px-2 py-1 border-round font-bold bg-blue-100 text-blue-800 text-xs">
-            <i class="pi pi-folder-open"></i>{{ selectCarpeta().prefijo }}-{{ selectCarpeta().numeracion }}
+        <span
+            [ngClass]="{'bg-red-100 text-red-800' :selectCarpeta().idCarpeta == 0, 'bg-blue-100 text-blue-800' : selectCarpeta().idCarpeta !== 0 }"
+            class="flex align-items-center gap-1 px-2 py-1 border-round font-bold text-xs">
+            <i class="pi pi-folder-open"></i>
+            @if(selectCarpeta().idCarpeta !== 0){
+            {{ selectCarpeta().prefijo }}-{{ selectCarpeta().numeracion }}
+            }
+            @else {
+            No se ha registrado carpeta
+            }
+
         </span>
     </div>
 
@@ -261,7 +271,7 @@
 
                             </div>
 
-                            @if (userData?.role == 'AdministraciÃ³n Financiera') {
+                            @if (userData?.role == 'Administración Financiera') {
                             <ui-icon-button icon="pi pi-pencil" tooltip="Editar pago"
                                 (onClick)="toggleEditPago(cronograma)">
                             </ui-icon-button>
@@ -303,6 +313,7 @@
                     <!-- DOCUMENTOS: ancho completo -->
                     <p-fieldset legend="Documentos" [toggleable]="true" [collapsed]="true" class="mt-2 fieldset-sm">
 
+                        @if (selectCarpeta().idCarpeta !== 0) {
                         <div class="flex align-items-center justify-content-between text-xs mb-2"
                             [class.text-gray-500]="!cronograma.documentoTributario">
                             <div class="flex align-items-center gap-2 cursor-pointer"
@@ -316,6 +327,7 @@
                                 [tooltip]="cronograma.documentoTributario ? 'Actualizar documento tributario' : 'Subir documento tributario'"
                                 (onClick)="selectedCronograma(cronograma, 'docTributario')">
                             </ui-icon-button>
+
                         </div>
 
                         <div class="flex align-items-center justify-content-between text-xs mb-2"
@@ -373,6 +385,13 @@
                             </ui-icon-button>
                             }
                         </div>
+                        }
+                        @else {
+                        <div class="flex flex-column align-items-center gap-3 py-4 text-red-700 bg-red-50 border-round-3xl border-red-100 border-1">
+                            <i class="pi pi-inbox" style="font-size:2.5rem"></i>
+                            <span class="text-sm">Aún no se ha registrado carpeta para subir los archivos</span>
+                        </div>
+                        }
 
                     </p-fieldset>
 

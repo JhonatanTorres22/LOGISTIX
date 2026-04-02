@@ -18,6 +18,7 @@ import { SelectModule } from "primeng/select";
 import { FormsModule } from '@angular/forms';
 import { DashboardSignal } from '@/pages/dashboard/signals/dashboard.signal';
 import { CarpetaSignal } from '@/proceso-compras/domain/signals/carpeta.signal';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-tree-solicitudes',
@@ -110,7 +111,7 @@ export class TreeSolicitudes implements OnInit {
         this.solicitudSeleccionada.set(false);   // 👈 limpiar vista
         this.subtarea.set({ codigoSubTarea: 0 } as any);
         this.actionOrdenCompraCarpet.set('');
-
+        this.selectCarpeta.set(this.selectDefaultCarpeta)
         this.obtenerTodasSolicitudesCompra();    // recargar lista limpia
       }
     });
@@ -149,10 +150,11 @@ export class TreeSolicitudes implements OnInit {
             leaf: false,
             data: s,
             children: [],
-            styleClass:
-              s.cantidadAnexo === 0
-                ? 'solicitud-sin-anexo'
-                : 'solicitud-con-anexo'
+            styleClass: [
+              s.cantidadAnexo === 0 ? 'solicitud-sin-anexo' : '',
+              s.estadoProximo === 'Completado' ? 'solicitud-completada' : ''
+            ].join(' ')
+
           }))
         );
 
@@ -187,6 +189,7 @@ export class TreeSolicitudes implements OnInit {
       this.currentSolicitudNode = node;
 
       if (node.children?.length === 0) {
+        this.selectCarpeta.set(this.selectDefaultCarpeta)
         this.obtenerOrdenCompra(node, node.data.idSolicitudCompra);
       } else {
         node.expanded = true;
@@ -213,6 +216,22 @@ export class TreeSolicitudes implements OnInit {
       });
 
       node.expanded = !node.expanded;
+    }
+    // 👉 ABRIR ARCHIVOS
+    if (
+      node.key?.startsWith('archivo') ||
+      node.key?.startsWith('docTrib') ||
+      node.key?.startsWith('infProv') ||
+      node.key?.startsWith('infResp') ||
+      node.key?.startsWith('compPago')
+    ) {
+      const url = this.obtenerUrlArchivos(node);
+
+      if (url) {
+        window.open(url, '_blank'); // abre en nueva pestaña
+      }
+
+      return;
     }
   }
 
@@ -362,22 +381,30 @@ export class TreeSolicitudes implements OnInit {
   }
 
   getIconClass(node: TreeNode): string {
+
+
+    if (node.data?.estadoProximo === 'Completado') {
+      return node.expanded
+        ? 'pi pi-folder-open text-green-700'
+        : 'pi pi-folder text-green-700';
+    }
+
     if (node.key?.startsWith('solicitud')) {
       return node.data?.cantidadAnexo === 0
-        ? 'pi pi-exclamation-triangle icon-warning'
+        ? 'pi pi-exclamation-triangle text-red-700'
         : node.expanded
-          ? 'pi pi-folder-open icon-folder-open'
-          : 'pi pi-folder icon-folder';
+          ? 'pi pi-folder-open text-yellow-700'
+          : 'pi pi-folder text-yellow-700';
     }
 
     if (node.key?.startsWith('carpeta') || node.key?.startsWith('anexo')) {
       return node.expanded
-        ? 'pi pi-folder-open icon-folder-open'
-        : 'pi pi-folder icon-folder';
+        ? 'pi pi-folder-open text-yellow-700'
+        : 'pi pi-folder text-yellow-700';
     }
 
     if (node.key?.startsWith('cronograma')) {
-      return 'pi pi-calendar icon-calendar';
+      return 'pi pi-calendar text-blue-700';
     }
 
     if (
@@ -387,7 +414,7 @@ export class TreeSolicitudes implements OnInit {
       node.key?.startsWith('compPago') ||
       node.key?.startsWith('archivo')
     ) {
-      return 'pi pi-file-pdf icon-pdf';
+      return 'pi pi-file-pdf text-red-700';
     }
 
     return '';
@@ -419,5 +446,38 @@ export class TreeSolicitudes implements OnInit {
     console.log(event.value);
 
     this.filtroActivo.set(event.value ?? null);
+  }
+
+  obtenerUrlArchivos(node: TreeNode): string | null {
+    if (!node?.data) return null;
+
+    const file = node.data;
+
+    if (!file) return null;
+    if (node.key?.startsWith('archivo')) {
+      return `${environment.EndPoint}/wwwroot/Archivos/${file}`;
+    }
+
+    // DOCUMENTO TRIBUTARIO
+    if (node.key?.startsWith('docTrib')) {
+      return `${environment.EndPoint}/wwwroot/documentosTributarios/${file}`;
+    }
+
+    // INFORME PROVEEDOR
+    if (node.key?.startsWith('infProv')) {
+      return `${environment.EndPoint}/wwwroot/informesProveedores/${file}`;
+    }
+
+    // INFORME RESPONSABLE
+    if (node.key?.startsWith('infResp')) {
+      return `${environment.EndPoint}/wwwroot/informesResponsables/${file}`;
+    }
+
+    // COMPROBANTE DE PAGO
+    if (node.key?.startsWith('compPago')) {
+      return `${environment.EndPoint}/wwwroot/comprobantes/${file}`;
+    }
+
+    return null;
   }
 }

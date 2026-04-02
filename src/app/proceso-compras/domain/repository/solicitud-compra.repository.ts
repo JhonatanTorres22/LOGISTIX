@@ -5,7 +5,7 @@ import { ActualizarEstadoAtencionOrden, AgregarOrdenCompraDetalle, DataOrdenComp
 
 
 export abstract class SolicitudCompraRepository {
-   abstract obtener(codigo: number) : Observable<DataSolicitudCompra>
+   abstract obtener(codigo: number, idAlmacen : number) : Observable<DataSolicitudCompra>
    abstract agregar(agregar: AgregarSolicitud[]) : Observable<void>
    abstract generarOrden(generar : GenerarOrdenDeCompra[]) : Observable<void>
    abstract eliminarSolicitudCompraDetalle(eliminar : EliminarSolicitudCompraDetalle) : Observable<ApiResponse>

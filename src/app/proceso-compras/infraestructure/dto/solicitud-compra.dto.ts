@@ -30,6 +30,8 @@ export interface DetalleSolicitudCompraDTO {
   nombreRs: string,
   ruc: string,
   direccionFiscal: string,
+  enStock : number,
+  stockMinimo : number
 }
 
 export type AgregarSolicitudDTO =
@@ -37,7 +39,7 @@ export type AgregarSolicitudDTO =
     'codigoSolicitudCompra' | 'detalle'> &
 
   Omit<DetalleSolicitudCompraDTO,
-    'codigoSolicitudCompraDetalle' | 'direccionFiscal' | 'ruc' | 'nombreRs' | 'enOrdenDeCompra'>
+    'codigoSolicitudCompraDetalle' | 'direccionFiscal' | 'ruc' | 'nombreRs' | 'enOrdenDeCompra'  | 'enStock' | 'stockMinimo'>
   & {
     datosDeActividad: string
   }
@@ -45,7 +47,7 @@ export type AgregarSolicitudDTO =
 export interface GenerarOrdenDeCompraDTO {
   codigoSolicitudCompraDetalle: number
 }
-export type EditarSolicitudCompraDetalleDTO = Omit<DetalleSolicitudCompraDTO, 'enOrdenDeCompra' | 'nombreRs' | 'ruc' | 'direccionFiscal'>
+export type EditarSolicitudCompraDetalleDTO = Omit<DetalleSolicitudCompraDTO, 'enOrdenDeCompra' | 'nombreRs' | 'ruc' | 'direccionFiscal' | 'enStock'| 'stockMinimo'>
 export type EliminarSolicitudCompraDetalleDTO = Pick<DetalleSolicitudCompraDTO, 'codigoSolicitudCompraDetalle'>
 
 export interface ActualizarEstadoProximoDTO {

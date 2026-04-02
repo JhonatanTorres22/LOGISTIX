@@ -3,7 +3,7 @@ import { GipeoSignal } from '@/proceso-compras/domain/signals/gipeo.signal';
 import { SolicitudCompraSignal } from '@/proceso-compras/domain/signals/solicitud-compra.signal';
 import { SolicitudCompraValidation } from '@/proceso-compras/domain/validators/solicitud-compra.validation';
 import { ProveedorProductoSignal } from '@/proveedor-producto/domain/signals/proveedor-producto.signal';
-import { Component, effect, inject, Input, OnInit, untracked } from '@angular/core';
+import { ChangeDetectorRef, Component, effect, inject, Input, OnInit, untracked } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { AlertService } from 'src/assets/demo/services/alert.service';
 import { SelectProveedorProducto } from "../select-proveedor-producto/select-proveedor-producto";
@@ -41,9 +41,11 @@ import { TabsModule } from "primeng/tabs";
 import { ListOrdenCompraDetalle } from "../list-orden-compra-detalle/list-orden-compra-detalle";
 import { SharedModule } from "@/core/components/shared.module";
 import { UiIconButton } from "@/core/components/ui-icon-button/ui-icon-button";
+import { GraficoTreeCarpetaAnexo } from "../grafico-tree-carpeta-anexo/grafico-tree-carpeta-anexo";
+import { ProgressBarModule } from 'primeng/progressbar';
 @Component({
   selector: 'app-list-solicitud-compra',
-  imports: [ProcesoComprasModule, DragDropModule, InputTextModule, RippleModule, SpeedDialModule, PopoverModule, SelectProveedorProducto, DetailsSubtarea, PdfOrdenCompra, UploadArchivo, SplitButtonModule, OneDriveCarpetas, TimeLineSolicitudCompra, UiSelectComponent, ListCronogramas, InputNumberModule, DividerModule, IconFieldModule, InputIconModule, Panel, TabsModule, ListOrdenCompraDetalle, SharedModule, UiIconButton],
+  imports: [ProcesoComprasModule, DragDropModule,ProgressBarModule, InputTextModule, RippleModule, SpeedDialModule, PopoverModule, SelectProveedorProducto, DetailsSubtarea, PdfOrdenCompra, UploadArchivo, SplitButtonModule, OneDriveCarpetas, TimeLineSolicitudCompra, UiSelectComponent, ListCronogramas, InputNumberModule, DividerModule, IconFieldModule, InputIconModule, Panel, TabsModule, ListOrdenCompraDetalle, SharedModule, UiIconButton, GraficoTreeCarpetaAnexo],
   templateUrl: './list-solicitud-compra.html',
   styleUrl: './list-solicitud-compra.scss'
 })
@@ -105,18 +107,15 @@ export class ListSolicitudCompra implements OnInit {
   listLocal: UiSelect[] = []
 
   anexos: Anexos[] = []
-  // private insertarAnexoPendiente = false;
 
   items!: MenuItem[];
   actionOrdenFirmada = this.anexoSignal.actionOrdenFirmada
 
-  // private ordenCarpetaSignal = inject(OrdenCarpetaSignal)
-  // listOrdenCarpeta = this.ordenCarpetaSignal.listOrdenCarpetas
-
-  // private cargadoDesdeSeleccion = false;
+  visibleGraficoCarpetas : boolean = false
   value: number = 0;
   private despuesDeGuardar = false;
   constructor(
+    private cd: ChangeDetectorRef,
     private alert: AlertService,
   ) {
     this.formSolicitudCompra = new FormGroup({
@@ -160,7 +159,7 @@ export class ListSolicitudCompra implements OnInit {
       { text: 'JEFATURA DE CALIDAD', value: 'JEFATURA DE CALIDAD' },
       { text: 'JEFATURA DE INVESTIGACIÓN', value: 'JEFATURA DE INVESTIGACIÓN' },
       { text: 'DIRECCIÓN DE ESCUELA PROFESIONAL DE ENFERMERÍA', value: 'DIRECCIÓN DE ESCUELA PROFESIONAL DE ENFERMERÍA' },
-      { text: 'DIRECCIÓN DE ESCUELA PROFESIONAL DE SISTEMAS', value: 'DIRECCIÓN DE ESCUELA PROFESIONAL DE SISTEMAS' },
+      { text: 'DIRECCIÓN DE ESCUELA PROFESIONAL DE INGENIERÍA DE SISTEMAS', value: 'DIRECCIÓN DE ESCUELA PROFESIONAL DE SISTEMAS' },
       { text: 'DIRECCIÓN DE BIENESTAR UNIVERSITARIO', value: 'DIRECCIÓN DE BIENESTAR UIVERSITARIO' }
     ]
 
@@ -177,7 +176,7 @@ export class ListSolicitudCompra implements OnInit {
 
   obtenerSolicitud = () => {
     this.loading = true
-    this.repository.obtener(this.selectSubTarea().codigoSubTarea).subscribe({
+    this.repository.obtener(this.selectSubTarea().codigoSubTarea, 3).subscribe({
       next: (data) => {
         this.listSolicitud.set(data.data)
 
@@ -314,7 +313,9 @@ export class ListSolicitudCompra implements OnInit {
         unidad: d.unidadMedida,
         descripcion: d.descripcionDelBien,
         ordenCompra: d.ordenCompra,
-        direccion: d.direccion
+        direccion: d.direccion,
+        stock: d.stock,
+        stockMinimo : d.stockMinimo
       }))
     )
 
@@ -523,7 +524,10 @@ export class ListSolicitudCompra implements OnInit {
     if (anexo.nombre === 'Cronograma') {
       this.visibleCronograma = true;
     } else {
-      this.visibleSubirArchivo = true;
+      setTimeout(() => {
+        this.visibleSubirArchivo = true;
+        this.cd.detectChanges(); // 👈 clave
+      });
     }
   }
 

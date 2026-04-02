@@ -2,8 +2,9 @@
 <ui-loading-progress-bar></ui-loading-progress-bar>
 }
 @else {
-<p-dialog [styleClass]="tipoMovimiento === 'SALIDA' ? 'bg-red-50' : tipoMovimiento === 'ENTRADA' ? 'bg-green-50' : 'bg-blue-50'"
- [(visible)]="visible" [modal]="true" [style]="{ width: '50rem' }" (onHide)="closeDialog()" [maximizable]="true">
+<p-dialog
+    [styleClass]="tipoMovimiento === 'SALIDA' ? 'bg-red-50' : tipoMovimiento === 'ENTRADA' ? 'bg-green-50' : 'bg-blue-50'"
+    [(visible)]="visible" [modal]="true" [style]="{ width: '70rem' }" (onHide)="closeDialog()" [maximizable]="true">
 
     <ng-template #header>
         <div class="inline-flex items-center justify-center gap-2">
@@ -12,6 +13,7 @@
             <p-tag [value]="listOrdenCompra()[0]?.tipoGasto" severity="info" />
         </div>
     </ng-template>
+    <!-- <pre> {{listOrdenCompra()[0]?.anexosPorFases | json}} </pre> -->
 
     <div [ngClass]="{'bg-red-100 border-red-300' : tipoMovimiento === 'SALIDA', 'bg-green-100 border-green-300' : tipoMovimiento === 'ENTRADA' }"
         class="flex align-items-center gap-2 p-2 mb-1 border-round-lg border-1">
@@ -22,7 +24,6 @@
             TIPO DE MOVIMIENTO {{ tipoMovimiento }}
         </span>
     </div>
-    <!-- {{tipoMovimiento}} -->
 
     @for (anexo of listOrdenCompra()[0]?.anexosPorFases; track anexo.idAnexosPorFase) {
 
@@ -60,6 +61,9 @@
                     <th style="width: 7rem" class="text-center">
                         <span class="text-primary font-bold text-xs">Cantidad</span>
                     </th>
+                    @if (tipoMovimiento === 'ENTRADA') {
+                        <th style="width: 10rem" class="text-center text-xs">Fecha Vencimiento</th>
+                    }
                     <th style="width: 7rem" class="text-center text-xs">Estado</th>
                 </tr>
             </ng-template>
@@ -88,6 +92,23 @@
                         </span>
                     </td>
 
+                    @if (tipoMovimiento === 'ENTRADA') {
+                        <td class="text-center text-xs">
+                            @if (seleccionados().includes(item)) {
+                                <ui-date-picker [(ngModel)]="fechasVencimiento[item.idProductoPorAlmacen]"></ui-date-picker>
+                            } @else if(!item.estadoAtencion) {
+                            <span class="text-400 text-xs italic">
+                                Sin fecha registrada
+                            </span>
+                            }
+                            @else {
+                                <span class="text-800 text-green-800 text-xs italic">
+                                Producto ya registrado con fecha de vencimiento
+                            </span>
+                            }
+                        </td>
+                    }
+
                     <td class="text-center text-xs">
                         @if (item.estadoAtencion) {
                         <p-tag styleClass="text-xs" value="Atendido" severity="success" icon="pi pi-check-circle" />
@@ -114,7 +135,7 @@
     <ng-template #footer>
         <ui-button label="CANCELAR" icon="pi pi-times" color="secondary" (click)="closeDialog()"></ui-button>
         <ui-button [label]="tipoMovimiento+''" icon="pi pi-save" color="primary"
-            [disabled]="seleccionados().length === 0" (onClick)="despacharSeleccionados()"></ui-button>
+            [disabled]="!tieneSeleccionConFecha()" (onClick)="despacharSeleccionados()"></ui-button>
 
     </ng-template>
 

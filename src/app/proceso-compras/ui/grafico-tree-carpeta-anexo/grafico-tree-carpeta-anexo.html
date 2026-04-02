@@ -1,0 +1,20 @@
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '90rem' }" (onHide)="closeDialog()"
+    [maximizable]="true">
+    <ng-template #header>
+        <div class="inline-flex items-center justify-center gap-2">
+            <span class="font-bold whitespace-nowrap"> GRÁFICOS DE ORDENAMIENTO DE CARPETAS </span>
+        </div>
+    </ng-template>
+    <!-- <pre> {{listOrdenCarpeta().length| json}} </pre> -->
+    @if (listOrdenCarpeta().length > 0) {
+    <div echarts [options]="option" (chartClick)="onChartClick($event)" style="height: 500px;">
+    </div>
+    }
+    @else {
+    <div class="flex flex-column align-items-center gap-3 py-6 text-color-secondary">
+        <i class="pi pi-inbox text-7xl"></i>
+        <span class="text-sm">Aún no se ha registrado carpetas.</span>
+
+    </div>
+    }
+</p-dialog>

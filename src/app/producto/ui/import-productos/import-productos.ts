@@ -7,13 +7,13 @@ import { CrearProducto, ResponseProducto } from '@/producto/domain/models/produc
 import * as XLSX from 'xlsx';
 import { AlertService } from 'src/assets/demo/services/alert.service';
 import { UiButtonComponent } from "@/core/components/ui-button/ui-button.component";
-import { CategoriaSignal } from '@/categoria/domain/signals/categoria.signal';
+import { Image } from 'primeng/image';
 import { MarcaRepository } from '@/marca/domain/repositories/marca.repository';
 import { ApiError } from '@/core/interceptors/error-message.model';
 
 @Component({
   selector: 'app-import-productos',
-  imports: [SharedModule, UiLoadingProgressBarComponent, UiButtonComponent],
+  imports: [SharedModule, UiLoadingProgressBarComponent, UiButtonComponent, Image],
   templateUrl: './import-productos.html',
   styleUrl: './import-productos.scss'
 })
@@ -111,7 +111,7 @@ export class ImportProductos implements OnInit {
           unidad: ((row['unidad'] || row['UNIDAD'] || '') as string).trim().toUpperCase(),
           // precioReferencial: Number(row['precio'] || row['PRECIO'] || 0),
           urlImagen: ((row['urlImagen'] || row['URLIMAGEN'] || '') as string).trim(),
-          tipo : ((row['modelo'] || row['MODELO'] || '') as string).trim().toUpperCase(),
+          tipo : ((row['tipo'] || row['TIPO'] || '') as string).trim().toUpperCase(),
           idMarca: marcaEncontrada.idMarca
         });
       }

@@ -487,6 +487,7 @@ export class UploadArchivo implements OnInit {
   };
 
   enviarConstanciaFirma = () => {
+    this.loading = true
 
     const rawProductos = this.selectProveedorProducto()
     // const productos = this.normalizarProductos(rawProductos)
@@ -523,13 +524,14 @@ export class UploadArchivo implements OnInit {
       next: () => {
         this.alert.showAlert(`Enviando correo`, 'success')
         if (this.selectAnexo().nombre == 'Orden Firmada') {
+          this.loading = false
           this.actualizarEstadoProximo()
           // this.actionOrdenCompraCarpeta.set('archivoAsignado')
         }
       },
       error: (err) => {
         console.log(err);
-
+        this.loading = false
         this.alert.showAlert(`Error`, 'error')
       }
     })

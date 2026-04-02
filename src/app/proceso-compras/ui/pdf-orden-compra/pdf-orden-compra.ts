@@ -28,7 +28,6 @@ import { UiCardNotItemsComponent } from "@/core/components/ui-card-not-items/ui-
 import { OrdenCarpetaSignal } from '@/panel-solicitudes/domain/signals/orden-carpetas.signal';
 import { InsertarCarpetasConAnexo } from '@/proceso-compras/domain/models/carpetas.models';
 import { CarpetasRepository } from '@/proceso-compras/domain/repository/carpeta.repository';
-import { ActualizarEstadoProximo } from '@/proceso-compras/domain/models/solicitud-compra.model';
 
 const pdfMake: any = pdfMakeImport;
 const pdfFonts: any = pdfFontsImport;
@@ -41,10 +40,8 @@ pdfMake.vfs = pdfFonts.vfs;
   styleUrl: './pdf-orden-compra.scss'
 })
 export class PdfOrdenCompra {
-  private repositorySolicitudCompra = inject(SolicitudCompraRepository)
   signalProveedorProducto = inject(ProveedorProductoSignal)
   selectProveedorProducto = this.signalProveedorProducto.selectProveedorProducto
-  // @Input() urlPdfExistente?: string;
 
   @Input() modo: 'GENERAR' | 'FIRMAR' = 'GENERAR';
   @Input() visible: boolean = false;
@@ -178,6 +175,8 @@ export class PdfOrdenCompra {
 
   private normalizarProductos(data: any[]): any[] {
     return data.map(item => ({
+      idSolicitudCompra :this.listAnexo()[0].idSolicitudCompra,
+      codigoPlanTrabajo : item.codigoPlanTrabajo,
       idSolicitudCompraDetalle: item.idSolicitudCompraDetalle ?? item.idOrdenCompra,
       proveedor: item.proveedor ?? item.nombreProveedor,
       ruc: item.ruc,
@@ -194,7 +193,6 @@ export class PdfOrdenCompra {
   private buildObservacionesCondicionesPlanoA4(): Content {
     const fs = 7;
 
-    // ===== Helpers =====
     const L = (t: string): TableCell => ({ text: t, bold: true, fontSize: fs } as TableCell);
     const C = (text: any, align: 'left' | 'center' | 'right' = 'left'): TableCell =>
       ({ text: text ?? '—', fontSize: fs, alignment: align, noWrap: false } as TableCell);
@@ -426,7 +424,7 @@ export class PdfOrdenCompra {
         ],
         [
           { text: 'Código de la Actividad', bold: true },
-          { text: 'PY_SI03 - CONSTRUCCIÓN DEL PABELLÓN A-B OFICINAS - PROGRAMA ACADÉMICO DE MEDICINA HUMANA' },
+          { text: `${productos[0].codigoPlanTrabajo}` },
           { text: '' },
           { text: '' }
         ],
@@ -498,8 +496,33 @@ export class PdfOrdenCompra {
                 width: 'auto'
               }
             ],
-            margin: [0, 0, 0, 25]
+            margin: [0, 0, 0, 10]
           },
+                    {
+            columns: [
+              { text: '', width: '*' }, // 👈 empuja a la derecha
+              { text: '', width: '*' },
+              //  { text: '', width: '*' },
+              {
+                table: {
+                  widths: ['auto', 'auto'],
+                  body: [
+                    [
+                      { text: 'N° SOLICITUD DE COMPRA', bold: true },
+                      { text: `${this.listAnexo()[0].idSolicitudCompra}`, alignment: 'center' }
+                    ]
+                  ]
+                },
+                layout: {
+                  hLineWidth: () => 1,
+                  vLineWidth: () => 1
+                },
+                width: 'auto'
+              }
+            ],
+            margin: [0, 0, 0, 10]
+          },
+          
 
           {
             table: {
@@ -768,9 +791,6 @@ export class PdfOrdenCompra {
       next: (data: ApiResponse) => {
         this.loading = false
         this.alert.showAlert(`Archivo Aprobado, ${data.message}`, 'success')
-        this.actualizarEstadoProximo()
-        // anexoPorFase.estado = 2;
-        // this.actionAnexo.set('Aprobar');
       },
       error: (err: ApiError) => {
         console.log(err);
@@ -781,25 +801,6 @@ export class PdfOrdenCompra {
     })
   }
 
-  actualizarEstadoProximo() {
-    const anexoActual = this.selectAnexo()?.nombre;
-
-
-    const actualizarEstado: ActualizarEstadoProximo = {
-      estadoProximo: 'Documento Tributario Por Aprobar',
-      idSolicitudCompra: this.listAnexo()[0].idSolicitudCompra
-    };
-
-    this.repositorySolicitudCompra.actualizarEstadoProximo(actualizarEstado).subscribe({
-      next: (res: ApiResponse) => {
-        this.actionOrdenCompraCarpeta.set('estadoActualizado')
-        this.alert.showAlert(`Estado actualizado. ${res.message}`, 'success');
-      },
-      error: (err: ApiError) => {
-        this.alert.showAlert(`Error al actualizar estado, ${err.error.message}`, 'error');
-      }
-    });
-  }
 
 
   // enviarConstanciaFirma = () => {

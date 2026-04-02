@@ -28,7 +28,7 @@
 
     <ng-template pTemplate="header">
         <tr>
-            <th style="width:10%">IMAGEN</th>
+            <th style="width:1%">IMAGEN</th>
             <th pSortableColumn="nombreProducto" style="width:30%">NOMBRE</th>
             <th pSortableColumn="modeloProducto" style="width:20%">MODELO</th>
             <th pSortableColumn="marca" style="width:20%">MARCA</th>
@@ -64,8 +64,7 @@
         @if (producto.nombreProducto) {
         <tr>
             <td>
-                <img [src]="producto.urlImagen" [alt]="producto.nombreProducto"
-                    class="w-12 h-12 rounded object-contain bg-gray-50" />
+                <p-image [src]="producto.urlImagen" alt="Image" width="30" [preview]="true" />    
             </td>
             <td>
                 {{ producto.nombreProducto }}
@@ -82,7 +81,8 @@
                 {{producto.descripcionProducto}}
             </td>
             <td>
-                <p-tag [value]="producto.tipo" [severity]="producto.tipo === 'PRODUCTO' ? 'success' : 'warn'" rounded></p-tag>
+                <p-tag [value]="producto.tipo" [severity]="producto.tipo === 'PRODUCTO' ? 'success' : 'warn'"
+                    rounded></p-tag>
             </td>
 
             <td>

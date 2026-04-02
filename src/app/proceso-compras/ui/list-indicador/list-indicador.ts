@@ -9,10 +9,11 @@ import { AnexoPorFaseRepository } from '@/proceso-compras/domain/repository/anex
 import { ProcesoComprasModule } from '@/proceso-compras/proceso-compras-module';
 import { Card } from "@/core/components/card/card";
 import { Tree } from "primeng/tree";
+import { ProductoModule } from "@/producto/producto-module";
 
 @Component({
   selector: 'app-list-indicador',
-  imports: [ProcesoComprasModule, Card, Tree],
+  imports: [ProcesoComprasModule, Card, Tree, ProductoModule],
   templateUrl: './list-indicador.html',
   styleUrl: './list-indicador.scss'
 })

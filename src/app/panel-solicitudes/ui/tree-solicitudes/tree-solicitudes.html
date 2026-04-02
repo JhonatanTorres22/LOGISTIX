@@ -4,6 +4,7 @@
 
 @if (nodes().length > 0) {
 <!-- <pre>{{nodes() | json}}</pre> -->
+<!-- <pre> {{listOrdenCarpeta() | json}} </pre> -->
 <div class="flex w-full h-full overflow-hidden" [class.tree-collapsed]="treeCollapsed">
 
   <div class="tree-panel flex flex-column border-right-1 surface-border flex-shrink-0">
@@ -50,7 +51,7 @@
             <i [class]="getIconClass(node)" class="flex-shrink-0 mt-1"></i>
             <span class="node-label text-xs"
               [class.node-sin-anexo]="node.key?.startsWith('solicitud') && node.data?.cantidadAnexo === 0"
-              [title]="node.label">
+              [class.node-completado]="node.data?.estadoProximo === 'Completado'" [title]="node.label">
               {{ node.label }}
             </span>
           </div>
